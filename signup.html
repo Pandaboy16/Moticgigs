@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - MoticGigs</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7f6;
+      color: #17201b;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: #0b8f55;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 35px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 28px 22px;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #66736c;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 7px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d5ddd9;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #0b8f55;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 22px;
+      border: none;
+      border-radius: 10px;
+      background: #0b8f55;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .login {
+      text-align: center;
+      margin-top: 20px;
+      color: #66736c;
+    }
+
+    .login a {
+      color: #0b8f55;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    #otpSection {
+      display: none;
+    }
+
+    .otp-note {
+      text-align: center;
+      color: #66736c;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>MoticGigs</h1>
+  </div>
+
+  <div class="container">
+    <div class="card">
+
+      <!-- SIGNUP SECTION -->
+      <div id="signupSection">
+
+        <h2>Create Account</h2>
+
+        <p class="subtitle">
+          Join MoticGigs and start earning.
+        </p>
+
+        <form id="signupForm">
+
+          <label for="fullName">Full Name</label>
+          <input
+            type="text"
+            id="fullName"
+            placeholder="Enter your full name"
+            required
+          >
+
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            required
+          >
+
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Create a password"
+            required
+            minlength="6"
+          >
+
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            placeholder="Confirm your password"
+            required
+            minlength="6"
+          >
+
+          <button type="submit" id="signupButton">
+            Create Account
+          </button>
+
+        </form>
+
+        <div id="signupMessage" class="message"></div>
+
+        <div class="login">
+          Already have an account?
+          <a href="login.html">Log In</a>
+        </div>
+
+      </div>
+
+
+      <!-- OTP SECTION -->
+      <div id="otpSection">
+
+        <h2>Verify Your Email</h2>
+
+        <p class="otp-note">
+          We sent a verification code to your email address.
+          Enter the code below to continue.
+        </p>
+
+        <label for="otp">6-Digit OTP</label>
+
+        <input
+          type="text"
+          id="otp"
+          placeholder="Enter 6-digit code"
+          inputmode="numeric"
+          maxlength="6"
+          autocomplete="one-time-code"
+        >
+
+        <button id="verifyButton">
+          Verify Email
+        </button>
+
+        <div id="otpMessage" class="message"></div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+
+    /*
+      WE WILL ADD YOUR SUPABASE URL AND
+      PUBLISHABLE KEY IN THE NEXT STEP.
+    */
+
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    let registeredEmail = "";
+
+
+    // SIGN UP
+    document
+      .getElementById("signupForm")
+      .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const fullName =
+          document.getElementById("fullName").value.trim();
+
+        const email =
+          document.getElementById("email").value.trim();
+
+        const password =
+          document.getElementById("password").value;
+
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+
+        const message =
+          document.getElementById("signupMessage");
+
+        const button =
+          document.getElementById("signupButton");
+
+
+        if (password !== confirmPassword) {
+          message.textContent =
+            "Passwords do not match.";
+          return;
+        }
+
+
+        button.disabled = true;
+        button.textContent = "Creating account...";
+        message.textContent = "";
+
+
+        try {
+
+          const { data, error } =
+            await supabaseClient.auth.signUp({
+
+              email: email,
+
+              password: password,
+
+              options: {
+                data: {
+                  full_name: fullName
+                }
+              }
+
+            });
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          registeredEmail = email;
+
+
+          document.getElementById("signupSection")
+            .style.display = "none";
+
+          document.getElementById("otpSection")
+            .style.display = "block";
+
+
+        } catch (error) {
+
+          message.textContent =
+            error.message;
+
+          button.disabled = false;
+          button.textContent =
+            "Create Account";
+
+        }
+
+      });
+
+
+    // VERIFY OTP
+    document
+      .getElementById("verifyButton")
+      .addEventListener("click", async function() {
+
+        const otp =
+          document.getElementById("otp").value.trim();
+
+        const message =
+          document.getElementById("otpMessage");
+
+        const button =
+          document.getElementById("verifyButton");
+
+
+        if (otp.length !== 6) {
+          message.textContent =
+            "Please enter the 6-digit OTP.";
+          return;
+        }
+
+
+        button.disabled = true;
+        button.textContent = "Verifying...";
+
+
+        try {
+
+          const { data, error } =
+            await supabaseClient.auth.verifyOtp({
+
+              email: registeredEmail,
+
+              token: otp,
+
+              type: "signup"
+
+            });
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          message.textContent =
+            "Email verified successfully!";
+
+
+          // Dashboard will be connected next.
+          setTimeout(function() {
+            window.location.href =
+              "dashboard.html";
+          }, 1000);
+
+
+        } catch (error) {
+
+          message.textContent =
+            error.message;
+
+          button.disabled = false;
+          button.textContent =
+            "Verify Email";
+
+        }
+
+      });
+
+  </script>
+
+</body>
+            </html>
