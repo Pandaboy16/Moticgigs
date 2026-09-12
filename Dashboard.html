@@ -1,0 +1,607 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>MotiGigs Dashboard</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
+      color: #222;
+    }
+
+    .header {
+      background: #16a34a;
+      color: white;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .logout {
+      border: 1px solid rgba(255,255,255,0.7);
+      background: transparent;
+      color: white;
+      padding: 8px 13px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 22px 16px 40px;
+    }
+
+    .welcome {
+      margin-bottom: 20px;
+    }
+
+    .welcome h1 {
+      margin: 0 0 6px;
+      font-size: 25px;
+    }
+
+    .welcome p {
+      margin: 0;
+      color: #666;
+    }
+
+    .balance-card {
+      background: #16a34a;
+      color: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 7px 20px rgba(0,0,0,0.08);
+    }
+
+    .balance-title {
+      font-size: 15px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .balance {
+      font-size: 35px;
+      font-weight: bold;
+    }
+
+    .pending-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+    }
+
+    .pending-title {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 7px;
+    }
+
+    .pending {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 25px;
+    }
+
+    .action {
+      background: white;
+      border: none;
+      border-radius: 13px;
+      padding: 20px 12px;
+      text-align: center;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .action:hover {
+      transform: translateY(-1px);
+    }
+
+    .icon {
+      font-size: 27px;
+      margin-bottom: 8px;
+    }
+
+    .tasks {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+    }
+
+    .tasks h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px 10px;
+      color: #777;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    @media (max-width: 500px) {
+      .actions {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .balance {
+        font-size: 30px;
+      }
+    }
+  </style></head><body>  <header class="header">
+    <div class="logo">MotiGigs</div><button class="logout" id="logoutButton">
+  Logout
+</button>
+
+  </header>  <main class="container"><div id="loading" class="loading">
+  Loading your dashboard...
+</div>
+
+<div id="dashboard" style="display:none;">
+
+  <div class="welcome">
+    <h1 id="welcomeName">Welcome!</h1>
+    <p>Complete tasks and earn money.</p>
+  </div>
+
+
+  <div id="message" class="message"></div>
+
+
+  <!-- AVAILABLE BALANCE -->
+
+  <div class="balance-card">
+
+    <div class="balance-title">
+      Available Balance
+    </div>
+
+    <div class="balance">
+      ₦<span id="availableBalance">0.00</span>
+    </div>
+
+  </div>
+
+
+  <!-- PENDING BALANCE -->
+
+  <div class="pending-card">
+
+    <div class="pending-title">
+      Pending Balance
+    </div>
+
+    <div class="pending">
+      ₦<span id="pendingBalance">0.00</span>
+    </div>
+
+  </div>
+
+
+  <!-- ACTIONS -->
+
+  <div class="actions">
+
+    <button class="action" id="tasksButton">
+
+      <div class="icon">📋</div>
+
+      Available Tasks
+
+    </button>
+
+
+    <button class="action" id="withdrawButton">
+
+      <div class="icon">💳</div>
+
+      Withdraw
+
+    </button>
+
+
+    <button class="action" id="profileButton">
+
+      <div class="icon">👤</div>
+
+      Profile
+
+    </button>
+
+
+    <button class="action" id="historyButton">
+
+      <div class="icon">📊</div>
+
+      Transaction History
+
+    </button>
+
+  </div>
+
+
+  <!-- TASK AREA -->
+
+  <div class="tasks">
+
+    <h2>Available Tasks</h2>
+
+    <div class="empty">
+
+      <div style="font-size:40px;">📋</div>
+
+      <p>
+        Your available tasks will appear here.
+      </p>
+
+      <p style="font-size:13px;">
+        Advertisers haven't posted any available tasks yet.
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+
+  </main>  <script>
+
+    // =========================================
+    // SUPABASE CONNECTION
+    // =========================================
+
+    const SUPABASE_URL =
+      "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    // =========================================
+    // ELEMENTS
+    // =========================================
+
+    const loading =
+      document.getElementById("loading");
+
+    const dashboard =
+      document.getElementById("dashboard");
+
+    const welcomeName =
+      document.getElementById("welcomeName");
+
+    const availableBalance =
+      document.getElementById("availableBalance");
+
+    const pendingBalance =
+      document.getElementById("pendingBalance");
+
+    const message =
+      document.getElementById("message");
+
+
+    // =========================================
+    // MESSAGE
+    // =========================================
+
+    function showError(text) {
+
+      message.textContent = text;
+
+      message.className = "message error";
+
+    }
+
+
+    // =========================================
+    // LOAD DASHBOARD
+    // =========================================
+
+    async function loadDashboard() {
+
+      try {
+
+        // Get authenticated user
+        const {
+          data: userData,
+          error: userError
+        } = await supabaseClient.auth.getUser();
+
+
+        if (userError) {
+          throw userError;
+        }
+
+
+        const user = userData.user;
+
+
+        // No logged-in user
+        if (!user) {
+
+          window.location.href =
+            "signup.html";
+
+          return;
+
+        }
+
+
+        // =====================================
+        // LOAD MOTICGIGS PROFILE
+        // =====================================
+
+        const {
+          data: profile,
+          error: profileError
+        } = await supabaseClient
+          .from("Moticgigs")
+          .select("full_name, email, role, status")
+          .eq("Id", user.id)
+          .maybeSingle();
+
+
+        if (profileError) {
+
+          console.error(
+            "Profile error:",
+            profileError
+          );
+
+        }
+
+
+        // =====================================
+        // SHOW NAME
+        // =====================================
+
+        const name =
+          profile?.full_name ||
+          user.user_metadata?.full_name ||
+          user.email?.split("@")[0] ||
+          "User";
+
+
+        welcomeName.textContent =
+          "Welcome, " + name + "!";
+
+
+        // =====================================
+        // LOAD WALLET
+        // =====================================
+
+        const {
+          data: wallet,
+          error: walletError
+        } = await supabaseClient
+          .from("Wallet")
+          .select(
+            "available_balance, pending_balance"
+          )
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+
+        if (walletError) {
+
+          console.error(
+            "Wallet error:",
+            walletError
+          );
+
+        }
+
+
+        // =====================================
+        // SHOW BALANCES
+        // =====================================
+
+        const available =
+          Number(
+            wallet?.available_balance || 0
+          );
+
+        const pending =
+          Number(
+            wallet?.pending_balance || 0
+          );
+
+
+        availableBalance.textContent =
+          available.toLocaleString(
+            "en-NG",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }
+          );
+
+
+        pendingBalance.textContent =
+          pending.toLocaleString(
+            "en-NG",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }
+          );
+
+
+        // =====================================
+        // SHOW DASHBOARD
+        // =====================================
+
+        loading.style.display = "none";
+
+        dashboard.style.display = "block";
+
+
+      } catch (error) {
+
+        console.error(
+          "Dashboard error:",
+          error
+        );
+
+        loading.style.display = "none";
+
+        showError(
+          "Unable to load your dashboard. Please refresh the page."
+        );
+
+      }
+
+    }
+
+
+    // =========================================
+    // LOGOUT
+    // =========================================
+
+    document
+      .getElementById("logoutButton")
+      .addEventListener(
+        "click",
+        async function() {
+
+          const {
+            error
+          } = await supabaseClient.auth.signOut();
+
+
+          if (error) {
+
+            alert(
+              "Could not log out. Please try again."
+            );
+
+            return;
+
+          }
+
+
+          window.location.href =
+            "index.html";
+
+        }
+      );
+
+
+    // =========================================
+    // ACTION BUTTONS
+    // =========================================
+
+    document
+      .getElementById("tasksButton")
+      .addEventListener(
+        "click",
+        function() {
+
+          alert(
+            "The task marketplace is coming next."
+          );
+
+        }
+      );
+
+
+    document
+      .getElementById("withdrawButton")
+      .addEventListener(
+        "click",
+        function() {
+
+          alert(
+            "Withdrawal will be available here."
+          );
+
+        }
+      );
+
+
+    document
+      .getElementById("profileButton")
+      .addEventListener(
+        "click",
+        function() {
+
+          alert(
+            "Your profile section will be added next."
+          );
+
+        }
+      );
+
+
+    document
+      .getElementById("historyButton")
+      .addEventListener(
+        "click",
+        function() {
+
+          alert(
+            "Transaction history will be added next."
+          );
+
+        }
+      );
+
+
+    // =========================================
+    // START
+    // =========================================
+
+    loadDashboard();
+
+  </script></body>
+</html>
