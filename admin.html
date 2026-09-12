@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - MoticGigs</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f7f6;
+      color: #222;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 18px;
+    }
+
+    .header-inner {
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .logout {
+      background: white;
+      color: #111827;
+      border: 0;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .deposit {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .deposit p {
+      margin: 7px 0;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    button {
+      border: 0;
+      padding: 11px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .approve {
+      background: #16a34a;
+      color: white;
+    }
+
+    .reject {
+      background: #dc2626;
+      color: white;
+    }
+
+    .message {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .empty {
+      color: #777;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">MoticGigs Admin</div>
+    <button class="logout" id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div id="message" class="message"></div>
+
+  <div class="card">
+
+    <h2>Pending Deposits</h2>
+
+    <div id="deposits">
+      Loading deposits...
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+const depositsContainer =
+  document.getElementById("deposits");
+
+const message =
+  document.getElementById("message");
+
+
+async function checkAdmin() {
+
+  const {
+    data: { user },
+    error
+  } = await supabaseClient.auth.getUser();
+
+
+  if (error || !user) {
+
+    window.location.href = "login.html";
+    return null;
+
+  }
+
+
+  const { data: profile, error: profileError } =
+    await supabaseClient
+      .from("Moticgigs")
+      .select("role, full_name")
+      .eq("Id", user.id)
+      .single();
+
+
+  if (
+    profileError ||
+    !profile ||
+    profile.role !== "admin"
+  ) {
+
+    document.body.innerHTML = `
+      <div style="
+        text-align:center;
+        padding:60px 20px;
+        font-family:Arial;
+      ">
+        <h2>Access Denied</h2>
+        <p>You do not have administrator access.</p>
+        <a href="dashboard.html">Return to Dashboard</a>
+      </div>
+    `;
+
+    return null;
+  }
+
+
+  return user;
+
+}
+
+
+async function loadDeposits() {
+
+  const { data, error } =
+    await supabaseClient
+      .from("Deposit")
+      .select("*")
+      .eq("status", "PENDING")
+      .order("created_at", {
+        ascending: false
+      });
+
+
+  if (error) {
+
+    depositsContainer.innerHTML =
+      "<p>Unable to load deposits.</p>";
+
+    console.error(error);
+
+    return;
+  }
+
+
+  if (!data || data.length === 0) {
+
+    depositsContainer.innerHTML =
+      '<div class="empty">No pending deposits.</div>';
+
+    return;
+  }
+
+
+  depositsContainer.innerHTML = "";
+
+
+  data.forEach(deposit => {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "deposit";
+
+
+    div.innerHTML = `
+
+      <p>
+        <strong>Amount:</strong>
+        ₦${Number(deposit.amount).toLocaleString("en-NG")}
+      </p>
+
+      <p>
+        <strong>Sender:</strong>
+        ${escapeHtml(deposit.sender_name || "-")}
+      </p>
+
+      <p>
+        <strong>Reference:</strong>
+        ${escapeHtml(deposit.payment_reference || "-")}
+      </p>
+
+      <p>
+        <strong>Submitted:</strong>
+        ${new Date(deposit.created_at).toLocaleString()}
+      </p>
+
+      <div class="buttons">
+
+        <button
+          class="approve"
+          onclick="approveDeposit('${deposit.id}')">
+          Approve
+        </button>
+
+        <button
+          class="reject"
+          onclick="rejectDeposit('${deposit.id}')">
+          Reject
+        </button>
+
+      </div>
+    `;
+
+
+    depositsContainer.appendChild(div);
+
+  });
+
+}
+
+
+function escapeHtml(value) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent = value;
+
+  return div.innerHTML;
+
+}
+
+
+async function approveDeposit(id) {
+
+  alert(
+    "The approval function will be connected next."
+  );
+
+}
+
+
+async function rejectDeposit(id) {
+
+  alert(
+    "The rejection function will be connected next."
+  );
+
+}
+
+
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async () => {
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href = "login.html";
+
+  });
+
+
+(async function() {
+
+  const user = await checkAdmin();
+
+  if (user) {
+    await loadDeposits();
+  }
+
+})();
+
+</script>
+
+</body>
+</html>
