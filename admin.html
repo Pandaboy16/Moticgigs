@@ -45,6 +45,7 @@
       padding: 9px 14px;
       border-radius: 8px;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .container {
@@ -110,6 +111,14 @@
       text-align: center;
       padding: 20px;
     }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 
@@ -118,7 +127,10 @@
 <header>
   <div class="header-inner">
     <div class="logo">MoticGigs Admin</div>
-    <button class="logout" id="logoutBtn">Logout</button>
+
+    <button class="logout" id="logoutBtn">
+      Logout
+    </button>
   </div>
 </header>
 
@@ -160,35 +172,182 @@ const message =
   document.getElementById("message");
 
 
+/* =========================
+   CHECK ADMIN
+========================= */
+
 async function checkAdmin() {
 
-  const {
-    data: { user },
-    error
-  } = await supabaseClient.auth.getUser();
+  try {
+
+    const {
+      data: { session },
+      error: sessionError
+    } = await supabaseClient.auth.getSession();
 
 
-  if (error || !user) {
+    if (sessionError) {
 
-    window.location.href = "login.html";
-    return null;
+      console.error("Session error:", sessionError);
 
-  }
+      window.location.href = "login.html";
+
+      return null;
+    }
 
 
-  const { data: profile, error: profileError } =
-    await supabaseClient
+    if (!session || !session.user) {
+
+      window.location.href = "login.html";
+
+      return null;
+    }
+
+
+    const user = session.user;
+
+
+    /*
+      Get the user's profile.
+
+      IMPORTANT:
+      The profile table you created is Moticgigs.
+      The user's ID is matched with the auth user's ID.
+    */
+
+    const {
+      data: profile,
+      error: profileError
+    } = await supabaseClient
       .from("Moticgigs")
-      .select("role, full_name")
-      .eq("Id", user.id)
-      .single();
+      .select("id, role, full_name")
+      .eq("id", user.id)
+      .maybeSingle();
 
 
-  if (
-    profileError ||
-    !profile ||
-    profile.role !== "admin"
-  ) {
+    console.log("Logged in user:", user);
+    console.log("Profile:", profile);
+    console.log("Profile error:", profileError);
+
+
+    if (profileError) {
+
+      document.body.innerHTML = `
+        <div style="
+          max-width:600px;
+          margin:60px auto;
+          padding:20px;
+          font-family:Arial;
+        ">
+
+          <div style="
+            background:#fee2e2;
+            color:#991b1b;
+            padding:20px;
+            border-radius:12px;
+          ">
+
+            <h2>Admin Check Error</h2>
+
+            <p>
+              The website could not read your administrator profile.
+            </p>
+
+            <p>
+              <strong>Error:</strong>
+              ${escapeHtml(profileError.message || "Unknown error")}
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+      return null;
+    }
+
+
+    if (!profile) {
+
+      document.body.innerHTML = `
+        <div style="
+          text-align:center;
+          padding:60px 20px;
+          font-family:Arial;
+        ">
+
+          <h2>Profile Not Found</h2>
+
+          <p>
+            Your login account was found, but no matching
+            profile was found in the Moticgigs table.
+          </p>
+
+          <a href="dashboard.html">
+            Return to Dashboard
+          </a>
+
+        </div>
+      `;
+
+      return null;
+    }
+
+
+    /* ADMIN ROLE CHECK */
+
+    if (
+      String(profile.role).trim().toLowerCase() !== "admin"
+    ) {
+
+      document.body.innerHTML = `
+        <div style="
+          text-align:center;
+          padding:60px 20px;
+          font-family:Arial;
+        ">
+
+          <h2>Access Denied</h2>
+
+          <p>
+            You do not have administrator access.
+          </p>
+
+          <p>
+            Current role:
+            <strong>${escapeHtml(profile.role || "none")}</strong>
+          </p>
+
+          <a href="dashboard.html">
+            Return to Dashboard
+          </a>
+
+        </div>
+      `;
+
+      return null;
+    }
+
+
+    /* ADMIN VERIFIED */
+
+    message.innerHTML = `
+      <div style="
+        background:#dcfce7;
+        color:#166534;
+        padding:12px;
+        border-radius:10px;
+      ">
+        Welcome, ${escapeHtml(profile.full_name || "Admin")}
+      </div>
+    `;
+
+
+    return user;
+
+  } catch (error) {
+
+    console.error("Admin check failed:", error);
 
     document.body.innerHTML = `
       <div style="
@@ -196,39 +355,53 @@ async function checkAdmin() {
         padding:60px 20px;
         font-family:Arial;
       ">
-        <h2>Access Denied</h2>
-        <p>You do not have administrator access.</p>
-        <a href="dashboard.html">Return to Dashboard</a>
+
+        <h2>Something went wrong</h2>
+
+        <p>
+          ${escapeHtml(error.message || "Unknown error")}
+        </p>
+
       </div>
     `;
 
     return null;
   }
-
-
-  return user;
-
 }
 
 
+/* =========================
+   LOAD DEPOSITS
+========================= */
+
 async function loadDeposits() {
 
-  const { data, error } =
-    await supabaseClient
-      .from("Deposit")
-      .select("*")
-      .eq("status", "PENDING")
-      .order("created_at", {
-        ascending: false
-      });
+  depositsContainer.innerHTML =
+    "Loading deposits...";
+
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("Deposit")
+    .select("*")
+    .eq("status", "PENDING")
+    .order("created_at", {
+      ascending: false
+    });
 
 
   if (error) {
 
-    depositsContainer.innerHTML =
-      "<p>Unable to load deposits.</p>";
+    depositsContainer.innerHTML = `
+      <div class="error">
+        Unable to load deposits.<br><br>
+        ${escapeHtml(error.message)}
+      </div>
+    `;
 
-    console.error(error);
+    console.error("Deposit error:", error);
 
     return;
   }
@@ -258,7 +431,8 @@ async function loadDeposits() {
 
       <p>
         <strong>Amount:</strong>
-        ₦${Number(deposit.amount).toLocaleString("en-NG")}
+        ₦${Number(deposit.amount || 0)
+          .toLocaleString("en-NG")}
       </p>
 
       <p>
@@ -268,13 +442,18 @@ async function loadDeposits() {
 
       <p>
         <strong>Reference:</strong>
-        ${escapeHtml(deposit.payment_reference || "-")}
+        ${escapeHtml(
+          deposit.payment_reference || "-"
+        )}
       </p>
 
       <p>
         <strong>Submitted:</strong>
-        ${new Date(deposit.created_at).toLocaleString()}
+        ${deposit.created_at
+          ? new Date(deposit.created_at).toLocaleString()
+          : "-"}
       </p>
+
 
       <div class="buttons">
 
@@ -301,17 +480,26 @@ async function loadDeposits() {
 }
 
 
+/* =========================
+   ESCAPE HTML
+========================= */
+
 function escapeHtml(value) {
 
   const div =
     document.createElement("div");
 
-  div.textContent = value;
+  div.textContent =
+    String(value ?? "");
 
   return div.innerHTML;
 
 }
 
+
+/* =========================
+   APPROVE DEPOSIT
+========================= */
 
 async function approveDeposit(id) {
 
@@ -322,6 +510,10 @@ async function approveDeposit(id) {
 }
 
 
+/* =========================
+   REJECT DEPOSIT
+========================= */
+
 async function rejectDeposit(id) {
 
   alert(
@@ -330,6 +522,10 @@ async function rejectDeposit(id) {
 
 }
 
+
+/* =========================
+   LOGOUT
+========================= */
 
 document
   .getElementById("logoutBtn")
@@ -342,12 +538,20 @@ document
   });
 
 
+/* =========================
+   START ADMIN DASHBOARD
+========================= */
+
 (async function() {
 
-  const user = await checkAdmin();
+  const user =
+    await checkAdmin();
+
 
   if (user) {
+
     await loadDeposits();
+
   }
 
 })();
