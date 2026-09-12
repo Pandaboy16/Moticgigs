@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deposit - MoticGigs</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f7f6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #16a34a;
+    }
+
+    .account {
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      padding: 18px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    .account p {
+      margin: 8px 0;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 7px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 9px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 9px;
+      background: #16a34a;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: #16a34a;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #message {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    #timer {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff7ed;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      color: #c2410c;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <a href="dashboard.html" class="back">← Back to Dashboard</a>
+
+  <div class="card">
+
+    <h1>Deposit Funds</h1>
+
+    <p>
+      Send your payment to the MoticGigs PalmPay account below.
+    </p>
+
+    <div class="account">
+
+      <p><strong>Account Number:</strong> 8906682115</p>
+
+      <p><strong>Account Name:</strong> Nmesoma Mark Etumugo</p>
+
+      <p><strong>Bank:</strong> PalmPay</p>
+
+    </div>
+
+    <form id="depositForm">
+
+      <label for="amount">Amount (₦)</label>
+
+      <input
+        type="number"
+        id="amount"
+        min="1"
+        step="0.01"
+        placeholder="Enter amount"
+        required
+      >
+
+      <label for="senderName">Sender Name</label>
+
+      <input
+        type="text"
+        id="senderName"
+        placeholder="Name used for the transfer"
+        required
+      >
+
+      <label for="reference">Payment Reference</label>
+
+      <input
+        type="text"
+        id="reference"
+        placeholder="Enter transfer reference"
+        required
+      >
+
+      <button type="submit" id="depositButton">
+        I Have Sent It
+      </button>
+
+    </form>
+
+    <div id="message"></div>
+
+    <div id="timer">
+      Deposit verification window:
+      <br>
+      <span id="countdown">15:00</span>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+const form =
+  document.getElementById("depositForm");
+
+const button =
+  document.getElementById("depositButton");
+
+const message =
+  document.getElementById("message");
+
+const timerBox =
+  document.getElementById("timer");
+
+const countdown =
+  document.getElementById("countdown");
+
+
+form.addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+  button.disabled = true;
+  button.textContent = "Submitting...";
+
+  message.textContent = "";
+  message.style.color = "";
+
+
+  const {
+    data: { user },
+    error: userError
+  } = await supabaseClient.auth.getUser();
+
+
+  if (userError || !user) {
+
+    message.textContent =
+      "You are not logged in. Please log in again.";
+
+    message.style.color = "red";
+
+    button.disabled = false;
+    button.textContent = "I Have Sent It";
+
+    return;
+  }
+
+
+  const amount =
+    Number(document.getElementById("amount").value);
+
+  const senderName =
+    document.getElementById("senderName").value.trim();
+
+  const reference =
+    document.getElementById("reference").value.trim();
+
+
+  if (amount <= 0) {
+
+    message.textContent =
+      "Enter a valid deposit amount.";
+
+    message.style.color = "red";
+
+    button.disabled = false;
+    button.textContent = "I Have Sent It";
+
+    return;
+  }
+
+
+  /*
+    The expiry is 15 minutes from submission.
+  */
+
+  const expiresAt =
+    new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+
+  const { error } =
+    await supabaseClient
+      .from("Deposit")
+      .insert({
+        user_id: user.id,
+        amount: amount,
+        payment_method: "PALMPAY",
+        payment_reference: reference,
+        sender_name: senderName,
+        status: "PENDING",
+        expires_at: expiresAt
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    message.textContent =
+      "Deposit submission failed: " + error.message;
+
+    message.style.color = "red";
+
+    button.disabled = false;
+    button.textContent = "I Have Sent It";
+
+    return;
+  }
+
+
+  message.textContent =
+    "Deposit submitted successfully. Please wait for admin approval.";
+
+  message.style.color = "green";
+
+  button.disabled = true;
+  button.textContent = "Submitted";
+
+  timerBox.style.display = "block";
+
+
+  let seconds = 15 * 60;
+
+
+  const interval =
+    setInterval(function() {
+
+      const minutes =
+        Math.floor(seconds / 60);
+
+      const remainingSeconds =
+        seconds % 60;
+
+      countdown.textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(remainingSeconds).padStart(2, "0");
+
+
+      seconds--;
+
+
+      if (seconds < 0) {
+
+        clearInterval(interval);
+
+        countdown.textContent = "Expired";
+
+      }
+
+    }, 1000);
+
+});
+
+</script>
+
+</body>
+  </html>
