@@ -1,406 +1,344 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Account - MoticGigs</title>
-
-  <style>
+  <title>Create Account - MotiGigs</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7f6;
-      color: #17201b;
+      margin: 0;
       min-height: 100vh;
-    }
-
-    .header {
-      background: #0b8f55;
-      color: white;
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
-      text-align: center;
-    }
-
-    .header h1 {
-      font-size: 28px;
     }
 
     .container {
-      max-width: 500px;
-      margin: 35px auto;
-      padding: 20px;
+      width: 100%;
+      max-width: 430px;
     }
 
     .card {
       background: white;
-      padding: 28px 22px;
+      padding: 30px 24px;
       border-radius: 16px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     }
 
-    h2 {
+    .logo {
       text-align: center;
+      font-size: 30px;
+      font-weight: bold;
+      color: #16a34a;
       margin-bottom: 8px;
     }
 
     .subtitle {
       text-align: center;
-      color: #66736c;
+      color: #666;
       margin-bottom: 25px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 22px;
+      color: #222;
     }
 
     label {
       display: block;
-      margin: 15px 0 7px;
-      font-weight: bold;
+      margin-bottom: 7px;
+      font-weight: 600;
+      color: #333;
     }
 
     input {
       width: 100%;
-      padding: 14px;
-      border: 1px solid #d5ddd9;
-      border-radius: 10px;
+      padding: 13px;
+      margin-bottom: 16px;
+      border: 1px solid #ddd;
+      border-radius: 9px;
       font-size: 16px;
       outline: none;
     }
 
     input:focus {
-      border-color: #0b8f55;
+      border-color: #16a34a;
     }
 
     button {
       width: 100%;
       padding: 14px;
-      margin-top: 22px;
       border: none;
-      border-radius: 10px;
-      background: #0b8f55;
+      border-radius: 9px;
+      background: #16a34a;
       color: white;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
     }
 
+    button:hover {
+      background: #15803d;
+    }
+
     button:disabled {
-      opacity: 0.6;
+      background: #9ca3af;
+      cursor: not-allowed;
     }
 
     .message {
-      margin-top: 15px;
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
       text-align: center;
       font-size: 14px;
     }
 
-    .login {
+    .success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .login-link {
       text-align: center;
       margin-top: 20px;
-      color: #66736c;
+      color: #666;
     }
 
-    .login a {
-      color: #0b8f55;
-      font-weight: bold;
+    .login-link a {
+      color: #16a34a;
       text-decoration: none;
+      font-weight: bold;
     }
+  </style></head><body>  <div class="container">
+    <div class="card">  <div class="logo">MotiGigs</div>
+  <div class="subtitle">Complete tasks. Earn money.</div>
 
-    #otpSection {
-      display: none;
-    }
+  <h2>Create Account</h2>
 
-    .otp-note {
-      text-align: center;
-      color: #66736c;
-      line-height: 1.5;
-      margin-top: 10px;
-    }
-  </style>
-</head>
+  <form id="signupForm">
 
-<body>
+    <label for="fullName">Full Name</label>
+    <input
+      type="text"
+      id="fullName"
+      placeholder="Enter your full name"
+      required
+    >
 
-  <div class="header">
-    <h1>MoticGigs</h1>
+    <label for="email">Email Address</label>
+    <input
+      type="email"
+      id="email"
+      placeholder="Enter your email"
+      required
+    >
+
+    <label for="password">Password</label>
+    <input
+      type="password"
+      id="password"
+      placeholder="Create a password"
+      minlength="6"
+      required
+    >
+
+    <label for="confirmPassword">Confirm Password</label>
+    <input
+      type="password"
+      id="confirmPassword"
+      placeholder="Confirm your password"
+      minlength="6"
+      required
+    >
+
+    <button type="submit" id="signupButton">
+      Create Account
+    </button>
+
+  </form>
+
+  <div id="message" class="message"></div>
+
+  <div class="login-link">
+    Already have an account?
+    <a href="login.html">Log In</a>
   </div>
 
-  <div class="container">
-    <div class="card">
+</div>
 
-      <!-- SIGNUP SECTION -->
-      <div id="signupSection">
+  </div>  <script>
+    // ==============================
+    // SUPABASE CONNECTION
+    // ==============================
 
-        <h2>Create Account</h2>
+    const SUPABASE_URL =
+      "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
-        <p class="subtitle">
-          Join MoticGigs and start earning.
-        </p>
+    const SUPABASE_KEY =
+      "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-        <form id="signupForm">
-
-          <label for="fullName">Full Name</label>
-          <input
-            type="text"
-            id="fullName"
-            placeholder="Enter your full name"
-            required
-          >
-
-          <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="Enter your email"
-            required
-          >
-
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="Create a password"
-            required
-            minlength="6"
-          >
-
-          <label for="confirmPassword">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            placeholder="Confirm your password"
-            required
-            minlength="6"
-          >
-
-          <button type="submit" id="signupButton">
-            Create Account
-          </button>
-
-        </form>
-
-        <div id="signupMessage" class="message"></div>
-
-        <div class="login">
-          Already have an account?
-          <a href="login.html">Log In</a>
-        </div>
-
-      </div>
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
 
-      <!-- OTP SECTION -->
-      <div id="otpSection">
+    // ==============================
+    // ELEMENTS
+    // ==============================
 
-        <h2>Verify Your Email</h2>
-
-        <p class="otp-note">
-          We sent a verification code to your email address.
-          Enter the code below to continue.
-        </p>
-
-        <label for="otp">6-Digit OTP</label>
-
-        <input
-          type="text"
-          id="otp"
-          placeholder="Enter 6-digit code"
-          inputmode="numeric"
-          maxlength="6"
-          autocomplete="one-time-code"
-        >
-
-        <button id="verifyButton">
-          Verify Email
-        </button>
-
-        <div id="otpMessage" class="message"></div>
-
-      </div>
-
-    </div>
-  </div>
+    const signupForm = document.getElementById("signupForm");
+    const signupButton = document.getElementById("signupButton");
+    const message = document.getElementById("message");
 
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    // ==============================
+    // MESSAGE FUNCTION
+    // ==============================
 
-  <script>
-
-    /*
-      WE WILL ADD YOUR SUPABASE URL AND
-      PUBLISHABLE KEY IN THE NEXT STEP.
-    */
-
-    const SUPABASE_URL = "https://jfoijwjqfaewzyzjawbw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
-    const supabaseClient =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = "message " + type;
+    }
 
 
-    let registeredEmail = "";
-
-
+    // ==============================
     // SIGN UP
-    document
-      .getElementById("signupForm")
-      .addEventListener("submit", async function(event) {
+    // ==============================
 
-        event.preventDefault();
+    signupForm.addEventListener("submit", async function(event) {
 
-        const fullName =
-          document.getElementById("fullName").value.trim();
+      event.preventDefault();
 
-        const email =
-          document.getElementById("email").value.trim();
+      const fullName =
+        document.getElementById("fullName").value.trim();
 
-        const password =
-          document.getElementById("password").value;
+      const email =
+        document.getElementById("email").value.trim();
 
-        const confirmPassword =
-          document.getElementById("confirmPassword").value;
+      const password =
+        document.getElementById("password").value;
 
-        const message =
-          document.getElementById("signupMessage");
-
-        const button =
-          document.getElementById("signupButton");
+      const confirmPassword =
+        document.getElementById("confirmPassword").value;
 
 
-        if (password !== confirmPassword) {
-          message.textContent =
-            "Passwords do not match.";
-          return;
-        }
+      // Check name
+      if (!fullName) {
+        showMessage("Please enter your full name.", "error");
+        return;
+      }
 
 
-        button.disabled = true;
-        button.textContent = "Creating account...";
-        message.textContent = "";
+      // Check passwords
+      if (password !== confirmPassword) {
+        showMessage("Passwords do not match.", "error");
+        return;
+      }
 
 
-        try {
+      // Check password length
+      if (password.length < 6) {
+        showMessage(
+          "Password must be at least 6 characters.",
+          "error"
+        );
+        return;
+      }
 
-          const { data, error } =
-            await supabaseClient.auth.signUp({
 
-              email: email,
+      // Disable button
+      signupButton.disabled = true;
+      signupButton.textContent = "Creating Account...";
 
-              password: password,
+      message.className = "message";
 
-              options: {
-                data: {
-                  full_name: fullName
-                }
+
+      try {
+
+        const { data, error } =
+          await supabaseClient.auth.signUp({
+
+            email: email,
+
+            password: password,
+
+            options: {
+              data: {
+                full_name: fullName
               }
+            }
 
-            });
-
-
-          if (error) {
-            throw error;
-          }
+          });
 
 
-          registeredEmail = email;
-
-
-          document.getElementById("signupSection")
-            .style.display = "none";
-
-          document.getElementById("otpSection")
-            .style.display = "block";
-
-
-        } catch (error) {
-
-          message.textContent =
-            error.message;
-
-          button.disabled = false;
-          button.textContent =
-            "Create Account";
-
-        }
-
-      });
-
-
-    // VERIFY OTP
-    document
-      .getElementById("verifyButton")
-      .addEventListener("click", async function() {
-
-        const otp =
-          document.getElementById("otp").value.trim();
-
-        const message =
-          document.getElementById("otpMessage");
-
-        const button =
-          document.getElementById("verifyButton");
-
-
-        if (otp.length !== 6) {
-          message.textContent =
-            "Please enter the 6-digit OTP.";
-          return;
+        // Supabase error
+        if (error) {
+          throw error;
         }
 
 
-        button.disabled = true;
-        button.textContent = "Verifying...";
-
-
-        try {
-
-          const { data, error } =
-            await supabaseClient.auth.verifyOtp({
-
-              email: registeredEmail,
-
-              token: otp,
-
-              type: "email"
-
-            });
-
-
-          if (error) {
-            throw error;
-          }
-
-
-          message.textContent =
-            "Email verified successfully!";
-
-
-          // Dashboard will be connected next.
-          setTimeout(function() {
-            window.location.href =
-              "dashboard.html";
-          }, 1000);
-
-
-        } catch (error) {
-
-          message.textContent =
-            error.message;
-
-          button.disabled = false;
-          button.textContent =
-            "Verify Email";
-
+        // Make sure a user was created
+        if (!data || !data.user) {
+          throw new Error(
+            "Account could not be created. Please try again."
+          );
         }
 
-      });
 
-  </script>
+        // Because Confirm Email is disabled,
+        // Supabase should return an active session.
+        if (!data.session) {
+          throw new Error(
+            "Account created, but no active session was returned. Please check that Confirm Email is OFF in Supabase."
+          );
+        }
 
-</body>
-            </html>
+
+        // Success
+        showMessage(
+          "Account created successfully! Redirecting...",
+          "success"
+        );
+
+
+        // Give Supabase a moment to save the session
+        setTimeout(function() {
+
+          window.location.href = "dashboard.html";
+
+        }, 1200);
+
+
+      } catch (error) {
+
+        console.error("Signup error:", error);
+
+        showMessage(
+          error.message || "Something went wrong. Please try again.",
+          "error"
+        );
+
+        signupButton.disabled = false;
+        signupButton.textContent = "Create Account";
+
+      }
+
+    });
+  </script></body>
+</html>
