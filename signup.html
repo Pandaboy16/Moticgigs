@@ -1,41 +1,42 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Account - MotiGigs</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+
+  <title>Create Account - MoticGigs</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
     * {
       box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
 
     body {
       margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      background: #f4f7f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      background: #f4f7f6;
+      color: #222;
     }
 
     .container {
-      width: 100%;
-      max-width: 430px;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
     }
 
-    .card {
+    .box {
       background: white;
-      padding: 30px 24px;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
     }
 
-    .logo {
+    h1 {
+      color: #075e3d;
       text-align: center;
-      font-size: 30px;
-      font-weight: bold;
-      color: #16a34a;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .subtitle {
@@ -44,301 +45,443 @@
       margin-bottom: 25px;
     }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 22px;
-      color: #222;
-    }
-
     label {
       display: block;
+      font-weight: bold;
+      margin-top: 15px;
       margin-bottom: 7px;
-      font-weight: 600;
-      color: #333;
     }
 
     input {
       width: 100%;
       padding: 13px;
-      margin-bottom: 16px;
-      border: 1px solid #ddd;
-      border-radius: 9px;
+      border: 1px solid #ccc;
+      border-radius: 7px;
       font-size: 16px;
-      outline: none;
     }
 
-    input:focus {
-      border-color: #16a34a;
+    .role-title {
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    .role-option {
+      display: block;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .role-option:hover {
+      border-color: #075e3d;
+    }
+
+    .role-option input {
+      width: auto;
+      margin-right: 10px;
+    }
+
+    .role-name {
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .role-description {
+      display: block;
+      margin-left: 27px;
+      margin-top: 5px;
+      color: #666;
+      font-size: 14px;
     }
 
     button {
       width: 100%;
+      margin-top: 25px;
       padding: 14px;
-      border: none;
-      border-radius: 9px;
-      background: #16a34a;
+      background: #075e3d;
       color: white;
-      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 17px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #15803d;
-    }
-
     button:disabled {
-      background: #9ca3af;
+      background: #999;
       cursor: not-allowed;
     }
 
     .message {
       display: none;
-      margin-top: 16px;
       padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .success {
-      display: block;
-      background: #dcfce7;
-      color: #166534;
+      border-radius: 7px;
+      margin-top: 15px;
     }
 
     .error {
-      display: block;
-      background: #fee2e2;
-      color: #991b1b;
+      background: #ffe0e0;
+      color: #a00000;
     }
 
-    .login-link {
+    .success {
+      background: #dff5e8;
+      color: #126b3e;
+    }
+
+    .login {
       text-align: center;
       margin-top: 20px;
-      color: #666;
     }
 
-    .login-link a {
-      color: #16a34a;
-      text-decoration: none;
+    .login a {
+      color: #075e3d;
       font-weight: bold;
+      text-decoration: none;
     }
-  </style></head><body>  <div class="container">
-    <div class="card">  <div class="logo">MotiGigs</div>
-  <div class="subtitle">Complete tasks. Earn money.</div>
+  </style>
+</head>
 
-  <h2>Create Account</h2>
+<body>
 
-  <form id="signupForm">
+<div class="container">
 
-    <label for="fullName">Full Name</label>
-    <input
-      type="text"
-      id="fullName"
-      placeholder="Enter your full name"
-      required
-    >
+  <div class="box">
 
-    <label for="email">Email Address</label>
-    <input
-      type="email"
-      id="email"
-      placeholder="Enter your email"
-      required
-    >
+    <h1>MoticGigs</h1>
 
-    <label for="password">Password</label>
-    <input
-      type="password"
-      id="password"
-      placeholder="Create a password"
-      minlength="6"
-      required
-    >
+    <p class="subtitle">
+      Create your account
+    </p>
 
-    <label for="confirmPassword">Confirm Password</label>
-    <input
-      type="password"
-      id="confirmPassword"
-      placeholder="Confirm your password"
-      minlength="6"
-      required
-    >
+    <form id="signupForm">
 
-    <button type="submit" id="signupButton">
-      Create Account
-    </button>
+      <label for="fullName">
+        Full Name
+      </label>
 
-  </form>
+      <input
+        type="text"
+        id="fullName"
+        placeholder="Enter your full name"
+        required
+      >
 
-  <div id="message" class="message"></div>
 
-  <div class="login-link">
-    Already have an account?
-    <a href="login.html">Log In</a>
+      <label for="email">
+        Email Address
+      </label>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        required
+      >
+
+
+      <label for="password">
+        Password
+      </label>
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Create a password"
+        minlength="6"
+        required
+      >
+
+
+      <div class="role-title">
+        What do you want to do on MoticGigs?
+      </div>
+
+
+      <!-- WORKER -->
+
+      <label class="role-option">
+
+        <input
+          type="radio"
+          name="role"
+          value="worker"
+          checked
+        >
+
+        <span class="role-name">
+          👷 Earn Money (Worker)
+        </span>
+
+        <span class="role-description">
+          Complete tasks posted by advertisers and earn money.
+        </span>
+
+      </label>
+
+
+      <!-- ADVERTISER -->
+
+      <label class="role-option">
+
+        <input
+          type="radio"
+          name="role"
+          value="advertiser"
+        >
+
+        <span class="role-name">
+          📢 Advertise / Post Tasks
+        </span>
+
+        <span class="role-description">
+          Deposit money and create tasks for workers.
+        </span>
+
+      </label>
+
+
+      <button
+        type="submit"
+        id="signupButton">
+        Create Account
+      </button>
+
+    </form>
+
+
+    <div
+      id="message"
+      class="message">
+    </div>
+
+
+    <div class="login">
+      Already have an account?
+      <a href="login.html">
+        Log In
+      </a>
+    </div>
+
   </div>
 
 </div>
 
-  </div>  <script>
-    // ==============================
-    // SUPABASE CONNECTION
-    // ==============================
 
-    const SUPABASE_URL =
-      "https://jfoijwjqfaewzyzjawbw.supabase.co";
+<script>
 
-    const SUPABASE_KEY =
-      "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+  // ==========================================
+  // SUPABASE
+  // ==========================================
 
-    const supabaseClient = window.supabase.createClient(
+  const SUPABASE_URL =
+    "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+  const supabaseClient =
+    supabase.createClient(
       SUPABASE_URL,
       SUPABASE_KEY
     );
 
 
-    // ==============================
-    // ELEMENTS
-    // ==============================
+  // ==========================================
+  // MESSAGE
+  // ==========================================
 
-    const signupForm = document.getElementById("signupForm");
-    const signupButton = document.getElementById("signupButton");
-    const message = document.getElementById("message");
+  function showMessage(text, type) {
+
+    const message =
+      document.getElementById("message");
+
+    message.textContent = text;
+
+    message.className =
+      "message " + type;
+
+    message.style.display =
+      "block";
+
+  }
 
 
-    // ==============================
-    // MESSAGE FUNCTION
-    // ==============================
+  // ==========================================
+  // SIGN UP
+  // ==========================================
 
-    function showMessage(text, type) {
-      message.textContent = text;
-      message.className = "message " + type;
-    }
-
-
-    // ==============================
-    // SIGN UP
-    // ==============================
-
-    signupForm.addEventListener("submit", async function(event) {
+  document
+    .getElementById("signupForm")
+    .addEventListener("submit", async function(event) {
 
       event.preventDefault();
 
+
       const fullName =
-        document.getElementById("fullName").value.trim();
+        document
+          .getElementById("fullName")
+          .value
+          .trim();
+
 
       const email =
-        document.getElementById("email").value.trim();
+        document
+          .getElementById("email")
+          .value
+          .trim();
+
 
       const password =
-        document.getElementById("password").value;
-
-      const confirmPassword =
-        document.getElementById("confirmPassword").value;
-
-
-      // Check name
-      if (!fullName) {
-        showMessage("Please enter your full name.", "error");
-        return;
-      }
+        document
+          .getElementById("password")
+          .value;
 
 
-      // Check passwords
-      if (password !== confirmPassword) {
-        showMessage("Passwords do not match.", "error");
-        return;
-      }
+      const selectedRole =
+        document
+          .querySelector(
+            'input[name="role"]:checked'
+          )
+          .value;
 
 
-      // Check password length
-      if (password.length < 6) {
-        showMessage(
-          "Password must be at least 6 characters.",
-          "error"
+      const button =
+        document.getElementById(
+          "signupButton"
         );
-        return;
-      }
 
 
-      // Disable button
-      signupButton.disabled = true;
-      signupButton.textContent = "Creating Account...";
+      button.disabled = true;
 
-      message.className = "message";
+      button.textContent =
+        "Creating account...";
 
 
-      try {
+      // ------------------------------------------
+      // Create Supabase account
+      // ------------------------------------------
 
-        const { data, error } =
-          await supabaseClient.auth.signUp({
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth.signUp({
 
-            email: email,
+          email: email,
 
-            password: password,
+          password: password,
 
-            options: {
-              data: {
-                full_name: fullName
-              }
+          options: {
+
+            data: {
+              full_name: fullName,
+              role: selectedRole
             }
 
-          });
+          }
+
+        });
 
 
-        // Supabase error
-        if (error) {
-          throw error;
-        }
+      if (error) {
 
+        console.error(error);
 
-        // Make sure a user was created
-        if (!data || !data.user) {
-          throw new Error(
-            "Account could not be created. Please try again."
-          );
-        }
+        button.disabled = false;
 
-
-        // Because Confirm Email is disabled,
-        // Supabase should return an active session.
-        if (!data.session) {
-          throw new Error(
-            "Account created, but no active session was returned. Please check that Confirm Email is OFF in Supabase."
-          );
-        }
-
-
-        // Success
-        showMessage(
-          "Account created successfully! Redirecting...",
-          "success"
-        );
-
-
-        // Give Supabase a moment to save the session
-        setTimeout(function() {
-
-          window.location.href = "dashboard.html";
-
-        }, 1200);
-
-
-      } catch (error) {
-
-        console.error("Signup error:", error);
+        button.textContent =
+          "Create Account";
 
         showMessage(
-          error.message || "Something went wrong. Please try again.",
+          error.message,
           "error"
         );
 
-        signupButton.disabled = false;
-        signupButton.textContent = "Create Account";
+        return;
+
+      }
+
+
+      // ------------------------------------------
+      // Make sure account was created
+      // ------------------------------------------
+
+      if (!data || !data.user) {
+
+        button.disabled = false;
+
+        button.textContent =
+          "Create Account";
+
+        showMessage(
+          "Account could not be created.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      // ------------------------------------------
+      // Confirm Email is OFF, so session should
+      // normally already exist.
+      // ------------------------------------------
+
+      if (!data.session) {
+
+        button.disabled = false;
+
+        button.textContent =
+          "Create Account";
+
+        showMessage(
+          "Account created, but no login session was returned. Please check your Supabase email confirmation settings.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      showMessage(
+        "Account created successfully. Redirecting...",
+        "success"
+      );
+
+
+      // ------------------------------------------
+      // Redirect based on selected role
+      // ------------------------------------------
+
+      if (selectedRole === "advertiser") {
+
+        setTimeout(() => {
+
+          window.location.href =
+            "dashboard.html";
+
+        }, 1000);
+
+      } else {
+
+        setTimeout(() => {
+
+          window.location.href =
+            "dashboard.html";
+
+        }, 1000);
 
       }
 
     });
-  </script></body>
+
+</script>
+
+</body>
 </html>
