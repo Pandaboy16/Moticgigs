@@ -84,20 +84,21 @@
     .deposit-item {
       border: 1px solid #ddd;
       border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 12px;
+      padding: 16px;
+      margin-bottom: 15px;
     }
 
     .deposit-item p {
-      margin: 7px 0;
+      margin: 8px 0;
     }
 
     .btn {
       border: none;
-      padding: 10px 15px;
+      padding: 11px 16px;
       border-radius: 7px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 14px;
     }
 
     .approve {
@@ -114,24 +115,44 @@
     .loading {
       color: #666;
     }
+
+    .empty {
+      color: #666;
+      padding: 10px 0;
+    }
   </style>
 </head>
 
 <body>
 
 <header>
+
   <h1>MoticGigs Admin</h1>
 
-  <button class="logout-btn" onclick="logout()">
+  <button
+    class="logout-btn"
+    onclick="logout()">
     Logout
   </button>
+
 </header>
+
 
 <div class="container">
 
-  <div id="errorBox" class="message error"></div>
+  <div
+    id="errorBox"
+    class="message error">
+  </div>
 
-  <div id="successBox" class="message success"></div>
+
+  <div
+    id="successBox"
+    class="message success">
+  </div>
+
+
+  <!-- ADMIN INFORMATION -->
 
   <div class="card">
 
@@ -143,24 +164,30 @@
 
   </div>
 
+
+  <!-- PENDING DEPOSITS -->
+
   <div class="card">
 
     <h2>Pending Deposits</h2>
 
     <div id="deposits">
+
       <p class="loading">
-        Waiting for administrator verification...
+        Loading pending deposits...
       </p>
+
     </div>
 
   </div>
 
 </div>
 
+
 <script>
 
   // =====================================================
-  // YOUR SUPABASE CONNECTION
+  // SUPABASE CONNECTION
   // =====================================================
 
   const SUPABASE_URL =
@@ -178,7 +205,7 @@
 
 
   // =====================================================
-  // SHOW ERROR
+  // ERROR MESSAGE
   // =====================================================
 
   function showError(message) {
@@ -193,7 +220,7 @@
 
 
   // =====================================================
-  // SHOW SUCCESS
+  // SUCCESS MESSAGE
   // =====================================================
 
   function showSuccess(message) {
@@ -209,23 +236,23 @@
 
       box.style.display = "none";
 
-    }, 3000);
+    }, 4000);
   }
 
 
   // =====================================================
-  // CHECK ADMIN ACCOUNT
+  // CHECK ADMIN
   // =====================================================
 
   async function checkAdmin() {
 
     try {
 
-      document.getElementById("welcomeMessage").textContent =
+      document.getElementById(
+        "welcomeMessage"
+      ).textContent =
         "Checking your login session...";
 
-
-      // Get current session
 
       const {
         data: sessionData,
@@ -261,14 +288,14 @@
         session.user;
 
 
-      document.getElementById("welcomeMessage").textContent =
+      document.getElementById(
+        "welcomeMessage"
+      ).textContent =
         "Reading administrator profile...";
 
 
-      // =================================================
       // IMPORTANT:
-      // YOUR COLUMN IS "Id" WITH CAPITAL I
-      // =================================================
+      // Moticgigs uses "Id" with capital I
 
       const {
         data: profile,
@@ -276,7 +303,9 @@
       } =
         await supabaseClient
           .from("Moticgigs")
-          .select('"Id", email, full_name, role, status')
+          .select(
+            '"Id", email, full_name, role, status'
+          )
           .eq("Id", user.id)
           .maybeSingle();
 
@@ -294,30 +323,22 @@
       if (!profile) {
 
         throw new Error(
-          "No Moticgigs profile was found for this administrator account."
+          "Administrator profile was not found."
         );
 
       }
 
-
-      // =================================================
-      // CHECK ADMIN ROLE
-      // =================================================
 
       if (profile.role !== "admin") {
 
         throw new Error(
           "Access denied. Your account role is '" +
           profile.role +
-          "', not 'admin'."
+          "'."
         );
 
       }
 
-
-      // =================================================
-      // CHECK ACCOUNT STATUS
-      // =================================================
 
       if (profile.status === "banned") {
 
@@ -330,17 +351,13 @@
       }
 
 
-      // =================================================
-      // ADMIN VERIFIED
-      // =================================================
-
-      document.getElementById("welcomeMessage").textContent =
+      document.getElementById(
+        "welcomeMessage"
+      ).textContent =
         "Welcome, " +
         (profile.full_name || "Administrator") +
         ". Administrator access confirmed.";
 
-
-      // Load deposits
 
       await loadPendingDeposits();
 
@@ -353,7 +370,9 @@
         error
       );
 
-      document.getElementById("welcomeMessage").textContent =
+      document.getElementById(
+        "welcomeMessage"
+      ).textContent =
         "Administrator check failed.";
 
       showError(error.message);
@@ -395,7 +414,10 @@
 
     if (error) {
 
-      console.error(error);
+      console.error(
+        "DEPOSIT LOAD ERROR:",
+        error
+      );
 
       depositsBox.innerHTML =
         "<p>Unable to load pending deposits.</p>";
@@ -409,11 +431,13 @@
     }
 
 
-    if (!deposits ||
-        deposits.length === 0) {
+    if (
+      !deposits ||
+      deposits.length === 0
+    ) {
 
       depositsBox.innerHTML =
-        "<p>No pending deposits.</p>";
+        "<p class='empty'>No pending deposits.</p>";
 
       return;
     }
@@ -423,6 +447,13 @@
 
 
     deposits.forEach(function(deposit) {
+
+      // IMPORTANT:
+      // Deposit primary key is "Id", not "id"
+
+      const depositId =
+        deposit.Id;
+
 
       const item =
         document.createElement("div");
@@ -488,13 +519,13 @@
 
         <button
           class="btn approve"
-          onclick="approveDeposit('${deposit.id}')">
+          onclick="approveDeposit('${depositId}')">
           Approve
         </button>
 
         <button
           class="btn reject"
-          onclick="rejectDeposit('${deposit.id}')">
+          onclick="rejectDeposit('${depositId}')">
           Reject
         </button>
 
@@ -514,9 +545,20 @@
 
   async function approveDeposit(id) {
 
+    if (!id) {
+
+      showError(
+        "Deposit ID was not found."
+      );
+
+      return;
+    }
+
+
     if (!confirm(
       "Are you sure you want to approve this deposit?"
     )) {
+
       return;
     }
 
@@ -527,14 +569,22 @@
       await supabaseClient
         .from("Deposit")
         .update({
+
           status: "APPROVED",
+
           approved_at:
             new Date().toISOString()
+
         })
-        .eq("id", id);
+        .eq("Id", id);
 
 
     if (error) {
+
+      console.error(
+        "APPROVE ERROR:",
+        error
+      );
 
       showError(
         "Could not approve deposit: " +
@@ -550,7 +600,7 @@
     );
 
 
-    loadPendingDeposits();
+    await loadPendingDeposits();
 
   }
 
@@ -561,9 +611,20 @@
 
   async function rejectDeposit(id) {
 
+    if (!id) {
+
+      showError(
+        "Deposit ID was not found."
+      );
+
+      return;
+    }
+
+
     if (!confirm(
       "Are you sure you want to reject this deposit?"
     )) {
+
       return;
     }
 
@@ -574,14 +635,22 @@
       await supabaseClient
         .from("Deposit")
         .update({
+
           status: "REJECTED",
+
           rejected_at:
             new Date().toISOString()
+
         })
-        .eq("id", id);
+        .eq("Id", id);
 
 
     if (error) {
+
+      console.error(
+        "REJECT ERROR:",
+        error
+      );
 
       showError(
         "Could not reject deposit: " +
@@ -597,7 +666,7 @@
     );
 
 
-    loadPendingDeposits();
+    await loadPendingDeposits();
 
   }
 
@@ -612,6 +681,7 @@
 
     window.location.href =
       "login.html";
+
   }
 
 
