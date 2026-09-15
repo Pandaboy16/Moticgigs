@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoticGigs Dashboard</title>
+
+  <title>Create Account - MoticGigs</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -15,518 +16,470 @@
 
     body {
       margin: 0;
-      background: #f5f7f6;
+      background: #f4f7f6;
       color: #222;
     }
 
-    header {
-      background: #16a34a;
-      color: white;
-      padding: 18px;
-    }
-
-    .header-inner {
-      max-width: 1000px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .logout {
-      background: white;
-      color: #16a34a;
-      border: none;
-      padding: 9px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-
     .container {
-      max-width: 1000px;
-      margin: auto;
+      max-width: 500px;
+      margin: 40px auto;
       padding: 20px;
     }
 
-    .welcome {
-      margin-bottom: 20px;
-    }
-
-    .balance-card {
-      background: #16a34a;
-      color: white;
-      padding: 24px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-    }
-
-    .balance-title {
-      font-size: 15px;
-      opacity: .9;
-    }
-
-    .balance {
-      font-size: 34px;
-      font-weight: bold;
-      margin: 8px 0 18px;
-    }
-
-    .pending {
-      font-size: 15px;
-      opacity: .95;
-    }
-
-    .deposit-btn {
-      margin-top: 18px;
+    .box {
       background: white;
-      color: #16a34a;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 9px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
     }
 
-    .actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+    h1 {
+      color: #075e3d;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
       margin-bottom: 25px;
     }
 
-    .action {
-      background: white;
-      border: none;
-      border-radius: 12px;
-      padding: 18px 10px;
-      font-size: 15px;
+    label {
+      display: block;
       font-weight: bold;
-      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+      margin-top: 15px;
+      margin-bottom: 7px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+
+    .role-title {
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    .role-option {
+      display: block;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
       cursor: pointer;
     }
 
-    .section {
-      background: white;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.05);
+    .role-option:hover {
+      border-color: #075e3d;
     }
 
-    .section h2 {
-      margin-top: 0;
+    .role-option input {
+      width: auto;
+      margin-right: 10px;
     }
 
-    .empty {
-      color: #777;
-      text-align: center;
-      padding: 25px 10px;
-    }
-
-    #message {
-      text-align: center;
-      margin: 15px 0;
-      color: #dc2626;
-    }
-
-    .role-badge {
-      display: inline-block;
-      background: #dcfce7;
-      color: #166534;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
+    .role-name {
       font-weight: bold;
-      margin-top: 5px;
+      font-size: 17px;
     }
 
-    @media (max-width: 600px) {
-      .actions {
-        grid-template-columns: 1fr 1fr;
-      }
+    .role-description {
+      display: block;
+      margin-left: 27px;
+      margin-top: 5px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 25px;
+      padding: 14px;
+      background: #075e3d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      border-radius: 7px;
+      margin-top: 15px;
+    }
+
+    .error {
+      background: #ffe0e0;
+      color: #a00000;
+    }
+
+    .success {
+      background: #dff5e8;
+      color: #126b3e;
+    }
+
+    .login {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .login a {
+      color: #075e3d;
+      font-weight: bold;
+      text-decoration: none;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo">MoticGigs</div>
-    <button class="logout" id="logoutBtn">Logout</button>
-  </div>
-</header>
-
 <div class="container">
 
-  <div class="welcome">
-    <h2 id="welcomeText">Welcome</h2>
-    <div id="roleBadge" class="role-badge"></div>
-  </div>
+  <div class="box">
+
+    <h1>MoticGigs</h1>
+
+    <p class="subtitle">
+      Create your account
+    </p>
+
+    <form id="signupForm">
+
+      <label for="fullName">
+        Full Name
+      </label>
+
+      <input
+        type="text"
+        id="fullName"
+        placeholder="Enter your full name"
+        required
+      >
 
 
-  <!-- BALANCE -->
+      <label for="email">
+        Email Address
+      </label>
 
-  <div class="balance-card">
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        required
+      >
 
-    <div class="balance-title">
-      Available Balance
+
+      <label for="password">
+        Password
+      </label>
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Create a password"
+        minlength="6"
+        required
+      >
+
+
+      <div class="role-title">
+        What do you want to do on MoticGigs?
+      </div>
+
+
+      <!-- WORKER -->
+
+      <label class="role-option">
+
+        <input
+          type="radio"
+          name="role"
+          value="worker"
+          checked
+        >
+
+        <span class="role-name">
+          👷 Earn Money (Worker)
+        </span>
+
+        <span class="role-description">
+          Complete tasks posted by advertisers and earn money.
+        </span>
+
+      </label>
+
+
+      <!-- ADVERTISER -->
+
+      <label class="role-option">
+
+        <input
+          type="radio"
+          name="role"
+          value="advertiser"
+        >
+
+        <span class="role-name">
+          📢 Advertise / Post Tasks
+        </span>
+
+        <span class="role-description">
+          Deposit money and create tasks for workers.
+        </span>
+
+      </label>
+
+
+      <button
+        type="submit"
+        id="signupButton">
+        Create Account
+      </button>
+
+    </form>
+
+
+    <div
+      id="message"
+      class="message">
     </div>
 
-    <div class="balance">
-      ₦<span id="availableBalance">0.00</span>
-    </div>
 
-    <div class="pending" id="pendingBox">
-      Pending Balance:
-      ₦<span id="pendingBalance">0.00</span>
-    </div>
-
-    <button
-      class="deposit-btn"
-      id="depositBtn"
-      onclick="window.location.href='deposit.html'">
-      + Deposit
-    </button>
-
-  </div>
-
-
-  <!-- WORKER ACTIONS -->
-
-  <div class="actions" id="workerActions">
-
-    <button
-      class="action"
-      onclick="window.location.href='tasks.html'">
-      📋 Available Tasks
-    </button>
-
-    <button
-      class="action"
-      onclick="window.location.href='withdraw.html'">
-      💰 Withdraw
-    </button>
-
-    <button
-      class="action"
-      onclick="showComingSoon('Profile')">
-      👤 Profile
-    </button>
-
-    <button
-      class="action"
-      onclick="showComingSoon('Transaction History')">
-      📊 Transactions
-    </button>
-
-  </div>
-
-
-  <!-- ADVERTISER ACTIONS -->
-
-  <div class="actions" id="advertiserActions" style="display:none;">
-
-    <button
-      class="action"
-      onclick="window.location.href='post-task.html'">
-      📢 Post Task
-    </button>
-
-    <button
-      class="action"
-      onclick="window.location.href='deposit.html'">
-      💳 Deposit
-    </button>
-
-    <button
-      class="action"
-      onclick="showComingSoon('My Tasks')">
-      📋 My Tasks
-    </button>
-
-    <button
-      class="action"
-      onclick="showComingSoon('Transaction History')">
-      📊 Transactions
-    </button>
-
-  </div>
-
-
-  <!-- WORKER TASK SECTION -->
-
-  <div class="section" id="workerTaskSection">
-
-    <h2>Available Tasks</h2>
-
-    <div class="empty">
-      Tasks posted by advertisers will appear here.
-    </div>
-
-  </div>
-
-
-  <!-- ADVERTISER SECTION -->
-
-  <div class="section" id="advertiserTaskSection" style="display:none;">
-
-    <h2>Advertiser Dashboard</h2>
-
-    <div class="empty">
-      Create tasks and manage your posted tasks here.
-      <br><br>
-      Click <b>Post Task</b> to create your first task.
+    <div class="login">
+      Already have an account?
+      <a href="login.html">
+        Log In
+      </a>
     </div>
 
   </div>
-
-
-  <div id="message"></div>
 
 </div>
 
 
 <script>
 
-const SUPABASE_URL =
-  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+  // ==========================================
+  // SUPABASE
+  // ==========================================
 
-const SUPABASE_KEY =
-  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+  const SUPABASE_URL =
+    "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  const SUPABASE_KEY =
+    "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-
-async function loadDashboard() {
-
-  const {
-    data: { user },
-    error: userError
-  } = await supabaseClient.auth.getUser();
+  const supabaseClient =
+    supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
 
-  if (userError || !user) {
+  // ==========================================
+  // MESSAGE
+  // ==========================================
 
-    window.location.href = "login.html";
+  function showMessage(text, type) {
 
-    return;
-  }
+    const message =
+      document.getElementById("message");
 
+    message.textContent = text;
 
-  // LOAD PROFILE INCLUDING ROLE
+    message.className =
+      "message " + type;
 
-  const {
-    data: profile,
-    error: profileError
-  } = await supabaseClient
-    .from("Moticgigs")
-    .select("full_name, email, role, status")
-    .eq("Id", user.id)
-    .single();
-
-
-  if (profileError || !profile) {
-
-    document.getElementById("message").textContent =
-      "Unable to load your profile.";
-
-    return;
-  }
-
-
-  // BANNED ACCOUNT
-
-  if (profile.status === "banned") {
-
-    document.getElementById("message").textContent =
-      "Your account has been banned.";
-
-    await supabaseClient.auth.signOut();
-
-    setTimeout(() => {
-      window.location.href = "login.html";
-    }, 2000);
-
-    return;
-  }
-
-
-  // NAME
-
-  const name =
-    profile.full_name || user.email;
-
-  document.getElementById("welcomeText").textContent =
-    "Welcome, " + name;
-
-
-  // CHECK ROLE
-
-  const role =
-    String(profile.role || "").toLowerCase();
-
-
-  // WORKER
-
-  if (role === "worker") {
-
-    document.getElementById("roleBadge").textContent =
-      "WORKER";
-
-    document.getElementById("workerActions").style.display =
-      "grid";
-
-    document.getElementById("advertiserActions").style.display =
-      "none";
-
-    document.getElementById("workerTaskSection").style.display =
+    message.style.display =
       "block";
 
-    document.getElementById("advertiserTaskSection").style.display =
-      "none";
-
-    document.getElementById("depositBtn").style.display =
-      "none";
-
-    document.getElementById("pendingBox").style.display =
-      "block";
-
-
-    // WORKER WALLET
-
-    const {
-      data: wallet,
-      error: walletError
-    } = await supabaseClient
-      .from("Wallet")
-      .select("available_balance, pending_balance")
-      .eq("user_id", user.id)
-      .eq("wallet_type", "WORKER")
-      .maybeSingle();
-
-
-    if (!walletError && wallet) {
-
-      showBalances(wallet);
-
-    }
-
   }
 
 
-  // ADVERTISER
+  // ==========================================
+  // SIGN UP
+  // ==========================================
 
-  else if (role === "advertiser") {
+  document
+    .getElementById("signupForm")
+    .addEventListener("submit", async function(event) {
 
-    document.getElementById("roleBadge").textContent =
-      "ADVERTISER";
-
-    document.getElementById("workerActions").style.display =
-      "none";
-
-    document.getElementById("advertiserActions").style.display =
-      "grid";
-
-    document.getElementById("workerTaskSection").style.display =
-      "none";
-
-    document.getElementById("advertiserTaskSection").style.display =
-      "block";
-
-    document.getElementById("depositBtn").style.display =
-      "block";
-
-    document.getElementById("pendingBox").style.display =
-      "none";
+      event.preventDefault();
 
 
-    // ADVERTISER WALLET
-
-    const {
-      data: wallet,
-      error: walletError
-    } = await supabaseClient
-      .from("Wallet")
-      .select("available_balance, pending_balance")
-      .eq("user_id", user.id)
-      .eq("wallet_type", "ADVERTISER")
-      .maybeSingle();
+      const fullName =
+        document
+          .getElementById("fullName")
+          .value
+          .trim();
 
 
-    if (!walletError && wallet) {
-
-      showBalances(wallet);
-
-    }
-
-  }
+      const email =
+        document
+          .getElementById("email")
+          .value
+          .trim();
 
 
-  // UNKNOWN ROLE
-
-  else {
-
-    document.getElementById("message").textContent =
-      "Your account role is not configured correctly.";
-
-  }
-
-}
+      const password =
+        document
+          .getElementById("password")
+          .value;
 
 
-function showBalances(wallet) {
+      const selectedRole =
+        document
+          .querySelector(
+            'input[name="role"]:checked'
+          )
+          .value;
 
-  document.getElementById("availableBalance")
-    .textContent =
-    Number(wallet.available_balance || 0)
-    .toLocaleString("en-NG", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+
+      const button =
+        document.getElementById(
+          "signupButton"
+        );
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "Creating account...";
+
+
+      // ------------------------------------------
+      // Create Supabase account
+      // ------------------------------------------
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth.signUp({
+
+          email: email,
+
+          password: password,
+
+          options: {
+
+            data: {
+              full_name: fullName,
+              role: selectedRole
+            }
+
+          }
+
+        });
+
+
+      if (error) {
+
+        console.error(error);
+
+        button.disabled = false;
+
+        button.textContent =
+          "Create Account";
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      // ------------------------------------------
+      // Make sure account was created
+      // ------------------------------------------
+
+      if (!data || !data.user) {
+
+        button.disabled = false;
+
+        button.textContent =
+          "Create Account";
+
+        showMessage(
+          "Account could not be created.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      // ------------------------------------------
+      // Confirm Email is OFF, so session should
+      // normally already exist.
+      // ------------------------------------------
+
+      if (!data.session) {
+
+        button.disabled = false;
+
+        button.textContent =
+          "Create Account";
+
+        showMessage(
+          "Account created, but no login session was returned. Please check your Supabase email confirmation settings.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      showMessage(
+        "Account created successfully. Redirecting...",
+        "success"
+      );
+
+
+      // ------------------------------------------
+      // Redirect based on selected role
+      // ------------------------------------------
+
+      if (selectedRole === "advertiser") {
+
+        setTimeout(() => {
+
+          window.location.href =
+            "dashboard.html";
+
+        }, 1000);
+
+      } else {
+
+        setTimeout(() => {
+
+          window.location.href =
+            "dashboard.html";
+
+        }, 1000);
+
+      }
+
     });
-
-
-  document.getElementById("pendingBalance")
-    .textContent =
-    Number(wallet.pending_balance || 0)
-    .toLocaleString("en-NG", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-
-}
-
-
-function showComingSoon(feature) {
-
-  document.getElementById("message").textContent =
-    feature + " will be added next.";
-
-}
-
-
-document
-  .getElementById("logoutBtn")
-  .addEventListener("click", async function() {
-
-    await supabaseClient.auth.signOut();
-
-    window.location.href = "login.html";
-
-  });
-
-
-loadDashboard();
 
 </script>
 
