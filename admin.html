@@ -16,12 +16,12 @@
 
     body {
       margin: 0;
-      background: #f4f7f5;
+      background: #f4f7f6;
       color: #222;
     }
 
     header {
-      background: #0b8f45;
+      background: #075e3d;
       color: white;
       padding: 18px;
       display: flex;
@@ -34,91 +34,133 @@
       font-size: 22px;
     }
 
-    .logout-btn {
-      background: white;
-      color: #0b8f45;
+    .logout {
+      background: #fff;
+      color: #075e3d;
       border: none;
-      padding: 10px 15px;
-      border-radius: 7px;
-      cursor: pointer;
+      padding: 9px 14px;
+      border-radius: 6px;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .container {
       max-width: 1000px;
-      margin: 25px auto;
-      padding: 15px;
+      margin: 20px auto;
+      padding: 0 15px;
     }
 
-    .card {
+    .welcome {
       background: white;
-      padding: 25px;
+      padding: 18px;
+      border-radius: 10px;
       margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
-    .card h2 {
+    .welcome h2 {
       margin-top: 0;
-      color: #0b8f45;
+      color: #075e3d;
     }
 
     .message {
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: 7px;
+      margin-bottom: 15px;
       display: none;
-      word-wrap: break-word;
-    }
-
-    .error {
-      background: #ffe5e5;
-      color: #b00020;
     }
 
     .success {
-      background: #e5f8ed;
-      color: #087a39;
+      background: #dff5e8;
+      color: #126b3e;
     }
 
-    .deposit-item {
+    .error {
+      background: #ffe1e1;
+      color: #a30000;
+    }
+
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .section h2 {
+      margin-top: 0;
+      color: #075e3d;
+    }
+
+    .deposit-card {
       border: 1px solid #ddd;
       border-radius: 8px;
-      padding: 16px;
+      padding: 15px;
       margin-bottom: 15px;
     }
 
-    .deposit-item p {
-      margin: 8px 0;
+    .deposit-card p {
+      margin: 7px 0;
+      word-break: break-word;
     }
 
-    .btn {
+    .amount {
+      font-size: 21px;
+      font-weight: bold;
+      color: #075e3d;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
       border: none;
-      padding: 11px 16px;
-      border-radius: 7px;
+      padding: 10px 16px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 14px;
     }
 
     .approve {
-      background: #0b8f45;
+      background: #075e3d;
       color: white;
+    }
+
+    .approve:disabled {
+      background: #999;
+      cursor: not-allowed;
     }
 
     .reject {
-      background: #d93025;
+      background: #c62828;
       color: white;
-      margin-left: 6px;
     }
 
     .loading {
+      text-align: center;
+      padding: 20px;
       color: #666;
     }
 
     .empty {
-      color: #666;
-      padding: 10px 0;
+      text-align: center;
+      padding: 25px;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 18px;
+      }
+
+      .container {
+        padding: 0 10px;
+      }
     }
   </style>
 </head>
@@ -126,274 +168,176 @@
 <body>
 
 <header>
-
   <h1>MoticGigs Admin</h1>
-
-  <button
-    class="logout-btn"
-    onclick="logout()">
-    Logout
-  </button>
-
+  <button class="logout" onclick="logout()">Logout</button>
 </header>
-
 
 <div class="container">
 
-  <div
-    id="errorBox"
-    class="message error">
-  </div>
+  <div id="message" class="message"></div>
 
-
-  <div
-    id="successBox"
-    class="message success">
-  </div>
-
-
-  <!-- ADMIN INFORMATION -->
-
-  <div class="card">
-
+  <div class="welcome">
     <h2>Admin Dashboard</h2>
-
-    <p id="welcomeMessage">
-      Checking administrator account...
-    </p>
-
+    <p id="adminInfo">Checking administrator account...</p>
   </div>
 
-
-  <!-- PENDING DEPOSITS -->
-
-  <div class="card">
-
+  <div class="section">
     <h2>Pending Deposits</h2>
 
     <div id="deposits">
-
-      <p class="loading">
-        Loading pending deposits...
-      </p>
-
+      <div class="loading">Loading deposits...</div>
     </div>
-
   </div>
 
 </div>
 
-
 <script>
-
-  // =====================================================
-  // SUPABASE CONNECTION
-  // =====================================================
 
   const SUPABASE_URL =
     "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
-  const SUPABASE_PUBLISHABLE_KEY =
+  const SUPABASE_KEY =
     "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-
   const supabaseClient =
-    window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-  // =====================================================
-  // ERROR MESSAGE
-  // =====================================================
+  // ---------------------------------------
+  // MESSAGE
+  // ---------------------------------------
 
-  function showError(message) {
+  function showMessage(text, type) {
 
-    const box =
-      document.getElementById("errorBox");
+    const message = document.getElementById("message");
 
-    box.textContent = message;
+    message.textContent = text;
 
-    box.style.display = "block";
+    message.className =
+      "message " + type;
+
+    message.style.display = "block";
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   }
 
 
-  // =====================================================
-  // SUCCESS MESSAGE
-  // =====================================================
-
-  function showSuccess(message) {
-
-    const box =
-      document.getElementById("successBox");
-
-    box.textContent = message;
-
-    box.style.display = "block";
-
-    setTimeout(function() {
-
-      box.style.display = "none";
-
-    }, 4000);
-  }
-
-
-  // =====================================================
-  // CHECK ADMIN
-  // =====================================================
+  // ---------------------------------------
+  // ADMIN CHECK
+  // ---------------------------------------
 
   async function checkAdmin() {
 
-    try {
+    const {
+      data: sessionData,
+      error: sessionError
+    } = await supabaseClient.auth.getSession();
 
-      document.getElementById(
-        "welcomeMessage"
-      ).textContent =
-        "Checking your login session...";
+    if (
+      sessionError ||
+      !sessionData ||
+      !sessionData.session
+    ) {
 
-
-      const {
-        data: sessionData,
-        error: sessionError
-      } =
-        await supabaseClient.auth.getSession();
-
-
-      if (sessionError) {
-
-        throw new Error(
-          "Session error: " +
-          sessionError.message
-        );
-
-      }
-
-
-      const session =
-        sessionData.session;
-
-
-      if (!session || !session.user) {
-
-        window.location.href =
-          "login.html";
-
-        return;
-      }
-
-
-      const user =
-        session.user;
-
-
-      document.getElementById(
-        "welcomeMessage"
-      ).textContent =
-        "Reading administrator profile...";
-
-
-      // IMPORTANT:
-      // Moticgigs uses "Id" with capital I
-
-      const {
-        data: profile,
-        error: profileError
-      } =
-        await supabaseClient
-          .from("Moticgigs")
-          .select(
-            '"Id", email, full_name, role, status'
-          )
-          .eq("Id", user.id)
-          .maybeSingle();
-
-
-      if (profileError) {
-
-        throw new Error(
-          "Profile error: " +
-          profileError.message
-        );
-
-      }
-
-
-      if (!profile) {
-
-        throw new Error(
-          "Administrator profile was not found."
-        );
-
-      }
-
-
-      if (profile.role !== "admin") {
-
-        throw new Error(
-          "Access denied. Your account role is '" +
-          profile.role +
-          "'."
-        );
-
-      }
-
-
-      if (profile.status === "banned") {
-
-        await supabaseClient.auth.signOut();
-
-        throw new Error(
-          "This administrator account has been banned."
-        );
-
-      }
-
-
-      document.getElementById(
-        "welcomeMessage"
-      ).textContent =
-        "Welcome, " +
-        (profile.full_name || "Administrator") +
-        ". Administrator access confirmed.";
-
-
-      await loadPendingDeposits();
+      window.location.href = "login.html";
+      return;
 
     }
 
-    catch (error) {
+    const user =
+      sessionData.session.user;
 
-      console.error(
-        "ADMIN ERROR:",
-        error
+
+    const {
+      data: profile,
+      error: profileError
+    } =
+      await supabaseClient
+        .from("Moticgigs")
+        .select('"Id", email, full_name, role, status')
+        .eq("Id", user.id)
+        .maybeSingle();
+
+
+    if (profileError) {
+
+      console.error(profileError);
+
+      showMessage(
+        "Could not read your administrator profile.",
+        "error"
       );
 
-      document.getElementById(
-        "welcomeMessage"
-      ).textContent =
-        "Administrator check failed.";
-
-      showError(error.message);
-
+      return;
     }
 
+
+    if (!profile) {
+
+      showMessage(
+        "Administrator profile was not found.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (profile.role !== "admin") {
+
+      showMessage(
+        "Access denied. Administrator account required.",
+        "error"
+      );
+
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 2000);
+
+      return;
+    }
+
+
+    if (profile.status === "banned") {
+
+      showMessage(
+        "This administrator account is banned.",
+        "error"
+      );
+
+      await supabaseClient.auth.signOut();
+
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 2000);
+
+      return;
+    }
+
+
+    document.getElementById("adminInfo").textContent =
+      "Logged in as administrator: " +
+      (profile.full_name || profile.email);
+
+
+    loadDeposits();
   }
 
 
-  // =====================================================
-  // LOAD PENDING DEPOSITS
-  // =====================================================
+  // ---------------------------------------
+  // LOAD DEPOSITS
+  // ---------------------------------------
 
-  async function loadPendingDeposits() {
+  async function loadDeposits() {
 
-    const depositsBox =
+    const container =
       document.getElementById("deposits");
 
-
-    depositsBox.innerHTML =
-      "<p class='loading'>Loading pending deposits...</p>";
+    container.innerHTML =
+      '<div class="loading">Loading deposits...</div>';
 
 
     const {
@@ -404,290 +348,295 @@
         .from("Deposit")
         .select("*")
         .eq("status", "PENDING")
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        );
+        .order("created_at", {
+          ascending: false
+        });
 
 
     if (error) {
 
-      console.error(
-        "DEPOSIT LOAD ERROR:",
-        error
-      );
+      console.error(error);
 
-      depositsBox.innerHTML =
-        "<p>Unable to load pending deposits.</p>";
+      container.innerHTML = "";
 
-      showError(
-        "Deposit error: " +
-        error.message
+      showMessage(
+        "Could not load deposits: " +
+        error.message,
+        "error"
       );
 
       return;
     }
 
 
-    if (
-      !deposits ||
-      deposits.length === 0
-    ) {
+    if (!deposits || deposits.length === 0) {
 
-      depositsBox.innerHTML =
-        "<p class='empty'>No pending deposits.</p>";
+      container.innerHTML =
+        '<div class="empty">No pending deposits.</div>';
 
       return;
     }
 
 
-    depositsBox.innerHTML = "";
+    container.innerHTML = "";
 
 
-    deposits.forEach(function(deposit) {
+    deposits.forEach(deposit => {
 
       // IMPORTANT:
-      // Deposit primary key is "Id", not "id"
+      // Deposit table now uses lowercase "id"
 
       const depositId =
-        deposit.Id;
+        deposit.id;
 
 
-      const item =
+      const card =
         document.createElement("div");
 
+      card.className =
+        "deposit-card";
 
-      item.className =
-        "deposit-item";
 
+      card.innerHTML = `
 
-      item.innerHTML = `
-
-        <p>
-          <strong>Amount:</strong>
-          ₦${Number(
-            deposit.amount || 0
-          ).toLocaleString()}
+        <p class="amount">
+          ₦${Number(deposit.amount || 0).toLocaleString()}
         </p>
 
         <p>
           <strong>Sender:</strong>
-          ${escapeHtml(
-            deposit.sender_name ||
-            "Not provided"
-          )}
+          ${escapeHtml(deposit.sender_name || "N/A")}
+        </p>
+
+        <p>
+          <strong>Payment Method:</strong>
+          ${escapeHtml(deposit.payment_method || "N/A")}
         </p>
 
         <p>
           <strong>Reference:</strong>
-          ${escapeHtml(
-            deposit.payment_reference ||
-            "Not provided"
-          )}
+          ${escapeHtml(deposit.payment_reference || "N/A")}
         </p>
 
         <p>
-          <strong>Payment:</strong>
-          ${escapeHtml(
-            deposit.payment_method ||
-            "PALMPAY"
-          )}
+          <strong>User ID:</strong>
+          ${escapeHtml(deposit.user_id || "N/A")}
         </p>
 
         <p>
-          <strong>Status:</strong>
-          ${escapeHtml(
-            deposit.status ||
-            "PENDING"
-          )}
+          <strong>Submitted:</strong>
+          ${deposit.created_at
+            ? new Date(deposit.created_at).toLocaleString()
+            : "N/A"}
         </p>
 
-        <p>
-          <strong>Created:</strong>
-          ${
-            deposit.created_at
-            ? new Date(
-                deposit.created_at
-              ).toLocaleString()
-            : "Unknown"
-          }
-        </p>
+        <div class="buttons">
 
-        <br>
+          <button
+            class="approve"
+            id="approve-${depositId}">
+            Approve Deposit
+          </button>
 
-        <button
-          class="btn approve"
-          onclick="approveDeposit('${depositId}')">
-          Approve
-        </button>
+          <button
+            class="reject"
+            id="reject-${depositId}">
+            Reject
+          </button>
 
-        <button
-          class="btn reject"
-          onclick="rejectDeposit('${depositId}')">
-          Reject
-        </button>
-
+        </div>
       `;
 
 
-      depositsBox.appendChild(item);
+      container.appendChild(card);
+
+
+      document
+        .getElementById("approve-" + depositId)
+        .addEventListener(
+          "click",
+          () => approveDeposit(depositId)
+        );
+
+
+      document
+        .getElementById("reject-" + depositId)
+        .addEventListener(
+          "click",
+          () => rejectDeposit(depositId)
+        );
 
     });
-
   }
 
 
-  // =====================================================
+  // ---------------------------------------
   // APPROVE DEPOSIT
-  // =====================================================
+  // ---------------------------------------
 
   async function approveDeposit(id) {
 
     if (!id) {
 
-      showError(
-        "Deposit ID was not found."
+      showMessage(
+        "Deposit ID is missing.",
+        "error"
       );
 
       return;
     }
 
 
-    if (!confirm(
-      "Are you sure you want to approve this deposit?"
-    )) {
+    const confirmed =
+      confirm(
+        "Approve this deposit?\n\n" +
+        "The deposit amount will automatically be added to the user's available wallet balance."
+      );
 
+
+    if (!confirmed) {
       return;
     }
 
 
+    const button =
+      document.getElementById(
+        "approve-" + id
+      );
+
+
+    if (button) {
+
+      button.disabled = true;
+      button.textContent = "Approving...";
+
+    }
+
+
     const {
+      data,
       error
     } =
-      await supabaseClient
-        .from("Deposit")
-        .update({
-
-          status: "APPROVED",
-
-          approved_at:
-            new Date().toISOString()
-
-        })
-        .eq("Id", id);
+      await supabaseClient.rpc(
+        "approve_deposit",
+        {
+          deposit_id: id
+        }
+      );
 
 
     if (error) {
 
       console.error(
-        "APPROVE ERROR:",
+        "Approve error:",
         error
       );
 
-      showError(
+
+      if (button) {
+
+        button.disabled = false;
+        button.textContent =
+          "Approve Deposit";
+
+      }
+
+
+      showMessage(
         "Could not approve deposit: " +
-        error.message
+        error.message,
+        "error"
       );
 
       return;
     }
 
 
-    showSuccess(
-      "Deposit approved successfully."
+    console.log(
+      "Deposit approved:",
+      data
     );
 
 
-    await loadPendingDeposits();
+    showMessage(
+      "Deposit approved successfully. The amount has been added to the user's available balance.",
+      "success"
+    );
+
+
+    // Reload pending deposits
+    await loadDeposits();
 
   }
 
 
-  // =====================================================
+  // ---------------------------------------
   // REJECT DEPOSIT
-  // =====================================================
+  // ---------------------------------------
 
   async function rejectDeposit(id) {
 
     if (!id) {
 
-      showError(
-        "Deposit ID was not found."
+      showMessage(
+        "Deposit ID is missing.",
+        "error"
       );
 
       return;
     }
 
 
-    if (!confirm(
-      "Are you sure you want to reject this deposit?"
-    )) {
+    const confirmed =
+      confirm(
+        "Are you sure you want to reject this deposit?"
+      );
 
+
+    if (!confirmed) {
       return;
     }
 
 
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("Deposit")
-        .update({
-
-          status: "REJECTED",
-
-          rejected_at:
-            new Date().toISOString()
-
-        })
-        .eq("Id", id);
-
-
-    if (error) {
-
-      console.error(
-        "REJECT ERROR:",
-        error
+    const button =
+      document.getElementById(
+        "reject-" + id
       );
 
-      showError(
-        "Could not reject deposit: " +
-        error.message
-      );
 
-      return;
+    if (button) {
+
+      button.disabled = true;
+      button.textContent = "Rejecting...";
+
     }
 
 
-    showSuccess(
-      "Deposit rejected successfully."
+    /*
+      NOTE:
+      Rejection will be connected to a secure
+      reject_deposit RPC in the next backend step.
+    */
+
+    if (button) {
+
+      button.disabled = false;
+      button.textContent = "Reject";
+
+    }
+
+
+    showMessage(
+      "The Reject function needs its secure backend RPC before it can process the deposit.",
+      "error"
     );
 
-
-    await loadPendingDeposits();
-
   }
 
 
-  // =====================================================
-  // LOGOUT
-  // =====================================================
-
-  async function logout() {
-
-    await supabaseClient.auth.signOut();
-
-    window.location.href =
-      "login.html";
-
-  }
-
-
-  // =====================================================
-  // ESCAPE HTML
-  // =====================================================
+  // ---------------------------------------
+  // HTML ESCAPE
+  // ---------------------------------------
 
   function escapeHtml(value) {
 
@@ -701,9 +650,23 @@
   }
 
 
-  // =====================================================
+  // ---------------------------------------
+  // LOGOUT
+  // ---------------------------------------
+
+  async function logout() {
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href =
+      "login.html";
+
+  }
+
+
+  // ---------------------------------------
   // START
-  // =====================================================
+  // ---------------------------------------
 
   checkAdmin();
 
