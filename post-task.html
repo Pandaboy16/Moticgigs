@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Task - MoticGigs</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f7f6;
+      color: #222;
+    }
+
+    header {
+      background: #16a34a;
+      color: white;
+      padding: 18px;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .back {
+      background: white;
+      color: #16a34a;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 3px 15px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 7px;
+    }
+
+    select,
+    input,
+    textarea {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      font-size: 15px;
+      background: white;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .balance {
+      background: #16a34a;
+      color: white;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .balance strong {
+      font-size: 25px;
+    }
+
+    .calculator {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 18px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin: 9px 0;
+    }
+
+    .total {
+      border-top: 1px solid #bbf7d0;
+      padding-top: 12px;
+      margin-top: 12px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .post-btn {
+      width: 100%;
+      margin-top: 22px;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: #16a34a;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .post-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #message {
+      text-align: center;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+
+    .success {
+      color: #16a34a;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">MoticGigs</div>
+
+    <button
+      class="back"
+      onclick="window.location.href='dashboard.html'">
+      ← Dashboard
+    </button>
+  </div>
+</header>
+
+
+<div class="container">
+
+  <div class="card">
+
+    <h2>📢 Post a Task</h2>
+    <p>Create a task for workers to complete.</p>
+
+    <div class="balance">
+      <div>Available Posting Balance</div>
+      ₦<strong id="balance">0.00</strong>
+    </div>
+
+
+    <label for="platform">Platform</label>
+
+    <select id="platform">
+      <option value="">Select platform</option>
+      <option value="Facebook">Facebook</option>
+      <option value="TikTok">TikTok</option>
+      <option value="Twitter">Twitter</option>
+      <option value="Instagram">Instagram</option>
+      <option value="Website">Website</option>
+      <option value="WhatsApp">WhatsApp</option>
+      <option value="YouTube">YouTube</option>
+      <option value="Snapchat">Snapchat</option>
+      <option value="Audiomack">Audiomack</option>
+      <option value="Spotify">Spotify</option>
+      <option value="Boomplay">Boomplay</option>
+      <option value="Telegram">Telegram</option>
+    </select>
+
+
+    <label for="taskType">Task</label>
+
+    <select id="taskType" disabled>
+      <option value="">Select task</option>
+    </select>
+
+
+    <div id="customCommentBox" class="hidden">
+
+      <label for="customComment">
+        Custom Comment
+      </label>
+
+      <textarea
+        id="customComment"
+        placeholder="Enter the comment workers should post">
+      </textarea>
+
+    </div>
+
+
+    <label for="taskLink">
+      Task Link
+    </label>
+
+    <input
+      type="url"
+      id="taskLink"
+      placeholder="https://..."
+    >
+
+
+    <label for="quantity">
+      Quantity
+    </label>
+
+    <input
+      type="number"
+      id="quantity"
+      min="1"
+      step="1"
+      placeholder="Example: 100"
+    >
+
+
+    <div class="calculator">
+
+      <div class="row">
+        <span>Price per action</span>
+        <strong>₦<span id="price">0.00</span></strong>
+      </div>
+
+      <div class="row">
+        <span>Quantity</span>
+        <strong id="quantityDisplay">0</strong>
+      </div>
+
+      <div class="row">
+        <span>Worker reward per action</span>
+        <strong>₦<span id="workerReward">0.00</span></strong>
+      </div>
+
+      <div class="row">
+        <span>Platform revenue per action</span>
+        <strong>₦<span id="platformRevenue">0.00</span></strong>
+      </div>
+
+      <div class="row total">
+        <span>Total budget</span>
+        <span>₦<span id="total">0.00</span></span>
+      </div>
+
+    </div>
+
+
+    <button
+      class="post-btn"
+      id="postBtn"
+      disabled>
+      Pay & Post Task
+    </button>
+
+  </div>
+
+
+  <div id="message"></div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/*
+  MoticGigs pricing
+*/
+
+const prices = {
+
+  Facebook: {
+    "Comment": 9,
+    "Custom comment": 30,
+    "Follow": 12,
+    "Like": 7,
+    "Views": 6,
+    "Like/comment/repost": 33
+  },
+
+  TikTok: {
+    "Comment": 9,
+    "Custom comment": 32,
+    "Follow": 10,
+    "Like": 8,
+    "Like/comment/repost": 30,
+    "Views": 6,
+    "Sound use": 50,
+    "Sound use premium": 300
+  },
+
+  Twitter: {
+    "Comment": 10,
+    "Custom comment": 30,
+    "Follow": 10,
+    "Like": 7,
+    "Like/comment/repost": 30,
+    "Views": 6
+  },
+
+  Instagram: {
+    "Comment": 9,
+    "Custom comment": 30,
+    "Follow": 10,
+    "Like": 7,
+    "Like/comment/repost": 30,
+    "Views": 5,
+    "Sound use": 50,
+    "Sound use premium": 300
+  },
+
+  Website: {
+    "Traffic": 5,
+    "Sign up": 50
+  },
+
+  WhatsApp: {
+    "Channel follow": 20,
+    "Group join": 20
+  },
+
+  YouTube: {
+    "Comment": 9,
+    "Custom comment": 35,
+    "Subscribe": 30,
+    "Like": 4
+  },
+
+  Snapchat: {
+    "Comment": 8,
+    "Custom comment": 20,
+    "Follow": 5,
+    "Like": 4
+  },
+
+  Audiomack: {
+    "Comment": 8,
+    "Custom comment": 20,
+    "Follow": 5,
+    "Like": 4
+  },
+
+  Spotify: {
+    "Comment": 8,
+    "Custom comment": 20,
+    "Follow": 5,
+    "Like": 4
+  },
+
+  Boomplay: {
+    "Comment": 8,
+    "Custom comment": 20,
+    "Follow": 5,
+    "Like": 4
+  },
+
+  Telegram: {
+    "Group join": 20,
+    "Channel join": 20,
+    "Bot start": 15
+  }
+
+};
+
+
+let currentUser = null;
+let currentBalance = 0;
+
+
+const platform =
+  document.getElementById("platform");
+
+const taskType =
+  document.getElementById("taskType");
+
+const quantity =
+  document.getElementById("quantity");
+
+const taskLink =
+  document.getElementById("taskLink");
+
+const customComment =
+  document.getElementById("customComment");
+
+const customCommentBox =
+  document.getElementById("customCommentBox");
+
+const postBtn =
+  document.getElementById("postBtn");
+
+
+/*
+  LOAD USER
+*/
+
+async function loadUser() {
+
+  const {
+    data: { user },
+    error
+  } =
+    await supabaseClient.auth.getUser();
+
+
+  if (error || !user) {
+
+    window.location.href =
+      "login.html";
+
+    return;
+  }
+
+
+  currentUser = user;
+
+
+  /*
+    Check advertiser role
+  */
+
+  const {
+    data: profile,
+    error: profileError
+  } =
+    await supabaseClient
+      .from("Moticgigs")
+      .select("role,status")
+      .eq("Id", user.id)
+      .single();
+
+
+  if (
+    profileError ||
+    !profile ||
+    profile.role !== "advertiser"
+  ) {
+
+    alert(
+      "Only advertisers can post tasks."
+    );
+
+    window.location.href =
+      "dashboard.html";
+
+    return;
+  }
+
+
+  if (profile.status === "banned") {
+
+    alert(
+      "Your account has been banned."
+    );
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href =
+      "login.html";
+
+    return;
+  }
+
+
+  /*
+    Load advertiser wallet
+  */
+
+  const {
+    data: wallet,
+    error: walletError
+  } =
+    await supabaseClient
+      .from("Wallet")
+      .select("available_balance")
+      .eq("user_id", user.id)
+      .eq("wallet_type", "ADVERTISER")
+      .maybeSingle();
+
+
+  if (walletError) {
+
+    document.getElementById("message").textContent =
+      walletError.message;
+
+    return;
+  }
+
+
+  if (!wallet) {
+
+    document.getElementById("message").textContent =
+      "Advertiser wallet not found.";
+
+    return;
+  }
+
+
+  currentBalance =
+    Number(wallet.available_balance || 0);
+
+
+  showBalance();
+
+}
+
+
+/*
+  PLATFORM CHANGE
+*/
+
+platform.addEventListener(
+  "change",
+  function() {
+
+    taskType.innerHTML =
+      '<option value="">Select task</option>';
+
+    taskType.disabled = true;
+
+    customCommentBox.classList.add(
+      "hidden"
+    );
+
+    if (!platform.value) {
+
+      calculate();
+
+      return;
+    }
+
+
+    const taskList =
+      prices[platform.value];
+
+
+    Object.keys(taskList).forEach(
+      function(task) {
+
+        const option =
+          document.createElement("option");
+
+        option.value = task;
+        option.textContent = task;
+
+        taskType.appendChild(option);
+
+      }
+    );
+
+
+    taskType.disabled = false;
+
+    calculate();
+
+  }
+);
+
+
+/*
+  TASK CHANGE
+*/
+
+taskType.addEventListener(
+  "change",
+  function() {
+
+    if (
+      taskType.value ===
+      "Custom comment"
+    ) {
+
+      customCommentBox.classList.remove(
+        "hidden"
+      );
+
+    } else {
+
+      customCommentBox.classList.add(
+        "hidden"
+      );
+
+      customComment.value = "";
+
+    }
+
+    calculate();
+
+  }
+);
+
+
+/*
+  QUANTITY CHANGE
+*/
+
+quantity.addEventListener(
+  "input",
+  calculate
+);
+
+
+/*
+  CALCULATE PRICE
+*/
+
+function calculate() {
+
+  let price = 0;
+
+  if (
+    platform.value &&
+    taskType.value &&
+    prices[platform.value] &&
+    prices[platform.value][taskType.value]
+  ) {
+
+    price =
+      Number(
+        prices[platform.value][taskType.value]
+      );
+
+  }
+
+
+  const qty =
+    Math.max(
+      0,
+      parseInt(quantity.value || 0)
+    );
+
+
+  const total =
+    price * qty;
+
+
+  const workerReward =
+    price / 2;
+
+
+  const platformRevenue =
+    price / 2;
+
+
+  document.getElementById("price")
+    .textContent =
+    price.toFixed(2);
+
+
+  document.getElementById("quantityDisplay")
+    .textContent =
+    qty;
+
+
+  document.getElementById("workerReward")
+    .textContent =
+    workerReward.toFixed(2);
+
+
+  document.getElementById("platformRevenue")
+    .textContent =
+    platformRevenue.toFixed(2);
+
+
+  document.getElementById("total")
+    .textContent =
+    total.toLocaleString(
+      "en-NG",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
+
+
+  postBtn.disabled =
+    !platform.value ||
+    !taskType.value ||
+    !taskLink.value ||
+    qty < 1 ||
+    total <= 0 ||
+    total > currentBalance;
+
+}
+
+
+taskLink.addEventListener(
+  "input",
+  calculate
+);
+
+
+/*
+  POST TASK
+*/
+
+postBtn.addEventListener(
+  "click",
+  async function() {
+
+    postBtn.disabled = true;
+
+    document.getElementById("message")
+      .className = "";
+
+    document.getElementById("message")
+      .textContent =
+      "Posting task...";
+
+
+    const price =
+      Number(
+        prices[platform.value][taskType.value]
+      );
+
+    const qty =
+      parseInt(quantity.value);
+
+
+    const totalBudget =
+      price * qty;
+
+
+    if (totalBudget > currentBalance) {
+
+      document.getElementById("message")
+        .className = "error";
+
+      document.getElementById("message")
+        .textContent =
+        "Insufficient available balance.";
+
+      postBtn.disabled = false;
+
+      return;
+    }
+
+
+    /*
+      Custom comment validation
+    */
+
+    if (
+      taskType.value ===
+      "Custom comment" &&
+      !customComment.value.trim()
+    ) {
+
+      document.getElementById("message")
+        .className = "error";
+
+      document.getElementById("message")
+        .textContent =
+        "Please enter the custom comment.";
+
+      postBtn.disabled = false;
+
+      return;
+    }
+
+
+    /*
+      Insert task
+    */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("Task")
+        .insert({
+
+          advertiser_id:
+            currentUser.id,
+
+          platform:
+            platform.value,
+
+          task_type:
+            taskType.value,
+
+          task_link:
+            taskLink.value.trim(),
+
+          custom_comment:
+            taskType.value ===
+            "Custom comment"
+              ? customComment.value.trim()
+              : null,
+
+          quantity:
+            qty,
+
+          completed_quantity:
+            0,
+
+          price_per_action:
+            price,
+
+          worker_reward:
+            price / 2,
+
+          platform_revenue:
+            price / 2,
+
+          total_budget:
+            totalBudget,
+
+          status:
+            "ACTIVE"
+
+        })
+        .select()
+        .single();
+
+
+    if (error) {
+
+      document.getElementById("message")
+        .className = "error";
+
+      document.getElementById("message")
+        .textContent =
+        error.message;
+
+      postBtn.disabled = false;
+
+      return;
+    }
+
+
+    /*
+      NOTE:
+      The secure server-side wallet charge
+      will be connected next.
+    */
+
+    currentBalance -= totalBudget;
+
+    showBalance();
+
+
+    document.getElementById("message")
+      .className = "success";
+
+    document.getElementById("message")
+      .textContent =
+      "Task posted successfully!";
+
+
+    platform.value = "";
+
+    taskType.innerHTML =
+      '<option value="">Select task</option>';
+
+    taskType.disabled = true;
+
+    taskLink.value = "";
+
+    quantity.value = "";
+
+    customComment.value = "";
+
+    customCommentBox.classList.add(
+      "hidden"
+    );
+
+    calculate();
+
+    postBtn.disabled = false;
+
+  }
+);
+
+
+/*
+  SHOW BALANCE
+*/
+
+function showBalance() {
+
+  document.getElementById("balance")
+    .textContent =
+    currentBalance.toLocaleString(
+      "en-NG",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
+
+}
+
+
+loadUser();
+
+</script>
+
+</body>
+</html>
