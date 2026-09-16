@@ -1,475 +1,752 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-  <meta charset="UTF-8">  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-  <title>MoticGigs Dashboard</title>    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>    <style>  
-    * {  
-      box-sizing: border-box;  
-      font-family: Arial, sans-serif;  
-    }  
-  
-    body {  
-      margin: 0;  
-      background: #f5f7f6;  
-      color: #222;  
-    }  
-  
-    header {  
-      background: #16a34a;  
-      color: white;  
-      padding: 18px;  
-    }  
-  
-    .header-inner {  
-      max-width: 1000px;  
-      margin: auto;  
-      display: flex;  
-      justify-content: space-between;  
-      align-items: center;  
-    }  
-  
-    .logo {  
-      font-size: 24px;  
-      font-weight: bold;  
-    }  
-  
-    .logout {  
-      background: white;  
-      color: #16a34a;  
-      border: none;  
-      padding: 9px 14px;  
-      border-radius: 8px;  
-      font-weight: bold;  
-    }  
-  
-    .container {  
-      max-width: 1000px;  
-      margin: auto;  
-      padding: 20px;  
-    }  
-  
-    .welcome {  
-      margin-bottom: 20px;  
-    }  
-  
-    .balance-card {  
-      background: #16a34a;  
-      color: white;  
-      padding: 24px;  
-      border-radius: 16px;  
-      margin-bottom: 20px;  
-    }  
-  
-    .balance-title {  
-      font-size: 15px;  
-      opacity: .9;  
-    }  
-  
-    .balance {  
-      font-size: 34px;  
-      font-weight: bold;  
-      margin: 8px 0 18px;  
-    }  
-  
-    .pending {  
-      font-size: 15px;  
-      opacity: .95;  
-    }  
-  
-    .deposit-btn {  
-      margin-top: 18px;  
-      background: white;  
-      color: #16a34a;  
-      border: none;  
-      padding: 12px 20px;  
-      border-radius: 9px;  
-      font-size: 16px;  
-      font-weight: bold;  
-      cursor: pointer;  
-    }  
-  
-    .actions {  
-      display: grid;  
-      grid-template-columns: repeat(2, 1fr);  
-      gap: 12px;  
-      margin-bottom: 25px;  
-    }  
-  
-    .action {  
-      background: white;  
-      border: none;  
-      border-radius: 12px;  
-      padding: 18px 10px;  
-      font-size: 15px;  
-      font-weight: bold;  
-      box-shadow: 0 3px 12px rgba(0,0,0,.06);  
-      cursor: pointer;  
-    }  
-  
-    .section {  
-      background: white;  
-      border-radius: 14px;  
-      padding: 20px;  
-      margin-bottom: 20px;  
-      box-shadow: 0 3px 12px rgba(0,0,0,.05);  
-    }  
-  
-    .section h2 {  
-      margin-top: 0;  
-    }  
-  
-    .empty {  
-      color: #777;  
-      text-align: center;  
-      padding: 25px 10px;  
-    }  
-  
-    #message {  
-      text-align: center;  
-      margin: 15px 0;  
-      color: #dc2626;  
-    }  
-  
-    .role-badge {  
-      display: inline-block;  
-      background: #dcfce7;  
-      color: #166534;  
-      padding: 6px 12px;  
-      border-radius: 20px;  
-      font-size: 13px;  
-      font-weight: bold;  
-      margin-top: 5px;  
-    }  
-  
-    @media (max-width: 600px) {  
-      .actions {  
-        grid-template-columns: 1fr 1fr;  
-      }  
-    }  
-  </style>  </head>  <body>  <header>  
-  <div class="header-inner">  
-    <div class="logo">MoticGigs</div>  
-    <button class="logout" id="logoutBtn">Logout</button>  
-  </div>  
-</header>  <div class="container">    <div class="welcome">  
-    <h2 id="welcomeText">Welcome</h2>  
-    <div id="roleBadge" class="role-badge"></div>  
-  </div>    <!-- BALANCE -->    <div class="balance-card">  <div class="balance-title">  
-  Available Balance  
-</div>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoticGigs Dashboard</title>
 
-<div class="balance">  
-  ₦<span id="availableBalance">0.00</span>  
-</div>  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<div class="pending" id="pendingBox">  
-  Pending Balance:  
-  ₦<span id="pendingBalance">0.00</span>  
-</div>  
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-<button  
-  class="deposit-btn"  
-  id="depositBtn"  
-  onclick="window.location.href='deposit.html'">  
-  + Deposit  
-</button>
+    body {
+      margin: 0;
+      background: #f5f7f6;
+      color: #222;
+    }
 
-  </div>    <!-- WORKER ACTIONS -->    <div class="actions" id="workerActions">  <button  
-  class="action"  
-  onclick="window.location.href='tasks.html'">  
-  📋 Available Tasks  
-</button>  
+    header {
+      background: #16a34a;
+      color: white;
+      padding: 18px;
+    }
 
-<button  
-  class="action"  
-  onclick="window.location.href='withdraw.html'">  
-  💰 Withdraw  
-</button>  
+    .header-inner {
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-<button  
-  class="action"  
-  onclick="showComingSoon('Profile')">  
-  👤 Profile  
-</button>  
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
 
-<button  
-  class="action"  
-  onclick="showComingSoon('Transaction History')">  
-  📊 Transactions  
-</button>
+    .logout {
+      background: white;
+      color: #16a34a;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-  </div>    <!-- ADVERTISER ACTIONS -->    <div class="actions" id="advertiserActions" style="display:none;">  <button  
-  class="action"  
-  onclick="window.location.href='post-task.html'">  
-  📢 Post Task  
-</button>  
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
 
-<button  
-  class="action"  
-  onclick="window.location.href='deposit.html'">  
-  💳 Deposit  
-</button>  
+    .welcome {
+      margin-bottom: 20px;
+    }
 
-<button  
-  class="action"  
-  onclick="showComingSoon('My Tasks')">  
-  📋 My Tasks  
-</button>  
+    .balance-card {
+      background: #16a34a;
+      color: white;
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
 
-<button  
-  class="action"  
-  onclick="showComingSoon('Transaction History')">  
-  📊 Transactions  
-</button>
+    .balance-title {
+      font-size: 15px;
+      opacity: .9;
+    }
 
-  </div>    <!-- WORKER TASK SECTION -->    <div class="section" id="workerTaskSection">  <h2>Available Tasks</h2>  
+    .balance {
+      font-size: 34px;
+      font-weight: bold;
+      margin: 8px 0 18px;
+    }
 
-<div class="empty">  
-  Tasks posted by advertisers will appear here.  
+    .pending {
+      font-size: 15px;
+      opacity: .95;
+    }
+
+    .deposit-btn {
+      margin-top: 18px;
+      background: white;
+      color: #16a34a;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 9px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .action {
+      background: white;
+      border: none;
+      border-radius: 12px;
+      padding: 18px 10px;
+      font-size: 15px;
+      font-weight: bold;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+      cursor: pointer;
+    }
+
+    .section {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.05);
+    }
+
+    .section h2 {
+      margin-top: 0;
+    }
+
+    .empty {
+      color: #777;
+      text-align: center;
+      padding: 25px 10px;
+    }
+
+    #message {
+      text-align: center;
+      margin: 15px 0;
+      color: #dc2626;
+    }
+
+    .role-badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #166534;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .task-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .task-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .task-info {
+      font-size: 14px;
+      color: #555;
+      margin: 6px 0;
+    }
+
+    .task-reward {
+      font-size: 16px;
+      font-weight: bold;
+      color: #16a34a;
+      margin-top: 10px;
+    }
+
+    .task-button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      background: #16a34a;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .actions {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">MoticGigs</div>
+    <button class="logout" id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="welcome">
+    <h2 id="welcomeText">Welcome</h2>
+    <div id="roleBadge" class="role-badge"></div>
+  </div>
+
+  <!-- BALANCE -->
+
+  <div class="balance-card">
+
+    <div class="balance-title">
+      Available Balance
+    </div>
+
+    <div class="balance">
+      ₦<span id="availableBalance">0.00</span>
+    </div>
+
+    <div class="pending" id="pendingBox">
+      Pending Balance:
+      ₦<span id="pendingBalance">0.00</span>
+    </div>
+
+    <button
+      class="deposit-btn"
+      id="depositBtn"
+      onclick="window.location.href='deposit.html'">
+      + Deposit
+    </button>
+
+  </div>
+
+  <!-- WORKER ACTIONS -->
+
+  <div class="actions" id="workerActions">
+
+    <button
+      class="action"
+      onclick="window.location.href='tasks.html'">
+      📋 Available Tasks
+    </button>
+
+    <button
+      class="action"
+      onclick="window.location.href='withdraw.html'">
+      💰 Withdraw
+    </button>
+
+    <button
+      class="action"
+      onclick="showComingSoon('Profile')">
+      👤 Profile
+    </button>
+
+    <button
+      class="action"
+      onclick="showComingSoon('Transaction History')">
+      📊 Transactions
+    </button>
+
+  </div>
+
+  <!-- ADVERTISER ACTIONS -->
+
+  <div
+    class="actions"
+    id="advertiserActions"
+    style="display:none;">
+
+    <button
+      class="action"
+      onclick="window.location.href='post-task.html'">
+      📢 Post Task
+    </button>
+
+    <button
+      class="action"
+      onclick="window.location.href='deposit.html'">
+      💳 Deposit
+    </button>
+
+    <button
+      class="action"
+      onclick="showComingSoon('My Tasks')">
+      📋 My Tasks
+    </button>
+
+    <button
+      class="action"
+      onclick="showComingSoon('Transaction History')">
+      📊 Transactions
+    </button>
+
+  </div>
+
+  <!-- WORKER TASK SECTION -->
+
+  <div
+    class="section"
+    id="workerTaskSection">
+
+    <h2>Available Tasks</h2>
+
+    <div id="taskList">
+      <div class="empty">
+        Loading available tasks...
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ADVERTISER SECTION -->
+
+  <div
+    class="section"
+    id="advertiserTaskSection"
+    style="display:none;">
+
+    <h2>Advertiser Dashboard</h2>
+
+    <div class="empty">
+      Create tasks and manage your posted tasks here.
+      <br><br>
+
+      Click <b>Post Task</b> to create your first task.
+    </div>
+
+  </div>
+
+  <div id="message"></div>
+
 </div>
 
-  </div>    <!-- ADVERTISER SECTION -->    <div class="section" id="advertiserTaskSection" style="display:none;">  <h2>Advertiser Dashboard</h2>  
+<script>
 
-<div class="empty">  
-  Create tasks and manage your posted tasks here.  
-  <br><br>  
-  Click <b>Post Task</b> to create your first task.  
-</div>
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
-  </div>    <div id="message"></div>  </div>  <script>  
-  
-const SUPABASE_URL =  
-  "https://jfoijwjqfaewzyzjawbw.supabase.co";  
-  
-const SUPABASE_KEY =  
-  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";  
-  
-const supabaseClient =  
-  window.supabase.createClient(  
-    SUPABASE_URL,  
-    SUPABASE_KEY  
-  );  
-  
-  
-async function loadDashboard() {  
-  
-  const {  
-    data: { user },  
-    error: userError  
-  } = await supabaseClient.auth.getUser();  
-  
-  
-  if (userError || !user) {  
-  
-    window.location.href = "login.html";  
-  
-    return;  
-  }  
-  
-  
-  // LOAD PROFILE INCLUDING ROLE  
-  
-  const {  
-    data: profile,  
-    error: profileError  
-  } = await supabaseClient  
-    .from("Moticgigs")  
-    .select("full_name, email, role, status")  
-    .eq("Id", user.id)  
-    .single();  
-  
-  
-  if (profileError || !profile) {  
-  
-    document.getElementById("message").textContent =  
-      "Unable to load your profile.";  
-  
-    return;  
-  }  
-  
-  
-  // BANNED ACCOUNT  
-  
-  if (profile.status === "banned") {  
-  
-    document.getElementById("message").textContent =  
-      "Your account has been banned.";  
-  
-    await supabaseClient.auth.signOut();  
-  
-    setTimeout(() => {  
-      window.location.href = "login.html";  
-    }, 2000);  
-  
-    return;  
-  }  
-  
-  
-  // NAME  
-  
-  const name =  
-    profile.full_name || user.email;  
-  
-  document.getElementById("welcomeText").textContent =  
-    "Welcome, " + name;  
-  
-  
-  // CHECK ROLE  
-  
-  const role =  
-    String(profile.role || "").toLowerCase();  
-  
-  
-  // WORKER  
-  
-  if (role === "worker") {  
-  
-    document.getElementById("roleBadge").textContent =  
-      "WORKER";  
-  
-    document.getElementById("workerActions").style.display =  
-      "grid";  
-  
-    document.getElementById("advertiserActions").style.display =  
-      "none";  
-  
-    document.getElementById("workerTaskSection").style.display =  
-      "block";  
-  
-    document.getElementById("advertiserTaskSection").style.display =  
-      "none";  
-  
-    document.getElementById("depositBtn").style.display =  
-      "none";  
-  
-    document.getElementById("pendingBox").style.display =  
-      "block";  
-  
-  
-    // WORKER WALLET  
-  
-    const {  
-      data: wallet,  
-      error: walletError  
-    } = await supabaseClient  
-      .from("Wallet")  
-      .select("available_balance, pending_balance")  
-      .eq("user_id", user.id)  
-      .eq("wallet_type", "WORKER")  
-      .maybeSingle();  
-  
-  
-    if (!walletError && wallet) {  
-  
-      showBalances(wallet);  
-  
-    }  
-  
-  }  
-  
-  
-  // ADVERTISER  
-  
-  else if (role === "advertiser") {  
-  
-    document.getElementById("roleBadge").textContent =  
-      "ADVERTISER";  
-  
-    document.getElementById("workerActions").style.display =  
-      "none";  
-  
-    document.getElementById("advertiserActions").style.display =  
-      "grid";  
-  
-    document.getElementById("workerTaskSection").style.display =  
-      "none";  
-  
-    document.getElementById("advertiserTaskSection").style.display =  
-      "block";  
-  
-    document.getElementById("depositBtn").style.display =  
-      "block";  
-  
-    document.getElementById("pendingBox").style.display =  
-      "none";  
-  
-  
-    // ADVERTISER WALLET  
-  
-    const {  
-      data: wallet,  
-      error: walletError  
-    } = await supabaseClient  
-      .from("Wallet")  
-      .select("available_balance, pending_balance")  
-      .eq("user_id", user.id)  
-      .eq("wallet_type", "ADVERTISER")  
-      .maybeSingle();  
-  
-  
-    if (!walletError && wallet) {  
-  
-      showBalances(wallet);  
-  
-    }  
-  
-  }  
-  
-  
-  // UNKNOWN ROLE  
-  
-  else {  
-  
-    document.getElementById("message").textContent =  
-      "Your account role is not configured correctly.";  
-  
-  }  
-  
-}  
-  
-  
-function showBalances(wallet) {  
-  
-  document.getElementById("availableBalance")  
-    .textContent =  
-    Number(wallet.available_balance || 0)  
-    .toLocaleString("en-NG", {  
-      minimumFractionDigits: 2,  
-      maximumFractionDigits: 2  
-    });  
-  
-  
-  document.getElementById("pendingBalance")  
-    .textContent =  
-    Number(wallet.pending_balance || 0)  
-    .toLocaleString("en-NG", {  
-      minimumFractionDigits: 2,  
-      maximumFractionDigits: 2  
-    });  
-  
-}  
-  
-  
-function showComingSoon(feature) {  
-  
-  document.getElementById("message").textContent =  
-    feature + " will be added next.";  
-  
-}  
-  
-  
-document  
-  .getElementById("logoutBtn")  
-  .addEventListener("click", async function() {  
-  
-    await supabaseClient.auth.signOut();  
-  
-    window.location.href = "login.html";  
-  
-  });  
-  
-  
-loadDashboard();  
-  
-</script>  </body>  
+const SUPABASE_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+async function loadDashboard() {
+
+  const {
+    data: { user },
+    error: userError
+  } = await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+
+  // LOAD PROFILE
+
+  const {
+    data: profile,
+    error: profileError
+  } = await supabaseClient
+    .from("Moticgigs")
+    .select("full_name, email, role, status")
+    .eq("Id", user.id)
+    .single();
+
+
+  if (profileError || !profile) {
+
+    document.getElementById("message").textContent =
+      "Unable to load your profile.";
+
+    return;
+  }
+
+
+  // BANNED ACCOUNT
+
+  if (profile.status === "banned") {
+
+    document.getElementById("message").textContent =
+      "Your account has been banned.";
+
+    await supabaseClient.auth.signOut();
+
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 2000);
+
+    return;
+  }
+
+
+  // NAME
+
+  const name =
+    profile.full_name || user.email;
+
+  document.getElementById("welcomeText").textContent =
+    "Welcome, " + name;
+
+
+  const role =
+    String(profile.role || "").toLowerCase();
+
+
+  // =========================
+  // WORKER
+  // =========================
+
+  if (role === "worker") {
+
+    document.getElementById("roleBadge").textContent =
+      "WORKER";
+
+    document.getElementById("workerActions").style.display =
+      "grid";
+
+    document.getElementById("advertiserActions").style.display =
+      "none";
+
+    document.getElementById("workerTaskSection").style.display =
+      "block";
+
+    document.getElementById("advertiserTaskSection").style.display =
+      "none";
+
+    document.getElementById("depositBtn").style.display =
+      "none";
+
+    document.getElementById("pendingBox").style.display =
+      "block";
+
+
+    // WORKER WALLET
+
+    const {
+      data: wallet,
+      error: walletError
+    } = await supabaseClient
+      .from("Wallet")
+      .select("available_balance, pending_balance")
+      .eq("user_id", user.id)
+      .eq("wallet_type", "WORKER")
+      .maybeSingle();
+
+
+    if (!walletError && wallet) {
+      showBalances(wallet);
+    }
+
+
+    // LOAD AVAILABLE TASKS
+
+    await loadAvailableTasks(user.id);
+
+  }
+
+
+  // =========================
+  // ADVERTISER
+  // =========================
+
+  else if (role === "advertiser") {
+
+    document.getElementById("roleBadge").textContent =
+      "ADVERTISER";
+
+    document.getElementById("workerActions").style.display =
+      "none";
+
+    document.getElementById("advertiserActions").style.display =
+      "grid";
+
+    document.getElementById("workerTaskSection").style.display =
+      "none";
+
+    document.getElementById("advertiserTaskSection").style.display =
+      "block";
+
+    document.getElementById("depositBtn").style.display =
+      "block";
+
+    document.getElementById("pendingBox").style.display =
+      "none";
+
+
+    // ADVERTISER WALLET
+
+    const {
+      data: wallet,
+      error: walletError
+    } = await supabaseClient
+      .from("Wallet")
+      .select("available_balance, pending_balance")
+      .eq("user_id", user.id)
+      .eq("wallet_type", "ADVERTISER")
+      .maybeSingle();
+
+
+    if (!walletError && wallet) {
+      showBalances(wallet);
+    }
+
+  }
+
+
+  else {
+
+    document.getElementById("message").textContent =
+      "Your account role is not configured correctly.";
+
+  }
+
+}
+
+
+// ==========================================
+// LOAD AVAILABLE TASKS
+// ==========================================
+
+async function loadAvailableTasks(workerId) {
+
+  const taskList =
+    document.getElementById("taskList");
+
+  taskList.innerHTML =
+    '<div class="empty">Loading available tasks...</div>';
+
+
+  const {
+    data: tasks,
+    error
+  } = await supabaseClient
+    .from("Task")
+    .select(`
+      id,
+      platform,
+      task_type,
+      task_link,
+      custom_comment,
+      quantity,
+      completed_quantity,
+      price_per_action,
+      worker_reward,
+      status,
+      created_at
+    `)
+    .eq("status", "ACTIVE")
+    .order("created_at", {
+      ascending: false
+    });
+
+
+  if (error) {
+
+    console.error("Task loading error:", error);
+
+    taskList.innerHTML =
+      '<div class="empty">Unable to load tasks.</div>';
+
+    return;
+  }
+
+
+  if (!tasks || tasks.length === 0) {
+
+    taskList.innerHTML =
+      '<div class="empty">No available tasks right now.</div>';
+
+    return;
+  }
+
+
+  taskList.innerHTML = "";
+
+
+  for (const task of tasks) {
+
+    const remaining =
+      Number(task.quantity || 0) -
+      Number(task.completed_quantity || 0);
+
+
+    if (remaining <= 0) {
+      continue;
+    }
+
+
+    const card =
+      document.createElement("div");
+
+    card.className = "task-card";
+
+
+    card.innerHTML = `
+
+      <div class="task-title">
+        ${escapeHtml(task.platform)}
+        - ${escapeHtml(task.task_type)}
+      </div>
+
+      <div class="task-info">
+        Available slots:
+        <b>${remaining}</b>
+      </div>
+
+      <div class="task-info">
+        Worker reward:
+        <b>₦${Number(task.worker_reward || 0).toFixed(2)}</b>
+      </div>
+
+      <div class="task-info">
+        Task link:
+        <a
+          href="${escapeAttribute(task.task_link)}"
+          target="_blank"
+          rel="noopener">
+          Open task
+        </a>
+      </div>
+
+      ${
+        task.custom_comment
+          ? `
+            <div class="task-info">
+              Custom comment:
+              <b>${escapeHtml(task.custom_comment)}</b>
+            </div>
+          `
+          : ""
+      }
+
+      <button
+        class="task-button"
+        onclick="window.location.href='tasks.html'">
+        Open Available Tasks
+      </button>
+
+    `;
+
+
+    taskList.appendChild(card);
+  }
+
+
+  if (!taskList.children.length) {
+
+    taskList.innerHTML =
+      '<div class="empty">No available tasks right now.</div>';
+
+  }
+
+}
+
+
+// ==========================================
+// SECURITY HELPERS
+// ==========================================
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function escapeAttribute(value) {
+
+  return String(value || "")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "%3C")
+    .replace(/>/g, "%3E");
+}
+
+
+// ==========================================
+// BALANCES
+// ==========================================
+
+function showBalances(wallet) {
+
+  document.getElementById("availableBalance")
+    .textContent =
+    Number(wallet.available_balance || 0)
+    .toLocaleString("en-NG", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+
+  document.getElementById("pendingBalance")
+    .textContent =
+    Number(wallet.pending_balance || 0)
+    .toLocaleString("en-NG", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+}
+
+
+// ==========================================
+// COMING SOON
+// ==========================================
+
+function showComingSoon(feature) {
+
+  document.getElementById("message").textContent =
+    feature + " will be added next.";
+
+}
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async function() {
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href = "login.html";
+
+  });
+
+
+loadDashboard();
+
+</script>
+
+</body>
 </html>
