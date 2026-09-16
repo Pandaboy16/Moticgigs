@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0">
-
-  <title>Available Tasks - MoticGigs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoticGigs Dashboard</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-
     * {
       box-sizing: border-box;
       font-family: Arial, sans-serif;
@@ -39,11 +34,11 @@
     }
 
     .logo {
-      font-size: 23px;
+      font-size: 24px;
       font-weight: bold;
     }
 
-    .back-btn {
+    .logout {
       background: white;
       color: #16a34a;
       border: none;
@@ -54,246 +49,293 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: auto;
       padding: 20px;
     }
 
-    h1 {
+    .welcome {
+      margin-bottom: 20px;
+    }
+
+    .balance-card {
+      background: #16a34a;
+      color: white;
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+
+    .balance-title {
+      font-size: 15px;
+      opacity: .9;
+    }
+
+    .balance {
+      font-size: 34px;
+      font-weight: bold;
+      margin: 8px 0 18px;
+    }
+
+    .pending {
+      font-size: 15px;
+      opacity: .95;
+    }
+
+    .deposit-btn {
+      margin-top: 18px;
+      background: white;
+      color: #16a34a;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 9px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .action {
+      background: white;
+      border: none;
+      border-radius: 12px;
+      padding: 18px 10px;
+      font-size: 15px;
+      font-weight: bold;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+      cursor: pointer;
+    }
+
+    .section {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.05);
+    }
+
+    .section h2 {
+      margin-top: 0;
+    }
+
+    .empty {
+      color: #777;
+      text-align: center;
+      padding: 25px 10px;
+    }
+
+    #message {
+      text-align: center;
+      margin: 15px 0;
+      color: #dc2626;
+    }
+
+    .role-badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #166534;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
       margin-top: 5px;
     }
 
     .task-card {
-      background: white;
-      border-radius: 15px;
-      padding: 18px;
-      margin-bottom: 15px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.06);
       border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #fafafa;
     }
 
     .task-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .task-info {
+      font-size: 14px;
       color: #555;
-      margin: 7px 0;
-      font-size: 15px;
+      margin: 6px 0;
     }
 
-    .reward {
-      color: #16a34a;
-      font-weight: bold;
-      font-size: 18px;
-      margin-top: 12px;
-    }
-
-    .start-btn {
-      width: 100%;
-      background: #16a34a;
-      color: white;
-      border: none;
-      padding: 13px;
-      border-radius: 9px;
+    .task-reward {
       font-size: 16px;
       font-weight: bold;
-      margin-top: 14px;
-      cursor: pointer;
-    }
-
-    .start-btn:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-
-    /* WORKSPACE */
-
-    .workspace {
-      display: none;
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 20px;
-      margin-top: 15px;
-      border: 2px solid #16a34a;
-    }
-
-    .workspace-title {
-      font-size: 21px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-
-    .step {
-      background: #f5f7f6;
-      padding: 15px;
-      border-radius: 11px;
-      margin-bottom: 15px;
-    }
-
-    .step-title {
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .open-task-btn {
-      display: block;
-      text-align: center;
-      background: #16a34a;
-      color: white;
-      text-decoration: none;
-      padding: 12px;
-      border-radius: 9px;
-      font-weight: bold;
+      color: #16a34a;
       margin-top: 10px;
     }
 
-    input[type="text"] {
+    .task-button {
       width: 100%;
-      padding: 13px;
-      border: 1px solid #ccc;
-      border-radius: 9px;
-      font-size: 16px;
-      margin-top: 8px;
-      outline: none;
-    }
-
-    input[type="text"]:focus {
-      border-color: #16a34a;
-    }
-
-    input[type="file"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 9px;
-      background: white;
-      margin-top: 8px;
-    }
-
-    .preview {
-      display: none;
-      width: 100%;
-      max-height: 400px;
-      object-fit: contain;
-      border-radius: 10px;
       margin-top: 12px;
-      border: 1px solid #ddd;
-    }
-
-    .submit-btn {
-      width: 100%;
-      background: #16a34a;
-      color: white;
+      padding: 11px;
       border: none;
-      padding: 14px;
-      border-radius: 9px;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-
-    .submit-btn:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-
-    .cancel-btn {
-      width: 100%;
-      background: #eee;
-      color: #333;
-      border: none;
-      padding: 12px;
-      border-radius: 9px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .empty {
-      text-align: center;
-      color: #777;
-      background: white;
-      border-radius: 14px;
-      padding: 30px 15px;
-    }
-
-    .message {
-      text-align: center;
-      margin: 15px 0;
-      font-weight: bold;
-    }
-
-    .success {
-      color: #16a34a;
-    }
-
-    .error {
-      color: #dc2626;
-    }
-
-    .comment-box {
-      background: #fff;
-      border: 1px solid #ddd;
-      padding: 12px;
       border-radius: 8px;
-      margin-top: 8px;
+      background: #16a34a;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
     }
 
+    @media (max-width: 600px) {
+      .actions {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
   </style>
-
 </head>
-
 
 <body>
 
 <header>
-
   <div class="header-inner">
+    <div class="logo">MoticGigs</div>
+    <button class="logout" id="logoutBtn">Logout</button>
+  </div>
+</header>
 
-    <div class="logo">
-      MoticGigs
+<div class="container">
+
+  <div class="welcome">
+    <h2 id="welcomeText">Welcome</h2>
+    <div id="roleBadge" class="role-badge"></div>
+  </div>
+
+  <!-- BALANCE -->
+
+  <div class="balance-card">
+
+    <div class="balance-title">
+      Available Balance
+    </div>
+
+    <div class="balance">
+      ₦<span id="availableBalance">0.00</span>
+    </div>
+
+    <div class="pending" id="pendingBox">
+      Pending Balance:
+      ₦<span id="pendingBalance">0.00</span>
     </div>
 
     <button
-      class="back-btn"
-      onclick="window.location.href='dashboard.html'">
-
-      ← Dashboard
-
+      class="deposit-btn"
+      id="depositBtn"
+      onclick="window.location.href='deposit.html'">
+      + Deposit
     </button>
 
   </div>
 
-</header>
+  <!-- WORKER ACTIONS -->
 
+  <div class="actions" id="workerActions">
 
-<div class="container">
+    <button
+      class="action"
+      onclick="window.location.href='tasks.html'">
+      📋 Available Tasks
+    </button>
 
-  <h1>Available Tasks</h1>
+    <button
+      class="action"
+      onclick="window.location.href='withdraw.html'">
+      💰 Withdraw
+    </button>
 
-  <p>
-    Complete advertiser tasks and earn rewards.
-  </p>
+    <button
+      class="action"
+      onclick="showComingSoon('Profile')">
+      👤 Profile
+    </button>
 
+    <button
+      class="action"
+      onclick="showComingSoon('Transaction History')">
+      📊 Transactions
+    </button>
 
-  <div id="message" class="message"></div>
+  </div>
 
+  <!-- ADVERTISER ACTIONS -->
 
-  <div id="taskList">
+  <div
+    class="actions"
+    id="advertiserActions"
+    style="display:none;">
 
-    <div class="empty">
-      Loading available tasks...
+    <button
+      class="action"
+      onclick="window.location.href='post-task.html'">
+      📢 Post Task
+    </button>
+
+    <button
+      class="action"
+      onclick="window.location.href='deposit.html'">
+      💳 Deposit
+    </button>
+
+    <button
+      class="action"
+      onclick="showComingSoon('My Tasks')">
+      📋 My Tasks
+    </button>
+
+    <button
+      class="action"
+      onclick="showComingSoon('Transaction History')">
+      📊 Transactions
+    </button>
+
+  </div>
+
+  <!-- WORKER TASK SECTION -->
+
+  <div
+    class="section"
+    id="workerTaskSection">
+
+    <h2>Available Tasks</h2>
+
+    <div id="taskList">
+      <div class="empty">
+        Loading available tasks...
+      </div>
     </div>
 
   </div>
 
-</div>
+  <!-- ADVERTISER SECTION -->
 
+  <div
+    class="section"
+    id="advertiserTaskSection"
+    style="display:none;">
+
+    <h2>Advertiser Dashboard</h2>
+
+    <div class="empty">
+      Create tasks and manage your posted tasks here.
+      <br><br>
+
+      Click <b>Post Task</b> to create your first task.
+    </div>
+
+  </div>
+
+  <div id="message"></div>
+
+</div>
 
 <script>
 
@@ -310,131 +352,197 @@ const supabaseClient =
   );
 
 
-let currentUser = null;
-let selectedTask = null;
-let selectedFile = null;
-
-
-/* ==========================================
-   START
-========================================== */
-
-async function initialize() {
+async function loadDashboard() {
 
   const {
     data: { user },
-    error
+    error: userError
   } = await supabaseClient.auth.getUser();
 
-
-  if (error || !user) {
-
+  if (userError || !user) {
     window.location.href = "login.html";
-
     return;
   }
 
 
-  currentUser = user;
-
-
-  // Make sure account is actually a worker
+  // LOAD PROFILE
 
   const {
     data: profile,
     error: profileError
   } = await supabaseClient
     .from("Moticgigs")
-    .select("role,status")
+    .select("full_name, email, role, status")
     .eq("Id", user.id)
     .single();
 
 
-  if (
-    profileError ||
-    !profile ||
-    String(profile.role).toLowerCase() !== "worker"
-  ) {
+  if (profileError || !profile) {
 
     document.getElementById("message").textContent =
-      "Only worker accounts can access available tasks.";
-
-    document.getElementById("message").className =
-      "message error";
+      "Unable to load your profile.";
 
     return;
   }
 
+
+  // BANNED ACCOUNT
 
   if (profile.status === "banned") {
 
+    document.getElementById("message").textContent =
+      "Your account has been banned.";
+
     await supabaseClient.auth.signOut();
 
-    window.location.href = "login.html";
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 2000);
 
     return;
   }
 
 
-  await loadTasks();
+  // NAME
+
+  const name =
+    profile.full_name || user.email;
+
+  document.getElementById("welcomeText").textContent =
+    "Welcome, " + name;
+
+
+  const role =
+    String(profile.role || "").toLowerCase();
+
+
+  // =========================
+  // WORKER
+  // =========================
+
+  if (role === "worker") {
+
+    document.getElementById("roleBadge").textContent =
+      "WORKER";
+
+    document.getElementById("workerActions").style.display =
+      "grid";
+
+    document.getElementById("advertiserActions").style.display =
+      "none";
+
+    document.getElementById("workerTaskSection").style.display =
+      "block";
+
+    document.getElementById("advertiserTaskSection").style.display =
+      "none";
+
+    document.getElementById("depositBtn").style.display =
+      "none";
+
+    document.getElementById("pendingBox").style.display =
+      "block";
+
+
+    // WORKER WALLET
+
+    const {
+      data: wallet,
+      error: walletError
+    } = await supabaseClient
+      .from("Wallet")
+      .select("available_balance, pending_balance")
+      .eq("user_id", user.id)
+      .eq("wallet_type", "WORKER")
+      .maybeSingle();
+
+
+    if (!walletError && wallet) {
+      showBalances(wallet);
+    }
+
+
+    // LOAD AVAILABLE TASKS
+
+    await loadAvailableTasks(user.id);
+
+  }
+
+
+  // =========================
+  // ADVERTISER
+  // =========================
+
+  else if (role === "advertiser") {
+
+    document.getElementById("roleBadge").textContent =
+      "ADVERTISER";
+
+    document.getElementById("workerActions").style.display =
+      "none";
+
+    document.getElementById("advertiserActions").style.display =
+      "grid";
+
+    document.getElementById("workerTaskSection").style.display =
+      "none";
+
+    document.getElementById("advertiserTaskSection").style.display =
+      "block";
+
+    document.getElementById("depositBtn").style.display =
+      "block";
+
+    document.getElementById("pendingBox").style.display =
+      "none";
+
+
+    // ADVERTISER WALLET
+
+    const {
+      data: wallet,
+      error: walletError
+    } = await supabaseClient
+      .from("Wallet")
+      .select("available_balance, pending_balance")
+      .eq("user_id", user.id)
+      .eq("wallet_type", "ADVERTISER")
+      .maybeSingle();
+
+
+    if (!walletError && wallet) {
+      showBalances(wallet);
+    }
+
+  }
+
+
+  else {
+
+    document.getElementById("message").textContent =
+      "Your account role is not configured correctly.";
+
+  }
 
 }
 
 
-/* ==========================================
-   LOAD TASKS
-========================================== */
+// ==========================================
+// LOAD AVAILABLE TASKS
+// ==========================================
 
-async function loadTasks() {
+async function loadAvailableTasks(workerId) {
 
   const taskList =
     document.getElementById("taskList");
-
 
   taskList.innerHTML =
     '<div class="empty">Loading available tasks...</div>';
 
 
-  /*
-    First find tasks this worker has already
-    submitted and which are still pending/approved.
-  */
-
-  const {
-    data: mySubmissions,
-    error: submissionError
-  } = await supabaseClient
-    .from("Submission")
-    .select("task_id,status")
-    .eq("worker_id", currentUser.id)
-    .in("status", ["PENDING", "APPROVED"]);
-
-
-  if (submissionError) {
-
-    console.error(submissionError);
-
-    taskList.innerHTML =
-      '<div class="empty">Unable to load your submissions.</div>';
-
-    return;
-  }
-
-
-  const submittedTaskIds =
-    new Set(
-      (mySubmissions || [])
-        .map(row => row.task_id)
-    );
-
-
-  /*
-    Load active advertiser tasks.
-  */
-
   const {
     data: tasks,
-    error: taskError
+    error
   } = await supabaseClient
     .from("Task")
     .select(`
@@ -456,41 +564,18 @@ async function loadTasks() {
     });
 
 
-  if (taskError) {
+  if (error) {
 
-    console.error(taskError);
+    console.error("Task loading error:", error);
 
     taskList.innerHTML =
-      '<div class="empty">Unable to load available tasks.</div>';
+      '<div class="empty">Unable to load tasks.</div>';
 
     return;
   }
 
 
-  /*
-    Only show tasks that:
-    - are active
-    - still have slots
-    - this worker has not already submitted
-  */
-
-  const availableTasks =
-    (tasks || []).filter(task => {
-
-      const remaining =
-        Number(task.quantity || 0) -
-        Number(task.completed_quantity || 0);
-
-
-      return (
-        remaining > 0 &&
-        !submittedTaskIds.has(task.id)
-      );
-
-    });
-
-
-  if (availableTasks.length === 0) {
+  if (!tasks || tasks.length === 0) {
 
     taskList.innerHTML =
       '<div class="empty">No available tasks right now.</div>';
@@ -502,11 +587,16 @@ async function loadTasks() {
   taskList.innerHTML = "";
 
 
-  availableTasks.forEach(task => {
+  for (const task of tasks) {
 
     const remaining =
       Number(task.quantity || 0) -
       Number(task.completed_quantity || 0);
+
+
+    if (remaining <= 0) {
+      continue;
+    }
 
 
     const card =
@@ -528,561 +618,57 @@ async function loadTasks() {
       </div>
 
       <div class="task-info">
-        Price per action:
-        <b>₦${Number(task.price_per_action || 0).toFixed(2)}</b>
+        Worker reward:
+        <b>₦${Number(task.worker_reward || 0).toFixed(2)}</b>
       </div>
 
-      <div class="reward">
-        Worker reward:
-        ₦${Number(task.worker_reward || 0).toFixed(2)}
+      <div class="task-info">
+        Task link:
+        <a
+          href="${escapeAttribute(task.task_link)}"
+          target="_blank"
+          rel="noopener">
+          Open task
+        </a>
       </div>
 
       ${
         task.custom_comment
-        ? `
-          <div class="task-info">
-            Custom comment:
-            <div class="comment-box">
-              ${escapeHtml(task.custom_comment)}
+          ? `
+            <div class="task-info">
+              Custom comment:
+              <b>${escapeHtml(task.custom_comment)}</b>
             </div>
-          </div>
-        `
-        : ""
+          `
+          : ""
       }
 
       <button
-        class="start-btn"
-        onclick="openWorkspace('${task.id}')">
-
-        Start Task
-
+        class="task-button"
+        onclick="window.location.href='tasks.html'">
+        Open Available Tasks
       </button>
-
-      <div
-        id="workspace-${task.id}"
-        class="workspace">
-
-        <div class="workspace-title">
-          Complete This Task
-        </div>
-
-        <div class="step">
-
-          <div class="step-title">
-            Step 1 — Open the advertiser's task
-          </div>
-
-          <div>
-            Perform the required action on the platform.
-          </div>
-
-          <a
-            class="open-task-btn"
-            href="${escapeAttribute(task.task_link)}"
-            target="_blank"
-            rel="noopener">
-
-            🔗 Open Task
-
-          </a>
-
-        </div>
-
-
-        <div class="step">
-
-          <div class="step-title">
-            Step 2 — Enter your username
-          </div>
-
-          <div>
-            Enter the username you used to complete the task.
-          </div>
-
-          <input
-            type="text"
-            id="username-${task.id}"
-            placeholder="Enter your username"
-            maxlength="100">
-
-        </div>
-
-
-        <div class="step">
-
-          <div class="step-title">
-            Step 3 — Upload screenshot proof
-          </div>
-
-          <div>
-            Upload a screenshot showing that you completed the task.
-          </div>
-
-          <input
-            type="file"
-            id="proof-${task.id}"
-            accept="image/*"
-            onchange="previewProof('${task.id}')">
-
-          <img
-            id="preview-${task.id}"
-            class="preview">
-
-        </div>
-
-
-        <button
-          class="submit-btn"
-          id="submit-${task.id}"
-          onclick="submitTask('${task.id}')">
-
-          Submit Task
-
-        </button>
-
-
-        <button
-          class="cancel-btn"
-          onclick="closeWorkspace('${task.id}')">
-
-          Cancel
-
-        </button>
-
-      </div>
 
     `;
 
 
     taskList.appendChild(card);
-
-  });
-
-}
+  }
 
 
-/* ==========================================
-   OPEN WORKSPACE
-========================================== */
+  if (!taskList.children.length) {
 
-function openWorkspace(taskId) {
-
-  selectedTask = taskId;
-
-
-  const workspace =
-    document.getElementById(
-      "workspace-" + taskId
-    );
-
-
-  if (workspace) {
-
-    workspace.style.display = "block";
-
-    workspace.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
+    taskList.innerHTML =
+      '<div class="empty">No available tasks right now.</div>';
 
   }
 
 }
 
 
-/* ==========================================
-   CLOSE WORKSPACE
-========================================== */
-
-function closeWorkspace(taskId) {
-
-  const workspace =
-    document.getElementById(
-      "workspace-" + taskId
-    );
-
-
-  if (workspace) {
-
-    workspace.style.display = "none";
-
-  }
-
-}
-
-
-/* ==========================================
-   IMAGE PREVIEW
-========================================== */
-
-function previewProof(taskId) {
-
-  const input =
-    document.getElementById(
-      "proof-" + taskId
-    );
-
-  const preview =
-    document.getElementById(
-      "preview-" + taskId
-    );
-
-
-  if (!input.files || !input.files[0]) {
-
-    preview.style.display = "none";
-
-    return;
-  }
-
-
-  const file = input.files[0];
-
-
-  if (!file.type.startsWith("image/")) {
-
-    input.value = "";
-
-    showMessage(
-      "Please select an image.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (file.size > 8 * 1024 * 1024) {
-
-    input.value = "";
-
-    showMessage(
-      "Image must be 8MB or smaller.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  selectedFile = file;
-
-
-  const reader =
-    new FileReader();
-
-
-  reader.onload = function(event) {
-
-    preview.src =
-      event.target.result;
-
-    preview.style.display =
-      "block";
-
-  };
-
-
-  reader.readAsDataURL(file);
-
-}
-
-
-/* ==========================================
-   SUBMIT TASK
-========================================== */
-
-async function submitTask(taskId) {
-
-  const usernameInput =
-    document.getElementById(
-      "username-" + taskId
-    );
-
-  const proofInput =
-    document.getElementById(
-      "proof-" + taskId
-    );
-
-  const submitButton =
-    document.getElementById(
-      "submit-" + taskId
-    );
-
-
-  const username =
-    usernameInput.value.trim();
-
-
-  if (!username) {
-
-    showMessage(
-      "Please enter your username.",
-      "error"
-    );
-
-    usernameInput.focus();
-
-    return;
-  }
-
-
-  if (!proofInput.files || !proofInput.files[0]) {
-
-    showMessage(
-      "Please upload your screenshot proof.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const file =
-    proofInput.files[0];
-
-
-  if (!file.type.startsWith("image/")) {
-
-    showMessage(
-      "Proof must be an image.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (file.size > 8 * 1024 * 1024) {
-
-    showMessage(
-      "Image must be 8MB or smaller.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  submitButton.disabled = true;
-
-  submitButton.textContent =
-    "Uploading proof...";
-
-
-  try {
-
-    /*
-      Create a private storage path.
-
-      The file stays inside the private
-      task-proofs bucket.
-    */
-
-    const extension =
-      getFileExtension(file.name);
-
-
-    const filePath =
-      currentUser.id +
-      "/" +
-      taskId +
-      "/" +
-      crypto.randomUUID() +
-      "." +
-      extension;
-
-
-    const {
-      data: uploadData,
-      error: uploadError
-    } = await supabaseClient
-      .storage
-      .from("task-proofs")
-      .upload(
-        filePath,
-        file,
-        {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type
-        }
-      );
-
-
-    if (uploadError) {
-
-      console.error(uploadError);
-
-      throw new Error(
-        "Unable to upload screenshot."
-      );
-
-    }
-
-
-    /*
-      Store the private storage path
-      in the Submission.proof column.
-
-      The database trigger created earlier
-      will automatically:
-      - set reward
-      - set status to PENDING
-      - add reward to pending balance
-    */
-
-    const {
-      error: insertError
-    } = await supabaseClient
-      .from("Submission")
-      .insert({
-
-        task_id: taskId,
-
-        worker_id: currentUser.id,
-
-        username: username,
-
-        proof: uploadData.path
-
-      });
-
-
-    if (insertError) {
-
-      console.error(insertError);
-
-      /*
-        If submission fails, remove the
-        uploaded proof so unused files
-        are not left in storage.
-      */
-
-      await supabaseClient
-        .storage
-        .from("task-proofs")
-        .remove([uploadData.path]);
-
-
-      throw new Error(
-        insertError.message ||
-        "Unable to submit task."
-      );
-
-    }
-
-
-    /*
-      Submission successful.
-    */
-
-    showMessage(
-      "Task submitted successfully. Your reward has been added to Pending Balance.",
-      "success"
-    );
-
-
-    /*
-      Reload task list.
-
-      Because this worker now has a
-      PENDING submission, the task will
-      disappear from their list.
-    */
-
-    await loadTasks();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    showMessage(
-      error.message ||
-      "Something went wrong while submitting the task.",
-      "error"
-    );
-
-
-    submitButton.disabled = false;
-
-    submitButton.textContent =
-      "Submit Task";
-
-  }
-
-}
-
-
-/* ==========================================
-   FILE EXTENSION
-========================================== */
-
-function getFileExtension(filename) {
-
-  const parts =
-    String(filename)
-      .split(".");
-
-  if (parts.length < 2) {
-    return "jpg";
-  }
-
-  const extension =
-    parts.pop()
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
-
-
-  const allowed =
-    [
-      "jpg",
-      "jpeg",
-      "png",
-      "webp"
-    ];
-
-
-  if (!allowed.includes(extension)) {
-    return "jpg";
-  }
-
-
-  return extension;
-
-}
-
-
-/* ==========================================
-   MESSAGE
-========================================== */
-
-function showMessage(text, type) {
-
-  const message =
-    document.getElementById("message");
-
-
-  message.textContent =
-    text;
-
-
-  message.className =
-    "message " + type;
-
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-}
-
-
-/* ==========================================
-   SECURITY HELPERS
-========================================== */
+// ==========================================
+// SECURITY HELPERS
+// ==========================================
 
 function escapeHtml(value) {
 
@@ -1099,19 +685,66 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
 
   return String(value || "")
-    .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")
     .replace(/</g, "%3C")
     .replace(/>/g, "%3E");
+}
+
+
+// ==========================================
+// BALANCES
+// ==========================================
+
+function showBalances(wallet) {
+
+  document.getElementById("availableBalance")
+    .textContent =
+    Number(wallet.available_balance || 0)
+    .toLocaleString("en-NG", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+
+  document.getElementById("pendingBalance")
+    .textContent =
+    Number(wallet.pending_balance || 0)
+    .toLocaleString("en-NG", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
 
 }
 
 
-/* ==========================================
-   INITIALIZE
-========================================== */
+// ==========================================
+// COMING SOON
+// ==========================================
 
-initialize();
+function showComingSoon(feature) {
+
+  document.getElementById("message").textContent =
+    feature + " will be added next.";
+
+}
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async function() {
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href = "login.html";
+
+  });
+
+
+loadDashboard();
 
 </script>
 
