@@ -11,22 +11,23 @@
   <style>
     * {
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
     }
 
     body {
       margin: 0;
+      font-family: Arial, sans-serif;
       background: #f4f7f6;
-      color: #222;
+      color: #17211b;
     }
 
     header {
-      background: #075e3d;
+      background: #075e36;
       color: white;
-      padding: 18px;
+      padding: 18px 16px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     header h1 {
@@ -35,142 +36,199 @@
     }
 
     .logout {
-      background: white;
-      color: #075e3d;
       border: none;
-      padding: 9px 14px;
-      border-radius: 6px;
+      background: white;
+      color: #075e36;
+      padding: 9px 13px;
+      border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1050px;
       margin: 20px auto;
-      padding: 0 15px;
+      padding: 0 14px;
     }
 
-    .message {
-      display: none;
-      padding: 13px;
-      border-radius: 8px;
-      margin-bottom: 15px;
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .stat-title {
+      color: #5d6b63;
+      font-size: 14px;
+    }
+
+    .stat-value {
+      display: block;
+      margin-top: 5px;
+      font-size: 25px;
       font-weight: bold;
+      color: #075e36;
     }
 
-    .success {
-      background: #dff5e8;
-      color: #126b3e;
-    }
-
-    .error {
-      background: #ffe0e0;
-      color: #a00000;
-    }
-
-    .welcome,
     .section {
       background: white;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
     }
 
-    .welcome h2,
     .section h2 {
-      margin-top: 0;
-      color: #075e3d;
+      margin: 0 0 14px;
+      font-size: 19px;
     }
 
     .card {
-      border: 1px solid #ddd;
-      border-radius: 9px;
-      padding: 15px;
-      margin-bottom: 15px;
+      border: 1px solid #e1e8e3;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 10px 0;
     }
 
-    .card p {
-      margin: 7px 0;
-      word-break: break-word;
-    }
-
-    .amount {
-      font-size: 21px;
-      font-weight: bold;
-      color: #075e3d;
-    }
-
-    .proof {
-      width: 100%;
-      max-width: 350px;
-      max-height: 400px;
-      object-fit: contain;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      margin-top: 10px;
-      background: #f5f5f5;
-    }
-
-    .buttons {
+    .row {
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
       flex-wrap: wrap;
-      margin-top: 15px;
+      margin: 7px 0;
     }
 
-    button.action {
+    .label {
+      font-weight: bold;
+      color: #526057;
+    }
+
+    .value {
+      word-break: break-word;
+      text-align: right;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .action {
       border: none;
-      padding: 11px 17px;
-      border-radius: 6px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: white;
       font-weight: bold;
       cursor: pointer;
     }
 
     .approve {
-      background: #075e3d;
-      color: white;
+      background: #087a43;
     }
 
     .reject {
       background: #c62828;
-      color: white;
     }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .note-input {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-top: 10px;
-      font-size: 14px;
+    .refresh {
+      background: #245bdb;
     }
 
     .loading,
-    .empty {
-      text-align: center;
-      padding: 25px;
-      color: #777;
+    .empty,
+    .error {
+      padding: 14px;
+      border-radius: 8px;
+      background: #f2f5f3;
+      color: #58645d;
     }
 
-    .tag {
+    .error {
+      background: #fff0f0;
+      color: #a32121;
+    }
+
+    .note {
+      width: 100%;
+      min-height: 70px;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccd7d0;
+      border-radius: 8px;
+      resize: vertical;
+      font-family: Arial, sans-serif;
+    }
+
+    .proof {
+      display: block;
+      width: 100%;
+      max-width: 450px;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 9px;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      background: #f5f5f5;
+    }
+
+    .status {
       display: inline-block;
       padding: 5px 9px;
-      border-radius: 5px;
-      background: #eef5f1;
-      color: #075e3d;
+      border-radius: 20px;
+      background: #fff4d6;
+      color: #795800;
       font-size: 12px;
       font-weight: bold;
     }
 
-    a.task-link {
-      color: #075e3d;
-      word-break: break-all;
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+    }
+
+    .success {
+      background: #e8f7ee;
+      color: #087a43;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 650px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        display: block;
+      }
+
+      .value {
+        text-align: left;
+        margin-top: 3px;
+      }
+
+      header h1 {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
@@ -178,46 +236,141 @@
 <body>
 
 <header>
-  <h1>MoticGigs Admin</h1>
-  <button class="logout" onclick="logout()">Logout</button>
+  <h1>MoticGigs Admin Dashboard</h1>
+
+  <button class="logout" onclick="logout()">
+    Logout
+  </button>
 </header>
 
 <div class="container">
 
-  <div id="message" class="message"></div>
+  <!-- STATS -->
 
-  <div class="welcome">
-    <h2>Admin Dashboard</h2>
-    <p id="adminInfo">Checking administrator account...</p>
-  </div>
+  <div class="stats">
+
+    <div class="stat">
+      <div class="stat-title">
+        Pending Deposits
+      </div>
+
+      <span
+        class="stat-value"
+        id="depositCount"
+      >
+        0
+      </span>
+    </div>
 
 
-  <!-- ========================= -->
-  <!-- PENDING DEPOSITS -->
-  <!-- ========================= -->
+    <div class="stat">
+      <div class="stat-title">
+        Pending Withdrawals
+      </div>
 
-  <div class="section">
+      <span
+        class="stat-value"
+        id="withdrawalCount"
+      >
+        0
+      </span>
+    </div>
 
-    <h2>Pending Deposits</h2>
 
-    <div id="deposits">
-      <div class="loading">Loading deposits...</div>
+    <div class="stat">
+      <div class="stat-title">
+        Pending Submissions
+      </div>
+
+      <span
+        class="stat-value"
+        id="submissionCount"
+      >
+        0
+      </span>
     </div>
 
   </div>
 
 
-  <!-- ========================= -->
-  <!-- PENDING SUBMISSIONS -->
-  <!-- ========================= -->
+  <!-- DEPOSITS -->
 
   <div class="section">
 
-    <h2>Pending Worker Submissions</h2>
+    <div class="section-header">
+
+      <h2>
+        Pending Deposits
+      </h2>
+
+      <button
+        class="action refresh"
+        onclick="loadDeposits()"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div id="deposits">
+      <div class="loading">
+        Loading deposits...
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- WITHDRAWALS -->
+
+  <div class="section">
+
+    <div class="section-header">
+
+      <h2>
+        Pending Withdrawals
+      </h2>
+
+      <button
+        class="action refresh"
+        onclick="loadWithdrawals()"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <div id="withdrawals">
+      <div class="loading">
+        Loading withdrawals...
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- SUBMISSIONS -->
+
+  <div class="section">
+
+    <div class="section-header">
+
+      <h2>
+        Pending Worker Submissions
+      </h2>
+
+      <button
+        class="action refresh"
+        onclick="loadSubmissions()"
+      >
+        Refresh
+      </button>
+
+    </div>
 
     <div id="submissions">
       <div class="loading">
-        Loading worker submissions...
+        Loading submissions...
       </div>
     </div>
 
@@ -228,261 +381,634 @@
 
 <script>
 
-  // ==========================================
-  // SUPABASE
-  // ==========================================
+/* =====================================================
+   SUPABASE CONNECTION
+===================================================== */
 
-  const SUPABASE_URL =
-    "https://jfoijwjqfaewzyzjawbw.supabase.co";
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+const SUPABASE_ANON_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-  const supabaseClient =
-    supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+let currentUser = null;
+
+
+/* =====================================================
+   MONEY FORMAT
+===================================================== */
+
+function money(value) {
+
+  return "₦" +
+    Number(value || 0).toLocaleString(
+      "en-NG",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
+
+}
+
+
+/* =====================================================
+   HTML ESCAPE
+===================================================== */
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+function formatDate(value) {
+
+  if (!value) {
+    return "—";
+  }
+
+  const d = new Date(value);
+
+  if (isNaN(d.getTime())) {
+    return escapeHtml(value);
+  }
+
+  return d.toLocaleString("en-NG");
+
+}
+
+
+/* =====================================================
+   CHECK ADMIN
+===================================================== */
+
+async function checkAdmin() {
+
+  const {
+    data: {
+      user
+    },
+    error: authError
+  } = await supabaseClient.auth.getUser();
+
+
+  if (authError || !user) {
+
+    window.location.href =
+      "index.html";
+
+    return;
+  }
+
+
+  currentUser = user;
+
+
+  const {
+    data: profile,
+    error: profileError
+  } =
+    await supabaseClient
+      .from("Moticgigs")
+      .select("role,status")
+      .eq("Id", user.id)
+      .single();
+
+
+  if (
+    profileError ||
+    !profile ||
+    profile.role !== "admin" ||
+    profile.status === "banned"
+  ) {
+
+    alert(
+      "Admin access required."
+    );
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href =
+      "index.html";
+
+    return;
+  }
+
+
+  await refreshDashboard();
+
+}
+
+
+/* =====================================================
+   REFRESH EVERYTHING
+===================================================== */
+
+async function refreshDashboard() {
+
+  await Promise.all([
+    loadDeposits(),
+    loadWithdrawals(),
+    loadSubmissions()
+  ]);
+
+}
+
+
+/* =====================================================
+   DEPOSITS
+===================================================== */
+
+async function loadDeposits() {
+
+  const box =
+    document.getElementById(
+      "deposits"
     );
 
 
-  // ==========================================
-  // MESSAGE
-  // ==========================================
-
-  function showMessage(text, type) {
-
-    const message =
-      document.getElementById("message");
-
-    message.textContent = text;
-
-    message.className =
-      "message " + type;
-
-    message.style.display = "block";
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-
-  }
+  box.innerHTML =
+    '<div class="loading">Loading deposits...</div>';
 
 
-  // ==========================================
-  // ADMIN CHECK
-  // ==========================================
-
-  async function checkAdmin() {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.getSession();
-
-
-    if (
-      error ||
-      !data ||
-      !data.session
-    ) {
-
-      window.location.href =
-        "login.html";
-
-      return;
-    }
-
-
-    const user =
-      data.session.user;
-
-
-    const {
-      data: profile,
-      error: profileError
-    } =
-      await supabaseClient
-        .from("Moticgigs")
-        .select('"Id", email, full_name, role, status')
-        .eq("Id", user.id)
-        .maybeSingle();
-
-
-    if (profileError) {
-
-      console.error(profileError);
-
-      showMessage(
-        "Could not read administrator profile: " +
-        profileError.message,
-        "error"
-      );
-
-      return;
-    }
-
-
-    if (!profile) {
-
-      showMessage(
-        "Administrator profile not found.",
-        "error"
-      );
-
-      return;
-    }
-
-
-    if (profile.role !== "admin") {
-
-      showMessage(
-        "Access denied. Administrator account required.",
-        "error"
-      );
-
-      setTimeout(() => {
-
-        window.location.href =
-          "dashboard.html";
-
-      }, 2000);
-
-      return;
-    }
-
-
-    if (profile.status === "banned") {
-
-      await supabaseClient.auth.signOut();
-
-      window.location.href =
-        "login.html";
-
-      return;
-    }
-
-
-    document.getElementById("adminInfo").textContent =
-      "Logged in as administrator: " +
-      (profile.full_name || profile.email);
-
-
-    // Load both sections
-    await loadDeposits();
-
-    await loadSubmissions();
-
-  }
-
-
-  // ==========================================
-  // LOAD DEPOSITS
-  // ==========================================
-
-  async function loadDeposits() {
-
-    const container =
-      document.getElementById("deposits");
-
-
-    container.innerHTML =
-      '<div class="loading">Loading deposits...</div>';
-
-
-    const {
-      data: deposits,
-      error
-    } =
-      await supabaseClient
-        .from("Deposit")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("Deposit")
+      .select("*")
+      .eq("status", "PENDING")
+      .order(
+        "created_at",
+        {
           ascending: false
-        });
-
-
-    if (error) {
-
-      console.error(error);
-
-      container.innerHTML = "";
-
-      showMessage(
-        "Could not load deposits: " +
-        error.message,
-        "error"
+        }
       );
 
-      return;
-    }
+
+  if (error) {
+
+    box.innerHTML =
+      '<div class="error">' +
+      "Could not load deposits:<br><br>" +
+      escapeHtml(error.message) +
+      "</div>";
+
+    document.getElementById(
+      "depositCount"
+    ).textContent = "0";
+
+    return;
+  }
 
 
-    if (!deposits || deposits.length === 0) {
-
-      container.innerHTML =
-        '<div class="empty">No pending deposits.</div>';
-
-      return;
-    }
+  document.getElementById(
+    "depositCount"
+  ).textContent = data.length;
 
 
-    container.innerHTML = "";
+  if (!data.length) {
+
+    box.innerHTML =
+      '<div class="empty">' +
+      "No pending deposits." +
+      "</div>";
+
+    return;
+  }
 
 
-    deposits.forEach(deposit => {
+  box.innerHTML =
+    data.map(d => `
 
-      const depositId =
-        deposit.id;
+      <div class="card">
 
+        <div class="row">
+          <span class="label">
+            Amount
+          </span>
+
+          <span class="value">
+            ${money(d.amount)}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Sender Name
+          </span>
+
+          <span class="value">
+            ${escapeHtml(d.sender_name)}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Payment Reference
+          </span>
+
+          <span class="value">
+            ${escapeHtml(d.payment_reference)}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Payment Method
+          </span>
+
+          <span class="value">
+            ${escapeHtml(d.payment_method)}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            User ID
+          </span>
+
+          <span class="value">
+            ${escapeHtml(d.user_id)}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Requested
+          </span>
+
+          <span class="value">
+            ${formatDate(d.created_at)}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Expires
+          </span>
+
+          <span class="value">
+            ${formatDate(d.expires_at)}
+          </span>
+        </div>
+
+
+        <span class="status">
+          PENDING
+        </span>
+
+
+        <div class="actions">
+
+          <button
+            class="action approve"
+            onclick="approveDeposit('${d.id}')"
+          >
+            Approve
+          </button>
+
+
+          <button
+            class="action reject"
+            onclick="rejectDeposit('${d.id}')"
+          >
+            Reject
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+/* =====================================================
+   APPROVE DEPOSIT
+===================================================== */
+
+async function approveDeposit(id) {
+
+  if (
+    !confirm(
+      "Approve this deposit?\n\n" +
+      "The amount will be added to the advertiser's available balance."
+    )
+  ) {
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient.rpc(
+      "approve_deposit",
+      {
+        deposit_id: id
+      }
+    );
+
+
+  if (error) {
+
+    alert(
+      "Deposit approval failed:\n\n" +
+      error.message
+    );
+
+    return;
+  }
+
+
+  alert(
+    "Deposit approved successfully."
+  );
+
+
+  await loadDeposits();
+
+}
+
+
+/* =====================================================
+   REJECT DEPOSIT
+===================================================== */
+
+async function rejectDeposit(id) {
+
+  const note =
+    prompt(
+      "Enter an optional rejection reason:"
+    );
+
+
+  if (note === null) {
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("Deposit")
+      .update({
+        status: "REJECTED",
+        rejected_at:
+          new Date().toISOString(),
+        admin_note:
+          note
+      })
+      .eq("id", id)
+      .eq("status", "PENDING");
+
+
+  if (error) {
+
+    alert(
+      "Deposit rejection failed:\n\n" +
+      error.message
+    );
+
+    return;
+  }
+
+
+  alert(
+    "Deposit rejected."
+  );
+
+
+  await loadDeposits();
+
+}
+
+
+/* =====================================================
+   WITHDRAWALS
+===================================================== */
+
+let withdrawalCards = [];
+
+
+async function loadWithdrawals() {
+
+  const box =
+    document.getElementById(
+      "withdrawals"
+    );
+
+
+  box.innerHTML =
+    '<div class="loading">Loading withdrawals...</div>';
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("Withdrawal")
+      .select("*")
+      .eq("status", "PENDING")
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (error) {
+
+    box.innerHTML =
+      '<div class="error">' +
+      "Could not load withdrawals:<br><br>" +
+      escapeHtml(error.message) +
+      "</div>";
+
+
+    document.getElementById(
+      "withdrawalCount"
+    ).textContent = "0";
+
+
+    return;
+  }
+
+
+  document.getElementById(
+    "withdrawalCount"
+  ).textContent = data.length;
+
+
+  if (!data.length) {
+
+    box.innerHTML =
+      '<div class="empty">' +
+      "No pending withdrawals." +
+      "</div>";
+
+    withdrawalCards = [];
+
+    return;
+  }
+
+
+  withdrawalCards = data;
+
+
+  box.innerHTML = "";
+
+
+  data.forEach(
+    (w, index) => {
 
       const card =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      card.className = "card";
+
+      card.className =
+        "card";
 
 
       card.innerHTML = `
 
-        <p class="amount">
-          ₦${Number(deposit.amount || 0).toLocaleString()}
-        </p>
+        <div class="row">
+          <span class="label">
+            Amount
+          </span>
 
-        <p>
-          <strong>Sender:</strong>
-          ${escapeHtml(deposit.sender_name || "N/A")}
-        </p>
+          <span class="value">
+            ${money(w.amount)}
+          </span>
+        </div>
 
-        <p>
-          <strong>Payment Method:</strong>
-          ${escapeHtml(deposit.payment_method || "N/A")}
-        </p>
 
-        <p>
-          <strong>Reference:</strong>
-          ${escapeHtml(deposit.payment_reference || "N/A")}
-        </p>
+        <div class="row">
+          <span class="label">
+            Bank
+          </span>
 
-        <p>
-          <strong>User ID:</strong>
-          ${escapeHtml(deposit.user_id || "N/A")}
-        </p>
+          <span class="value">
+            ${escapeHtml(
+              w.bank_name ||
+              w.bank_id ||
+              "—"
+            )}
+          </span>
+        </div>
 
-        <p>
-          <strong>Submitted:</strong>
-          ${deposit.created_at
-            ? new Date(deposit.created_at).toLocaleString()
-            : "N/A"}
-        </p>
 
-        <div class="buttons">
+        <div class="row">
+          <span class="label">
+            Account Number
+          </span>
+
+          <span class="value">
+            ${escapeHtml(
+              w.account_number
+            )}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Account Name
+          </span>
+
+          <span class="value">
+            ${escapeHtml(
+              w.account_name
+            )}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Worker ID
+          </span>
+
+          <span class="value">
+            ${escapeHtml(
+              w.worker_id
+            )}
+          </span>
+        </div>
+
+
+        <div class="row">
+          <span class="label">
+            Requested
+          </span>
+
+          <span class="value">
+            ${formatDate(
+              w.created_at
+            )}
+          </span>
+        </div>
+
+
+        <span class="status">
+          PENDING
+        </span>
+
+
+        <textarea
+          class="note"
+          id="withdrawNote_${index}"
+          placeholder="Admin note"
+        ></textarea>
+
+
+        <div class="actions">
 
           <button
             class="action approve"
-            id="approveDeposit-${depositId}">
-            Approve Deposit
+            onclick="approveWithdrawal(${index})"
+          >
+            Approve / Mark Paid
+          </button>
+
+
+          <button
+            class="action reject"
+            onclick="rejectWithdrawal(${index})"
+          >
+            Reject & Refund
           </button>
 
         </div>
@@ -490,681 +1016,270 @@
       `;
 
 
-      container.appendChild(card);
-
-
-      document
-        .getElementById(
-          "approveDeposit-" + depositId
-        )
-        .addEventListener(
-          "click",
-          () => approveDeposit(depositId)
-        );
-
-    });
-
-  }
-
-
-  // ==========================================
-  // APPROVE DEPOSIT
-  // ==========================================
-
-  async function approveDeposit(id) {
-
-    if (!id) {
-
-      showMessage(
-        "Deposit ID is missing.",
-        "error"
-      );
-
-      return;
-    }
-
-
-    if (
-      !confirm(
-        "Approve this deposit?\n\n" +
-        "The amount will automatically be added to the advertiser's available balance."
-      )
-    ) {
-
-      return;
-    }
-
-
-    const button =
-      document.getElementById(
-        "approveDeposit-" + id
-      );
-
-
-    if (button) {
-
-      button.disabled = true;
-
-      button.textContent =
-        "Approving...";
+      box.appendChild(card);
 
     }
+  );
+
+}
 
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "approve_deposit",
-        {
-          deposit_id: id
-        }
-      );
+/* =====================================================
+   WITHDRAWAL RPC ARGUMENTS
+===================================================== */
+
+function withdrawalArguments(
+  withdrawal,
+  note
+) {
+
+  return {
+
+    p_worker_id:
+      withdrawal.worker_id,
+
+    p_created_at:
+      withdrawal.created_at,
+
+    p_amount:
+      Number(withdrawal.amount),
+
+    p_account_number:
+      withdrawal.account_number,
+
+    p_provider_reference:
+      withdrawal.provider_reference ||
+      null,
+
+    p_admin_note:
+      note ||
+      null
+
+  };
+
+}
 
 
-    if (error) {
+/* =====================================================
+   APPROVE WITHDRAWAL
+===================================================== */
 
-      console.error(error);
+async function approveWithdrawal(index) {
 
-      if (button) {
-
-        button.disabled = false;
-
-        button.textContent =
-          "Approve Deposit";
-
-      }
-
-      showMessage(
-        "Could not approve deposit: " +
-        error.message,
-        "error"
-      );
-
-      return;
-    }
+  const withdrawal =
+    withdrawalCards[index];
 
 
-    console.log(
-      "Deposit approved:",
-      data
+  if (!withdrawal) {
+
+    alert(
+      "Withdrawal could not be found."
     );
 
-
-    showMessage(
-      "Deposit approved. The advertiser balance has been credited.",
-      "success"
-    );
-
-
-    await loadDeposits();
-
+    return;
   }
 
 
-  // ==========================================
-  // LOAD PENDING SUBMISSIONS
-  // ==========================================
-
-  async function loadSubmissions() {
-
-    const container =
-      document.getElementById("submissions");
-
-
-    container.innerHTML =
-      '<div class="loading">Loading worker submissions...</div>';
-
-
-    const {
-      data: submissions,
-      error
-    } =
-      await supabaseClient
-        .from("Submission")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
-          ascending: false
-        });
-
-
-    if (error) {
-
-      console.error(error);
-
-      container.innerHTML = "";
-
-      showMessage(
-        "Could not load submissions: " +
-        error.message,
-        "error"
-      );
-
-      return;
-    }
-
-
-    if (
-      !submissions ||
-      submissions.length === 0
-    ) {
-
-      container.innerHTML =
-        '<div class="empty">No pending worker submissions.</div>';
-
-      return;
-    }
-
-
-    container.innerHTML = "";
-
-
-    for (const submission of submissions) {
-
-      await createSubmissionCard(
-        submission,
-        container
-      );
-
-    }
-
-  }
-
-
-  // ==========================================
-  // CREATE SUBMISSION CARD
-  // ==========================================
-
-  async function createSubmissionCard(
-    submission,
-    container
+  if (
+    !confirm(
+      "Confirm that this withdrawal has been paid to the worker?"
+    )
   ) {
-
-    const card =
-      document.createElement("div");
-
-    card.className =
-      "card";
-
-
-    let task = null;
-
-
-    if (submission.task_id) {
-
-      const {
-        data: taskData
-      } =
-        await supabaseClient
-          .from("Task")
-          .select(
-            "id, platform, task_type, task_link, quantity, completed_quantity"
-          )
-          .eq("id", submission.task_id)
-          .maybeSingle();
-
-
-      task = taskData;
-
-    }
-
-
-    let proofUrl = null;
-
-
-    // ------------------------------------------
-    // Get temporary URL for private proof image
-    // ------------------------------------------
-
-    if (submission.proof) {
-
-      let proofPath =
-        submission.proof;
-
-
-      // If proof was stored as a full public URL,
-      // don't attempt signed URL.
-      if (
-        proofPath.startsWith("http://") ||
-        proofPath.startsWith("https://")
-      ) {
-
-        proofUrl =
-          proofPath;
-
-      } else {
-
-        const {
-          data: signedData,
-          error: signedError
-        } =
-          await supabaseClient.storage
-            .from("task-proofs")
-            .createSignedUrl(
-              proofPath,
-              3600
-            );
-
-
-        if (!signedError && signedData) {
-
-          proofUrl =
-            signedData.signedUrl;
-
-        }
-
-      }
-
-    }
-
-
-    card.innerHTML = `
-
-      <p class="amount">
-        Worker Reward:
-        ₦${Number(
-          submission.reward || 0
-        ).toLocaleString()}
-      </p>
-
-      <p>
-        <strong>Worker Username:</strong>
-        ${escapeHtml(
-          submission.username || "N/A"
-        )}
-      </p>
-
-      <p>
-        <strong>Worker ID:</strong>
-        ${escapeHtml(
-          submission.worker_id || "N/A"
-        )}
-      </p>
-
-      <p>
-        <strong>Platform:</strong>
-        <span class="tag">
-          ${escapeHtml(
-            task?.platform || "N/A"
-          )}
-        </span>
-      </p>
-
-      <p>
-        <strong>Task:</strong>
-        ${escapeHtml(
-          task?.task_type || "N/A"
-        )}
-      </p>
-
-      <p>
-        <strong>Task Link:</strong>
-        ${
-          task?.task_link
-          ? `
-            <a
-              class="task-link"
-              href="${escapeHtml(task.task_link)}"
-              target="_blank"
-              rel="noopener noreferrer">
-              Open Task
-            </a>
-          `
-          : "N/A"
-        }
-      </p>
-
-      <p>
-        <strong>Submitted:</strong>
-        ${
-          submission.created_at
-          ? new Date(
-              submission.created_at
-            ).toLocaleString()
-          : "N/A"
-        }
-      </p>
-
-      ${
-        task
-        ? `
-          <p>
-            <strong>Task Progress:</strong>
-            ${Number(task.completed_quantity || 0)}
-            /
-            ${Number(task.quantity || 0)}
-          </p>
-        `
-        : ""
-      }
-
-      <p>
-        <strong>Proof:</strong>
-      </p>
-
-      ${
-        proofUrl
-        ? `
-          <a
-            href="${escapeHtml(proofUrl)}"
-            target="_blank"
-            rel="noopener noreferrer">
-
-            <img
-              class="proof"
-              src="${escapeHtml(proofUrl)}"
-              alt="Worker task proof">
-          </a>
-        `
-        : `
-          <p>
-            No proof image available.
-          </p>
-        `
-      }
-
-      <input
-        type="text"
-        class="note-input"
-        id="note-${submission.id}"
-        placeholder="Optional rejection reason">
-
-      <div class="buttons">
-
-        <button
-          class="action approve"
-          id="approveSubmission-${submission.id}">
-          Approve Submission
-        </button>
-
-        <button
-          class="action reject"
-          id="rejectSubmission-${submission.id}">
-          Reject Submission
-        </button>
-
-      </div>
-
-    `;
-
-
-    container.appendChild(card);
-
-
-    document
-      .getElementById(
-        "approveSubmission-" +
-        submission.id
-      )
-      .addEventListener(
-        "click",
-        () =>
-          approveSubmission(
-            submission.id
-          )
-      );
-
-
-    document
-      .getElementById(
-        "rejectSubmission-" +
-        submission.id
-      )
-      .addEventListener(
-        "click",
-        () =>
-          rejectSubmission(
-            submission.id
-          )
-      );
-
+    return;
   }
 
 
-  // ==========================================
-  // APPROVE WORKER SUBMISSION
-  // ==========================================
-
-  async function approveSubmission(id) {
-
-    if (!id) {
-
-      showMessage(
-        "Submission ID is missing.",
-        "error"
-      );
-
-      return;
-    }
+  const noteElement =
+    document.getElementById(
+      "withdrawNote_" + index
+    );
 
 
-    if (
-      !confirm(
-        "Approve this worker submission?\n\n" +
-        "The reward will move from the worker's Pending Balance to Available Balance."
+  const note =
+    noteElement &&
+    noteElement.value.trim()
+      ? noteElement.value.trim()
+      : "Withdrawal paid";
+
+
+  const {
+    error
+  } =
+    await supabaseClient.rpc(
+      "approve_withdrawal",
+      withdrawalArguments(
+        withdrawal,
+        note
       )
-    ) {
-
-      return;
-    }
-
-
-    const button =
-      document.getElementById(
-        "approveSubmission-" + id
-      );
-
-
-    if (button) {
-
-      button.disabled = true;
-
-      button.textContent =
-        "Approving...";
-
-    }
-
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "approve_submission",
-        {
-          p_submission_id: id
-        }
-      );
-
-
-    if (error) {
-
-      console.error(error);
-
-      if (button) {
-
-        button.disabled = false;
-
-        button.textContent =
-          "Approve Submission";
-
-      }
-
-      showMessage(
-        "Could not approve submission: " +
-        error.message,
-        "error"
-      );
-
-      return;
-    }
-
-
-    console.log(
-      "Submission approved:",
-      data
     );
 
 
-    showMessage(
-      "Submission approved. The worker's reward has been moved to Available Balance.",
-      "success"
+  if (error) {
+
+    alert(
+      "Withdrawal approval failed:\n\n" +
+      error.message
     );
 
-
-    await loadSubmissions();
-
+    return;
   }
 
 
-  // ==========================================
-  // REJECT WORKER SUBMISSION
-  // ==========================================
-
-  async function rejectSubmission(id) {
-
-    if (!id) {
-
-      showMessage(
-        "Submission ID is missing.",
-        "error"
-      );
-
-      return;
-    }
+  alert(
+    "Withdrawal marked as paid successfully."
+  );
 
 
-    const noteInput =
-      document.getElementById(
-        "note-" + id
-      );
+  await loadWithdrawals();
+
+}
 
 
-    const note =
-      noteInput
-      ? noteInput.value.trim()
+/* =====================================================
+   REJECT WITHDRAWAL
+===================================================== */
+
+async function rejectWithdrawal(index) {
+
+  const withdrawal =
+    withdrawalCards[index];
+
+
+  if (!withdrawal) {
+
+    alert(
+      "Withdrawal could not be found."
+    );
+
+    return;
+  }
+
+
+  const noteElement =
+    document.getElementById(
+      "withdrawNote_" + index
+    );
+
+
+  const note =
+    noteElement
+      ? noteElement.value.trim()
       : "";
 
 
-    if (
-      !confirm(
-        "Reject this worker submission?\n\n" +
-        "The reward will be removed from the worker's Pending Balance."
+  if (!note) {
+
+    alert(
+      "Please enter a rejection reason."
+    );
+
+
+    if (noteElement) {
+      noteElement.focus();
+    }
+
+
+    return;
+  }
+
+
+  if (
+    !confirm(
+      "Reject this withdrawal and refund the amount to the worker's available balance?"
+    )
+  ) {
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient.rpc(
+      "reject_withdrawal",
+      withdrawalArguments(
+        withdrawal,
+        note
       )
-    ) {
-
-      return;
-    }
+    );
 
 
-    const button =
-      document.getElementById(
-        "rejectSubmission-" + id
-      );
+  if (error) {
+
+    alert(
+      "Withdrawal rejection failed:\n\n" +
+      error.message
+    );
+
+    return;
+  }
 
 
-    if (button) {
-
-      button.disabled = true;
-
-      button.textContent =
-        "Rejecting...";
-
-    }
+  alert(
+    "Withdrawal rejected and worker refunded."
+  );
 
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "reject_submission",
+  await loadWithdrawals();
+
+}
+
+
+/* =====================================================
+   SUBMISSIONS
+===================================================== */
+
+async function loadSubmissions() {
+
+  const box =
+    document.getElementById(
+      "submissions"
+    );
+
+
+  box.innerHTML =
+    '<div class="loading">Loading submissions...</div>';
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("Submission")
+      .select("*")
+      .eq("status", "PENDING")
+      .order(
+        "submitted_at",
         {
-          p_submission_id: id,
-          p_rejection_note: note || null
+          ascending: false
         }
       );
 
 
-    if (error) {
+  if (error) {
 
-      console.error(error);
-
-      if (button) {
-
-        button.disabled = false;
-
-        button.textContent =
-          "Reject Submission";
-
-      }
-
-      showMessage(
-        "Could not reject submission: " +
-        error.message,
-        "error"
-      );
-
-      return;
-    }
+    box.innerHTML =
+      '<div class="error">' +
+      "Could not load submissions:<br><br>" +
+      escapeHtml(error.message) +
+      "</div>";
 
 
-    console.log(
-      "Submission rejected:",
-      data
-    );
+    document.getElementById(
+      "submissionCount"
+    ).textContent = "0";
 
 
-    showMessage(
-      "Submission rejected. The reward has been removed from Pending Balance.",
-      "success"
-    );
-
-
-    await loadSubmissions();
-
+    return;
   }
 
 
-  // ==========================================
-  // ESCAPE HTML
-  // ==========================================
-
-  function escapeHtml(value) {
-
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-  }
+  document.getElementById(
+    "submissionCount"
+  ).textContent = data.length;
 
 
-  // ==========================================
-  // LOGOUT
-  // ==========================================
+  if (!data.length) {
 
-  async function logout() {
-
-    await supabaseClient.auth.signOut();
-
-    window.location.href =
-      "login.html";
-
-  }
-
-
-  // ==========================================
-  // START
-  // ==========================================
-
-  checkAdmin();
-
-</script>
-
-</body>
-  </html>
+    box.inne
