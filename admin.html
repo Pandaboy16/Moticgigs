@@ -1,1740 +1,1107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MoticGigs Admin Dashboard</title>
+  <title>Admin Dashboard - MoticGigs</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-*{
-  box-sizing:border-box;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f4f7f6;
-  color:#17211b;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
 
-header{
-  background:#075e36;
-  color:white;
-  padding:18px 15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+    header {
+      background: #111827;
+      color: white;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-header h1{
-  margin:0;
-  font-size:20px;
-}
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
 
-.logout{
-  border:0;
-  background:white;
-  color:#075e36;
-  padding:9px 14px;
-  border-radius:8px;
-  font-weight:bold;
-}
+    header button {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
 
-.container{
-  max-width:1050px;
-  margin:20px auto;
-  padding:0 14px;
-}
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-bottom:18px;
-}
+    .status {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
 
-.stat{
-  background:white;
-  padding:16px;
-  border-radius:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.06);
-}
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: none;
+      white-space: pre-wrap;
+    }
 
-.stat-title{
-  color:#5d6b63;
-  font-size:14px;
-}
+    .section {
+      background: white;
+      margin-bottom: 25px;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    }
 
-.stat-value{
-  display:block;
-  margin-top:5px;
-  color:#075e36;
-  font-size:25px;
-  font-weight:bold;
-}
+    .section h2 {
+      margin-top: 0;
+      font-size: 19px;
+    }
 
-.section{
-  background:white;
-  padding:16px;
-  margin-bottom:18px;
-  border-radius:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.06);
-}
+    .count {
+      background: #111827;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
 
-.section-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:12px;
-}
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 12px;
+      background: #fafafa;
+    }
 
-.section-header h2{
-  margin:0;
-  font-size:19px;
-}
+    .row {
+      margin: 7px 0;
+      word-break: break-word;
+    }
 
-.card{
-  border:1px solid #e1e8e3;
-  border-radius:10px;
-  padding:14px;
-  margin:10px 0;
-}
+    .label {
+      font-weight: bold;
+    }
 
-.row{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  margin:8px 0;
-}
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
 
-.label{
-  font-weight:bold;
-  color:#526057;
-}
+    button.action {
+      border: none;
+      padding: 10px 15px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+    }
 
-.value{
-  text-align:right;
-  word-break:break-word;
-}
+    .approve {
+      background: #16a34a;
+    }
 
-.status{
-  display:inline-block;
-  margin-top:8px;
-  padding:5px 9px;
-  border-radius:20px;
-  background:#fff4d6;
-  color:#795800;
-  font-size:12px;
-  font-weight:bold;
-}
+    .reject {
+      background: #dc2626;
+    }
 
-button.action{
-  border:0;
-  color:white;
-  padding:10px 14px;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
-}
+    .approve:hover {
+      background: #15803d;
+    }
 
-.refresh{
-  background:#245bdb;
-}
+    .reject:hover {
+      background: #b91c1c;
+    }
 
-.approve{
-  background:#087a43;
-}
+    .loading {
+      color: #6b7280;
+      padding: 10px 0;
+    }
 
-.reject{
-  background:#c62828;
-}
+    .empty {
+      color: #6b7280;
+      padding: 10px 0;
+    }
 
-.actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:14px;
-}
+    .proof-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
 
-.loading,
-.empty,
-.error,
-.success{
-  padding:14px;
-  border-radius:8px;
-}
+    .proof-box img {
+      width: 100%;
+      max-width: 450px;
+      max-height: 600px;
+      object-fit: contain;
+      display: block;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #f9fafb;
+    }
 
-.loading{
-  background:#f2f5f3;
-  color:#58645d;
-}
+    .proof-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: #2563eb;
+      text-decoration: none;
+    }
 
-.empty{
-  background:#f2f5f3;
-  color:#58645d;
-}
+    .small {
+      color: #6b7280;
+      font-size: 13px;
+    }
 
-.error{
-  background:#fff0f0;
-  color:#a32121;
-  word-break:break-word;
-}
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      resize: vertical;
+      margin-top: 10px;
+    }
 
-.success{
-  background:#e8f7ee;
-  color:#087a43;
-}
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 9999;
+      padding: 20px;
+      overflow: auto;
+    }
 
-.note{
-  width:100%;
-  min-height:70px;
-  margin-top:10px;
-  padding:10px;
-  border:1px solid #ccd7d0;
-  border-radius:8px;
-  resize:vertical;
-}
+    .modal-content {
+      background: white;
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 12px;
+    }
 
-.proof{
-  display:block;
-  width:100%;
-  max-width:450px;
-  max-height:500px;
-  object-fit:contain;
-  margin-top:10px;
-  border:1px solid #ddd;
-  border-radius:9px;
-}
+    .modal-content img {
+      width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+      background: #111;
+      border-radius: 8px;
+    }
 
-@media(max-width:650px){
-
-  .stats{
-    grid-template-columns:1fr;
-  }
-
-  .row{
-    display:block;
-  }
-
-  .value{
-    text-align:left;
-    margin-top:4px;
-  }
-
-  header h1{
-    font-size:18px;
-  }
-}
-</style>
+    .close {
+      float: right;
+      background: #111827;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-
-<h1>MoticGigs Admin Dashboard</h1>
-
-<button class="logout" onclick="logout()">
-Logout
-</button>
-
+  <h1>Admin Dashboard - MoticGigs</h1>
+  <button onclick="logout()">Logout</button>
 </header>
-
 
 <div class="container">
 
+  <div id="globalError" class="error"></div>
 
-<!-- STATS -->
-
-<div class="stats">
-
-<div class="stat">
-<div class="stat-title">
-Pending Deposits
-</div>
-
-<span class="stat-value" id="depositCount">
-0
-</span>
-</div>
+  <div class="status">
+    <strong>Admin status:</strong>
+    <span id="adminStatus">Checking...</span>
+  </div>
 
 
-<div class="stat">
-<div class="stat-title">
-Pending Withdrawals
-</div>
+  <!-- ========================= -->
+  <!-- DEPOSITS -->
+  <!-- ========================= -->
 
-<span class="stat-value" id="withdrawalCount">
-0
-</span>
-</div>
+  <div class="section">
 
+    <h2>
+      Pending Deposits
+      <span id="depositCount" class="count">0</span>
+    </h2>
 
-<div class="stat">
-<div class="stat-title">
-Pending Submissions
-</div>
+    <div id="deposits">
+      <div class="loading">Loading deposits...</div>
+    </div>
 
-<span class="stat-value" id="submissionCount">
-0
-</span>
-</div>
-
-</div>
+  </div>
 
 
+  <!-- ========================= -->
+  <!-- WITHDRAWALS -->
+  <!-- ========================= -->
 
-<!-- DEPOSITS -->
+  <div class="section">
 
-<div class="section">
+    <h2>
+      Pending Withdrawals
+      <span id="withdrawalCount" class="count">0</span>
+    </h2>
 
-<div class="section-header">
+    <div id="withdrawals">
+      <div class="loading">Loading withdrawals...</div>
+    </div>
 
-<h2>
-Pending Deposits
-</h2>
+  </div>
 
-<button
-class="action refresh"
-onclick="loadDeposits()">
-Refresh
-</button>
 
-</div>
+  <!-- ========================= -->
+  <!-- SUBMISSIONS -->
+  <!-- ========================= -->
 
-<div id="deposits">
-<div class="loading">
-Loading deposits...
-</div>
-</div>
+  <div class="section">
+
+    <h2>
+      Pending Worker Submissions
+      <span id="submissionCount" class="count">0</span>
+    </h2>
+
+    <div id="submissions">
+      <div class="loading">Loading submissions...</div>
+    </div>
+
+  </div>
 
 </div>
 
 
+<!-- ========================= -->
+<!-- IMAGE MODAL -->
+<!-- ========================= -->
 
-<!-- WITHDRAWALS -->
+<div id="imageModal" class="modal">
 
-<div class="section">
+  <div class="modal-content">
 
-<div class="section-header">
+    <button class="close" onclick="closeImage()">Close</button>
 
-<h2>
-Pending Withdrawals
-</h2>
+    <h3>Worker Screenshot</h3>
 
-<button
-class="action refresh"
-onclick="loadWithdrawals()">
-Refresh
-</button>
+    <img id="modalImage" src="" alt="Worker proof">
 
-</div>
-
-<div id="withdrawals">
-<div class="loading">
-Loading withdrawals...
-</div>
-</div>
+  </div>
 
 </div>
-
-
-
-<!-- SUBMISSIONS -->
-
-<div class="section">
-
-<div class="section-header">
-
-<h2>
-Pending Worker Submissions
-</h2>
-
-<button
-class="action refresh"
-onclick="loadSubmissions()">
-Refresh
-</button>
-
-</div>
-
-<div id="submissions">
-<div class="loading">
-Loading submissions...
-</div>
-</div>
-
-</div>
-
-</div>
-
 
 
 <script>
 
-/* =====================================================
-SUPABASE
-===================================================== */
+  // ==========================================
+  // SUPABASE
+  // ==========================================
 
-const SUPABASE_URL =
-"https://jfoijwjqfaewzyzjawbw.supabase.co";
+  const SUPABASE_URL =
+    "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
-const SUPABASE_ANON_KEY =
-"sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+  const SUPABASE_ANON_KEY =
+    "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-const supabaseClient =
-supabase.createClient(
-SUPABASE_URL,
-SUPABASE_ANON_KEY
-);
+  const supabaseClient =
+    supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
 
 
-/* =====================================================
-HELPERS
-===================================================== */
+  // ==========================================
+  // GLOBAL ERROR
+  // ==========================================
 
-function money(value){
+  function showError(message) {
 
-return "₦" +
-Number(value || 0).toLocaleString(
-"en-NG",
-{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-}
-);
+    const box = document.getElementById("globalError");
 
-}
+    box.style.display = "block";
 
+    box.textContent = message;
+  }
 
-function escapeHtml(value){
 
-return String(value ?? "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+  function clearError() {
 
-}
+    const box = document.getElementById("globalError");
 
+    box.style.display = "none";
 
-function formatDate(value){
+    box.textContent = "";
+  }
 
-if(!value){
-return "—";
-}
 
-const date =
-new Date(value);
+  // ==========================================
+  // CHECK ADMIN
+  // ==========================================
 
-if(
-isNaN(date.getTime())
-){
-return escapeHtml(value);
-}
+  async function checkAdmin() {
 
-return date.toLocaleString("en-NG");
+    try {
 
-}
+      clearError();
 
+      const {
+        data: userData,
+        error: userError
+      } = await supabaseClient.auth.getUser();
 
-/* =====================================================
-ADMIN CHECK
-===================================================== */
 
-async function checkAdmin(){
+      if (userError) {
+        throw userError;
+      }
 
-try{
 
-const {
-data,
-error
-} =
-await supabaseClient.auth.getUser();
+      if (!userData.user) {
 
+        document.getElementById("adminStatus").textContent =
+          "Not logged in";
 
-if(error){
+        window.location.href = "index.html";
 
-showGlobalError(
-"Authentication error: " +
-error.message
-);
+        return;
+      }
 
-return;
-}
 
+      const user = userData.user;
 
-if(!data.user){
 
-window.location.href =
-"index.html";
+      const {
+        data: profile,
+        error: profileError
+      } =
+        await supabaseClient
+          .from("Moticgigs")
+          .select("role,status")
+          .eq("Id", user.id)
+          .single();
 
-return;
-}
 
+      if (profileError) {
+        throw profileError;
+      }
 
-const {
-data:profile,
-error:profileError
-} =
-await supabaseClient
-.from("Moticgigs")
-.select("role,status")
-.eq("Id",data.user.id)
-.single();
 
+      if (
+        !profile ||
+        profile.role !== "admin" ||
+        profile.status === "banned"
+      ) {
 
-if(profileError){
+        document.getElementById("adminStatus").textContent =
+          "Access denied";
 
-showGlobalError(
-"Could not check admin account: " +
-profileError.message
-);
+        showError(
+          "Your account is not an active administrator."
+        );
 
-return;
-}
+        return;
+      }
 
 
-if(
-!profile ||
-profile.role !== "admin" ||
-profile.status === "banned"
-){
+      document.getElementById("adminStatus").textContent =
+        "Active administrator";
 
-alert(
-"Admin access required."
-);
 
-await supabaseClient.auth.signOut();
+      // Load everything separately.
+      await loadDeposits();
+      await loadWithdrawals();
+      await loadSubmissions();
 
-window.location.href =
-"index.html";
+    }
 
-return;
-}
+    catch (error) {
 
+      console.error(error);
 
-/*
-IMPORTANT:
-Load each section separately.
-One failed query cannot block
-the other sections.
-*/
+      document.getElementById("adminStatus").textContent =
+        "Error";
 
-loadDeposits();
-loadWithdrawals();
-loadSubmissions();
+      showError(
+        "Admin check failed:\n\n" +
+        (error.message || JSON.stringify(error))
+      );
 
-}
-catch(error){
+    }
 
-showGlobalError(
-"Dashboard error: " +
-error.message
-);
+  }
 
-}
 
-}
+  // ==========================================
+  // DEPOSITS
+  // ==========================================
 
+  async function loadDeposits() {
 
-/* =====================================================
-GLOBAL ERROR
-===================================================== */
+    const container =
+      document.getElementById("deposits");
 
-function showGlobalError(message){
+    container.innerHTML =
+      '<div class="loading">Loading deposits...</div>';
 
-document.getElementById(
-"deposits"
-).innerHTML =
-'<div class="error">' +
-escapeHtml(message) +
-'</div>';
 
-document.getElementById(
-"withdrawals"
-).innerHTML =
-'<div class="error">' +
-escapeHtml(message) +
-'</div>';
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("Deposit")
+        .select("*")
+        .eq("status", "PENDING")
+        .order("created_at", {
+          ascending: false
+        });
 
-document.getElementById(
-"submissions"
-).innerHTML =
-'<div class="error">' +
-escapeHtml(message) +
-'</div>';
 
-}
+    if (error) {
 
+      console.error(error);
 
-/* =====================================================
-DEPOSITS
-===================================================== */
+      container.innerHTML =
+        '<div class="error" style="display:block">' +
+        escapeHtml(error.message) +
+        '</div>';
 
-async function loadDeposits(){
+      return;
+    }
 
-const box =
-document.getElementById(
-"deposits"
-);
 
-box.innerHTML =
-'<div class="loading">Loading deposits...</div>';
+    document.getElementById("depositCount").textContent =
+      data.length;
 
-try{
 
-const {
-data,
-error
-} =
-await supabaseClient
-.from("Deposit")
-.select("*")
-.eq("status","PENDING")
-.order(
-"created_at",
-{
-ascending:false
-}
-);
+    if (!data.length) {
 
+      container.innerHTML =
+        '<div class="empty">No pending deposits.</div>';
 
-if(error){
+      return;
+    }
 
-box.innerHTML =
-'<div class="error">' +
-"<b>Deposit error:</b><br><br>" +
-escapeHtml(error.message) +
-"</div>";
 
-document.getElementById(
-"depositCount"
-).textContent="!";
+    container.innerHTML = "";
 
-return;
-}
 
+    data.forEach(deposit => {
 
-document.getElementById(
-"depositCount"
-).textContent =
-data.length;
+      const card =
+        document.createElement("div");
 
+      card.className = "card";
 
-if(!data.length){
 
-box.innerHTML =
-'<div class="empty">' +
-"No pending deposits." +
-"</div>";
+      card.innerHTML = `
 
-return;
-}
+        <div class="row">
+          <span class="label">Amount:</span>
+          ₦${Number(deposit.amount || 0).toLocaleString()}
+        </div>
 
+        <div class="row">
+          <span class="label">Sender:</span>
+          ${escapeHtml(deposit.sender_name || "")}
+        </div>
 
-box.innerHTML =
-data.map(
-deposit => `
+        <div class="row">
+          <span class="label">Reference:</span>
+          ${escapeHtml(deposit.payment_reference || "")}
+        </div>
 
-<div class="card">
+        <div class="row">
+          <span class="label">Payment Method:</span>
+          ${escapeHtml(deposit.payment_method || "")}
+        </div>
 
-<div class="row">
-<span class="label">
-Amount
-</span>
+        <div class="row small">
+          Created:
+          ${deposit.created_at
+            ? new Date(deposit.created_at).toLocaleString()
+            : ""}
+        </div>
 
-<span class="value">
-${money(deposit.amount)}
-</span>
-</div>
+        <textarea
+          id="depositNote_${deposit.id}"
+          placeholder="Admin note (optional)"
+        ></textarea>
 
+        <div class="buttons">
 
-<div class="row">
-<span class="label">
-Sender Name
-</span>
+          <button
+            class="action approve"
+            onclick="approveDeposit('${deposit.id}')"
+          >
+            Approve
+          </button>
 
-<span class="value">
-${escapeHtml(
-deposit.sender_name
-)}
-</span>
-</div>
+          <button
+            class="action reject"
+            onclick="rejectDeposit('${deposit.id}')"
+          >
+            Reject
+          </button>
 
+        </div>
 
-<div class="row">
-<span class="label">
-Payment Reference
-</span>
+      `;
 
-<span class="value">
-${escapeHtml(
-deposit.payment_reference
-)}
-</span>
-</div>
 
+      container.appendChild(card);
 
-<div class="row">
-<span class="label">
-Payment Method
-</span>
+    });
 
-<span class="value">
-${escapeHtml(
-deposit.payment_method
-)}
-</span>
-</div>
+  }
 
 
-<div class="row">
-<span class="label">
-User ID
-</span>
+  // ==========================================
+  // APPROVE DEPOSIT
+  // ==========================================
 
-<span class="value">
-${escapeHtml(
-deposit.user_id
-)}
-</span>
-</div>
+  async function approveDeposit(id) {
 
+    try {
 
-<div class="row">
-<span class="label">
-Created
-</span>
+      const {
+        error
+      } =
+        await supabaseClient.rpc(
+          "approve_deposit",
+          {
+            deposit_id: id
+          }
+        );
 
-<span class="value">
-${formatDate(
-deposit.created_at
-)}
-</span>
-</div>
 
+      if (error) {
+        throw error;
+      }
 
-<span class="status">
-PENDING
-</span>
 
+      alert("Deposit approved successfully.");
 
-<div class="actions">
+      await loadDeposits();
 
-<button
-class="action approve"
-onclick="approveDeposit('${deposit.id}')">
+    }
 
-Approve
+    catch (error) {
 
-</button>
+      console.error(error);
 
+      alert(
+        "Could not approve deposit:\n\n" +
+        error.message
+      );
 
-<button
-class="action reject"
-onclick="rejectDeposit('${deposit.id}')">
+    }
 
-Reject
+  }
 
-</button>
 
-</div>
+  // ==========================================
+  // REJECT DEPOSIT
+  // ==========================================
 
-</div>
+  async function rejectDeposit(id) {
 
-`
-).join("");
+    const note =
+      document.getElementById(
+        "depositNote_" + id
+      )?.value || "";
 
-}
-catch(error){
 
-box.innerHTML =
-'<div class="error">' +
-"<b>Deposit error:</b><br><br>" +
-escapeHtml(error.message) +
-"</div>";
+    if (
+      !confirm(
+        "Reject this deposit?"
+      )
+    ) {
+      return;
+    }
 
-}
 
-}
+    try {
 
+      const {
+        error
+      } =
+        await supabaseClient.rpc(
+          "reject_deposit",
+          {
+            p_deposit_id: id,
+            p_admin_note: note
+          }
+        );
 
-/* =====================================================
-APPROVE DEPOSIT
-===================================================== */
 
-async function approveDeposit(id){
+      if (error) {
+        throw error;
+      }
 
-if(
-!confirm(
-"Approve this deposit?"
-)
-){
-return;
-}
 
+      alert("Deposit rejected.");
 
-try{
+      await loadDeposits();
 
-const {
-error
-} =
-await supabaseClient.rpc(
-"approve_deposit",
-{
-deposit_id:id
-}
-);
+    }
 
+    catch (error) {
 
-if(error){
+      console.error(error);
 
-alert(
-"Approval failed:\n\n" +
-error.message
-);
+      alert(
+        "Could not reject deposit:\n\n" +
+        error.message
+      );
 
-return;
-}
+    }
 
+  }
 
-alert(
-"Deposit approved successfully."
-);
 
-loadDeposits();
+  // ==========================================
+  // WITHDRAWALS
+  // ==========================================
 
-}
-catch(error){
+  async function loadWithdrawals() {
 
-alert(
-"Error:\n\n" +
-error.message
-);
+    const container =
+      document.getElementById("withdrawals");
 
-}
+    container.innerHTML =
+      '<div class="loading">Loading withdrawals...</div>';
 
-}
 
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("Withdrawal")
+        .select("*")
+        .eq("status", "PENDING")
+        .order("created_at", {
+          ascending: false
+        });
 
-/* =====================================================
-REJECT DEPOSIT
-===================================================== */
 
-async function rejectDeposit(id){
+    if (error) {
 
-const note =
-prompt(
-"Enter rejection reason:"
-);
+      console.error(error);
 
-if(note === null){
-return;
-}
+      container.innerHTML =
+        '<div class="error" style="display:block">' +
+        escapeHtml(error.message) +
+        '</div>';
 
+      return;
+    }
 
-try{
 
-const {
-error
-} =
-await supabaseClient
-.from("Deposit")
-.update({
-status:"REJECTED",
-rejected_at:
-new Date().toISOString(),
-admin_note:note
-})
-.eq("id",id)
-.eq("status","PENDING");
+    document.getElementById("withdrawalCount").textContent =
+      data.length;
 
 
-if(error){
+    if (!data.length) {
 
-alert(
-"Rejection failed:\n\n" +
-error.message
-);
+      container.innerHTML =
+        '<div class="empty">No pending withdrawals.</div>';
 
-return;
-}
+      return;
+    }
 
 
-alert(
-"Deposit rejected."
-);
+    container.innerHTML = "";
 
-loadDeposits();
 
-}
-catch(error){
+    data.forEach(withdrawal => {
 
-alert(
-"Error:\n\n" +
-error.message
-);
+      const card =
+        document.createElement("div");
 
-}
+      card.className = "card";
 
-}
 
+      const createdAt =
+        withdrawal.created_at || "";
 
-/* =====================================================
-WITHDRAWALS
-===================================================== */
 
-let withdrawals=[];
+      card.innerHTML = `
 
+        <div class="row">
+          <span class="label">Amount:</span>
+          ₦${Number(withdrawal.amount || 0).toLocaleString()}
+        </div>
 
-async function loadWithdrawals(){
+        <div class="row">
+          <span class="label">Worker ID:</span>
+          ${escapeHtml(withdrawal.worker_id || "")}
+        </div>
 
-const box =
-document.getElementById(
-"withdrawals"
-);
+        <div class="row">
+          <span class="label">Bank:</span>
+          ${escapeHtml(withdrawal.bank_name || "")}
+        </div>
 
-box.innerHTML =
-'<div class="loading">Loading withdrawals...</div>';
+        <div class="row">
+          <span class="label">Account Number:</span>
+          ${escapeHtml(withdrawal.account_number || "")}
+        </div>
 
+        <div class="row">
+          <span class="label">Account Name:</span>
+          ${escapeHtml(withdrawal.account_name || "")}
+        </div>
 
-try{
+        <div class="row small">
+          Created:
+          ${createdAt
+            ? new Date(createdAt).toLocaleString()
+            : ""}
+        </div>
 
-const {
-data,
-error
-} =
-await supabaseClient
-.from("Withdrawal")
-.select("*")
-.eq("status","PENDING")
-.order(
-"created_at",
-{
-ascending:false
-}
-);
+        <textarea
+          id="withdrawalNote_${createdAt}"
+          placeholder="Admin note (optional)"
+        ></textarea>
 
+        <div class="buttons">
 
-if(error){
+          <button
+            class="action approve"
+            onclick="approveWithdrawal(
+              '${escapeJs(withdrawal.worker_id)}',
+              '${escapeJs(createdAt)}',
+              '${Number(withdrawal.amount || 0)}',
+              '${escapeJs(withdrawal.account_number || "")}'
+            )"
+          >
+            Approve
+          </button>
 
-box.innerHTML =
-'<div class="error">' +
-"<b>Withdrawal error:</b><br><br>" +
-escapeHtml(error.message) +
-"</div>";
+          <button
+            class="action reject"
+            onclick="rejectWithdrawal(
+              '${escapeJs(withdrawal.worker_id)}',
+              '${escapeJs(createdAt)}',
+              '${Number(withdrawal.amount || 0)}',
+              '${escapeJs(withdrawal.account_number || "")}'
+            )"
+          >
+            Reject
+          </button>
 
-document.getElementById(
-"withdrawalCount"
-).textContent="!";
+        </div>
 
-return;
-}
+      `;
 
 
-withdrawals =
-data || [];
+      container.appendChild(card);
 
+    });
 
-document.getElementById(
-"withdrawalCount"
-).textContent =
-withdrawals.length;
+  }
 
 
-if(!withdrawals.length){
+  // ==========================================
+  // APPROVE WITHDRAWAL
+  // ==========================================
 
-box.innerHTML =
-'<div class="empty">' +
-"No pending withdrawals." +
-"</div>";
+  async function approveWithdrawal(
+    workerId,
+    createdAt,
+    amount,
+    accountNumber
+  ) {
 
-return;
-}
+    if (
+      !confirm(
+        "Approve this withdrawal?"
+      )
+    ) {
+      return;
+    }
 
 
-box.innerHTML="";
+    try {
 
+      const {
+        error
+      } =
+        await supabaseClient.rpc(
+          "approve_withdrawal",
+          {
+            p_worker_id: workerId,
+            p_created_at: createdAt,
+            p_amount: Number(amount),
+            p_account_number: accountNumber,
+            p_provider_reference: null,
+            p_admin_note: null
+          }
+        );
 
-withdrawals.forEach(
-(w,index)=>{
 
-const card =
-document.createElement(
-"div"
-);
+      if (error) {
+        throw error;
+      }
 
-card.className="card";
 
+      alert(
+        "Withdrawal approved successfully."
+      );
 
-card.innerHTML=`
 
-<div class="row">
-<span class="label">
-Amount
-</span>
+      await loadWithdrawals();
 
-<span class="value">
-${money(w.amount)}
-</span>
-</div>
+    }
 
+    catch (error) {
 
-<div class="row">
-<span class="label">
-Bank
-</span>
+      console.error(error);
 
-<span class="value">
-${escapeHtml(
-w.bank_name ||
-w.bank_id ||
-"—"
-)}
-</span>
-</div>
+      alert(
+        "Could not approve withdrawal:\n\n" +
+        error.message
+      );
 
+    }
 
-<div class="row">
-<span class="label">
-Account Number
-</span>
+  }
 
-<span class="value">
-${escapeHtml(
-w.account_number
-)}
-</span>
-</div>
 
+  // ==========================================
+  // REJECT WITHDRAWAL
+  // ==========================================
 
-<div class="row">
-<span class="label">
-Account Name
-</span>
+  async function rejectWithdrawal(
+    workerId,
+    createdAt,
+    amount,
+    accountNumber
+  ) {
 
-<span class="value">
-${escapeHtml(
-w.account_name
-)}
-</span>
-</div>
+    const note =
+      prompt(
+        "Reason for rejecting this withdrawal:"
+      );
 
 
-<div class="row">
-<span class="label">
-Worker ID
-</span>
+    if (note === null) {
+      return;
+    }
 
-<span class="value">
-${escapeHtml(
-w.worker_id
-)}
-</span>
-</div>
 
+    try {
 
-<div class="row">
-<span class="label">
-Requested
-</span>
+      const {
+        error
+      } =
+        await supabaseClient.rpc(
+          "reject_withdrawal",
+          {
+            p_worker_id: workerId,
+            p_created_at: createdAt,
+            p_amount: Number(amount),
+            p_account_number: accountNumber,
+            p_provider_reference: null,
+            p_admin_note: note
+          }
+        );
 
-<span class="value">
-${formatDate(
-w.created_at
-)}
-</span>
-</div>
 
+      if (error) {
+        throw error;
+      }
 
-<span class="status">
-PENDING
-</span>
 
+      alert(
+        "Withdrawal rejected and the money was returned to the worker."
+      );
 
-<textarea
-class="note"
-id="withdrawNote${index}"
-placeholder="Admin note">
-</textarea>
 
+      await loadWithdrawals();
 
-<div class="actions">
+    }
 
-<button
-class="action approve"
-onclick="approveWithdrawal(${index})">
+    catch (error) {
 
-Approve / Mark Paid
+      console.error(error);
 
-</button>
+      alert(
+        "Could not reject withdrawal:\n\n" +
+        error.message
+      );
 
+    }
 
-<button
-class="action reject"
-onclick="rejectWithdrawal(${index})">
+  }
 
-Reject & Refund
 
-</button>
+  // ==========================================
+  // SUBMISSIONS
+  // ==========================================
 
-</div>
+  async function loadSubmissions() {
 
-`;
+    const container =
+      document.getElementById("submissions");
 
+    container.innerHTML =
+      '<div class="loading">Loading submissions...</div>';
 
-box.appendChild(card);
 
-});
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("Submission")
+        .select("*")
+        .eq("status", "PENDING")
+        .order("created_at", {
+          ascending: false
+        });
 
-}
-catch(error){
 
-box.innerHTML =
-'<div class="error">' +
-"<b>Withdrawal error:</b><br><br>" +
-escapeHtml(error.message) +
-"</div>";
+    if (error) {
 
-}
+      console.error(error);
 
-}
+      container.innerHTML =
+        '<div class="error" style="display:block">' +
+        escapeHtml(error.message) +
+        '</div>';
 
+      return;
+    }
 
-/* =====================================================
-APPROVE WITHDRAWAL
-===================================================== */
 
-async function approveWithdrawal(index){
+    document.getElementById("submissionCount").textContent =
+      data.length;
 
-const withdrawal =
-withdrawals[index];
 
+    if (!data.length) {
 
-if(!withdrawal){
-return;
-}
+      container.innerHTML =
+        '<div class="empty">No pending worker submissions.</div>';
 
+      return;
+    }
 
-if(
-!confirm(
-"Confirm that this withdrawal has been paid?"
-)
-){
-return;
-}
 
+    container.innerHTML = "";
 
-const noteElement =
-document.getElementById(
-"withdrawNote"+index
-);
 
+    for (const submission of data) {
 
-const note =
-noteElement &&
-noteElement.value.trim()
-?
-noteElement.value.trim()
-:
-"Withdrawal paid";
+      const card =
+        document.createElement("div");
 
+      card.className = "card";
 
-try{
 
-const {
-error
-} =
-await supabaseClient.rpc(
-"approve_withdrawal",
-{
-p_worker_id:
-withdrawal.worker_id,
+      card.innerHTML = `
 
-p_created_at:
-withdrawal.created_at,
+        <div class="row">
+          <span class="label">Worker ID:</span>
+          ${escapeHtml(submission.worker_id || "")}
+        </div>
 
-p_amount:
-Number(withdrawal.amount),
+        <div class="row">
+          <span class="label">Task ID:</span>
+          ${escapeHtml(submission.task_id || "")}
+        </div>
 
-p_account_number:
-withdrawal.account_number,
+        <div class="row">
+          <span class="label">Username:</span>
+          ${escapeHtml(submission.username || "")}
+        </div>
 
-p_provider_reference:
-withdrawal.provider_reference ||
-null,
+        <div class="row">
+          <span class="label">Reward:</span>
+          ₦${Number(submission.reward || 0).toLocaleString()}
+        </div>
 
-p_admin_note:
-note
-}
-);
+        <div class="row small">
+          Submitted:
+          ${
+            submission.submitted_at
+              ? new Date(
+                  submission.submitted_at
+                ).toLocaleString()
+              : ""
+          }
+        </div>
 
+        <div
+          class="proof-box"
+          id="proof_${submission.id}"
+        >
+          <strong>Worker Screenshot / Proof</strong>
 
-if(error){
+          <div class="loading">
+            Loading screenshot...
+          </div>
+        </div>
 
-alert(
-"Withdrawal approval failed:\n\n" +
-error.message
-);
+        <textarea
+          id="submissionNote_${submission.id}"
+          placeholder="Rejection note (optional)"
+        ></textarea>
 
-return;
-}
+        <div class="buttons">
 
+          <button
+            class="action approve"
+            onclick="approveSubmission('${submission.id}')"
+          >
+            Approve
+          </button>
 
-alert(
-"Withdrawal marked as paid."
-);
+          <button
+            class="action reject"
+            onclick="rejectSubmission('${submission.id}')"
+          >
+            Reject
+          </button>
 
-loadWithdrawals();
+        </div>
 
-}
-catch(error){
+      `;
 
-alert(
-"Error:\n\n" +
-error.message
-);
 
-}
+      container.appendChild(card);
 
-}
 
-
-/* =====================================================
-REJECT WITHDRAWAL
-===================================================== */
-
-async function rejectWithdrawal(index){
-
-const withdrawal =
-withdrawals[index];
-
-
-if(!withdrawal){
-return;
-}
-
-
-const noteElement =
-document.getElementById(
-"withdrawNote"+index
-);
-
-
-const note =
-noteElement
-?
-noteElement.value.trim()
-:
-"";
-
-
-if(!note){
-
-alert(
-"Enter a rejection reason first."
-);
-
-return;
-}
-
-
-if(
-!confirm(
-"Reject this withdrawal and refund the worker?"
-)
-){
-return;
-}
-
-
-try{
-
-const {
-error
-} =
-await supabaseClient.rpc(
-"reject_withdrawal",
-{
-p_worker_id:
-withdrawal.worker_id,
-
-p_created_at:
-withdrawal.created_at,
-
-p_amount:
-Number(withdrawal.amount),
-
-p_account_number:
-withdrawal.account_number,
-
-p_provider_reference:
-withdrawal.provider_reference ||
-null,
-
-p_admin_note:
-note
-}
-);
-
-
-if(error){
-
-alert(
-"Withdrawal rejection failed:\n\n" +
-error.message
-);
-
-return;
-}
-
-
-alert(
-"Withdrawal rejected and refunded."
-);
-
-loadWithdrawals();
-
-}
-catch(error){
-
-alert(
-"Error:\n\n" +
-error.message
-);
-
-}
-
-}
-
-
-/* =====================================================
-SUBMISSIONS
-===================================================== */
-
-async function loadSubmissions(){
-
-const box =
-document.getElementById(
-"submissions"
-);
-
-box.innerHTML =
-'<div class="loading">Loading submissions...</div>';
-
-
-try{
-
-const {
-data,
-error
-} =
-await supabaseClient
-.from("Submission")
-.select("*")
-.eq("status","PENDING")
-.order(
-"submitted_at",
-{
-ascending:false
-}
-);
-
-
-if(error){
-
-box.innerHTML =
-'<div class="error">' +
-"<b>Submission error:</b><br><br>" +
-escapeHtml(error.message) +
-"</div>";
-
-document.getElementById(
-"submissionCount"
-).textContent="!";
-
-return;
-}
-
-
-document.getElementById(
-"submissionCount"
-).textContent =
-data.length;
-
-
-if(!data.length){
-
-box.innerHTML =
-'<div class="empty">' +
-"No pending worker submissions." +
-"</div>";
-
-return;
-}
-
-
-box.innerHTML="";
-
-
-for(
-const submission
-of data
-){
-
-const card =
-document.createElement(
-"div"
-);
-
-card.className="card";
-
-
-let proofHtml="";
-
-
-if(submission.proof){
-
-try{
-
-const {
-data:signedData,
-error:signedError
-} =
-await supabaseClient
-.storage
-.from("task-proofs")
-.createSignedUrl(
-submission.proof,
-3600
-);
-
-
-if(
-!signedError &&
-signedData &&
-signedData.signedUrl
-){
-
-proofHtml=`
-
-<div
-class="label"
-style="margin-top:12px">
-Worker Proof
-</div>
-
-<img
-class="proof"
-src="${escapeHtml(
-signedData.signedUrl
-)}"
-alt="Worker proof">
-
-`;
-
-}
-else{
-
-proofHtml=`
-
-<div class="error">
-Proof image could not be opened.
-</div>
-
-`;
-
-}
-
-}
-catch(error){
-
-proofHtml=`
-
-<div class="error">
-Proof image could not be opened.
-</div>
-
-`;
-
-}
-
-}
-
-
-card.innerHTML=`
-
-<div class="row">
-
-<span class="label">
-Task ID
-</span>
-
-<span class="value">
-${escapeHtml(
-submission.task_id
-)}
-</span>
-
-</div>
-
-
-<div class="row">
-
-<span class="label">
-Worker ID
-</span>
-
-<span class="value">
-${escapeHtml(
-submission.worker_id
-)}
-</span>
-
-</div>
-
-
-<div class="row">
-
-<span class="label">
-Username
-</span>
-
-<span class="value">
-${escapeHtml(
-submission.username
-)}
-</span>
-
-</div>
-
-
-<div class="row">
-
-<span class="label">
-Reward
-</span>
-
-<span class="value">
-${money(
-submission.reward
-)}
-</span>
-
-</div>
-
-
-<div class="row">
-
-<span class="label">
-Submitted
-</span>
-
-<span class="value">
-${formatDate(
-submission.submitted_at ||
-submission.created_at
-)}
-</span>
-
-</div>
-
-
-${proofHtml}
-
-
-<div class="actions">
-
-<button
-class="action approve"
-onclick="approveSubmission('${escapeHtml(submission.id)}')">
-
-Approve
-
-</button>
-
-
-<button
-class="action reject"
-onclick="rejectSubmission('${escapeHtml(submission.id)}')">
-
-Reject
-
-</button>
-
-</div>
-
-`;
-
-
-box.appendChild(card);
-
-}
-
-}
-catch(error){
-
-box.innerHTML =
-'<div class="error">' +
-"<b>Submission error:</b><br><br>" +
-escapeHtml(error.message) +
-"</div>";
-
-}
-
-}
-
-
-/* =====================================================
-APPROVE SUBMISSION
-===================================================== */
-
-async function approveSubmission(id){
-
-if(
-!confirm(
-"Approve this worker submission?"
-)
-){
-return;
-}
-
-
-try{
-
-const {
-error
-} =
-await supabaseClient.rpc(
-"approve_submission",
-{
-p_submission_id:id
-}
-);
-
-
-if(error){
-
-alert(
-"Approval failed:\n\n" +
-error.message
-);
-
-return;
-}
-
-
-alert(
-"Submission approved."
-);
-
-loadSubmissions();
-
-}
-catch(error){
-
-alert(
-"Error:\n\n" +
-error.message
-);
-
-}
-
-}
-
-
-/* =====================================================
-REJECT SUBMISSION
-===================================================== */
-
-async function rejectSubmission(id){
-
-const note =
-prompt(
-"Enter rejection reason:"
-);
-
-
-if(
-note === null ||
-!note.trim()
-){
-return;
-}
-
-
-try{
-
-const {
-error
-} =
-await supabaseClient.rpc(
-"reject_submission",
-{
-p_submission_id:id,
-p_rejection_note:
-note.trim()
-}
-);
-
-
-if(error){
-
-alert(
-"Rejection failed:\n\n" +
-error.message
-);
-
-return;
-}
-
-
-alert(
-"Submission rejected."
-);
-
-loadSubmissions();
-
-}
-catch(error){
-
-alert(
-"Error:\n\n" +
-error.message
-);
-
-}
-
-}
-
-
-/* =====================================================
-LOGOUT
-===================================================== */
-
-async function logout(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href =
-"index.html";
-
-}
-
-
-/* =====================================================
-START
-===================================================== */
-
-checkAdmin();
-
-</script>
-
-</body>
-</html>
+      // Load screenshot after card is displayed.
+      loadProofImage(
+        
