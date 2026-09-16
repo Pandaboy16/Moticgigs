@@ -113,6 +113,7 @@
       display: flex;
       justify-content: space-between;
       margin: 9px 0;
+      gap: 15px;
     }
 
     .total {
@@ -181,19 +182,18 @@
   </div>
 </header>
 
-
 <div class="container">
 
   <div class="card">
 
     <h2>📢 Post a Task</h2>
+
     <p>Create a task for workers to complete.</p>
 
     <div class="balance">
       <div>Available Posting Balance</div>
       ₦<strong id="balance">0.00</strong>
     </div>
-
 
     <label for="platform">Platform</label>
 
@@ -213,13 +213,11 @@
       <option value="Telegram">Telegram</option>
     </select>
 
-
     <label for="taskType">Task</label>
 
     <select id="taskType" disabled>
       <option value="">Select task</option>
     </select>
-
 
     <div id="customCommentBox" class="hidden">
 
@@ -229,11 +227,9 @@
 
       <textarea
         id="customComment"
-        placeholder="Enter the comment workers should post">
-      </textarea>
+        placeholder="Enter the comment workers should post"></textarea>
 
     </div>
-
 
     <label for="taskLink">
       Task Link
@@ -244,7 +240,6 @@
       id="taskLink"
       placeholder="https://..."
     >
-
 
     <label for="quantity">
       Quantity
@@ -257,7 +252,6 @@
       step="1"
       placeholder="Example: 100"
     >
-
 
     <div class="calculator">
 
@@ -288,7 +282,6 @@
 
     </div>
 
-
     <button
       class="post-btn"
       id="postBtn"
@@ -298,11 +291,9 @@
 
   </div>
 
-
   <div id="message"></div>
 
 </div>
-
 
 <script>
 
@@ -319,9 +310,9 @@ const supabaseClient =
   );
 
 
-/*
-  MoticGigs pricing
-*/
+/* =========================
+   PRICING
+========================= */
 
 const prices = {
 
@@ -419,9 +410,17 @@ const prices = {
 };
 
 
+/* =========================
+   VARIABLES
+========================= */
+
 let currentUser = null;
 let currentBalance = 0;
 
+
+/* =========================
+   ELEMENTS
+========================= */
 
 const platform =
   document.getElementById("platform");
@@ -444,35 +443,42 @@ const customCommentBox =
 const postBtn =
   document.getElementById("postBtn");
 
+const message =
+  document.getElementById("message");
 
-/*
-  LOAD USER
-*/
+
+/* =========================
+   MESSAGE
+========================= */
+
+function showMessage(text, type = "") {
+
+  message.className = type;
+  message.textContent = text;
+
+}
+
+
+/* =========================
+   LOAD USER
+========================= */
 
 async function loadUser() {
 
   const {
     data: { user },
     error
-  } =
-    await supabaseClient.auth.getUser();
-
+  } = await supabaseClient.auth.getUser();
 
   if (error || !user) {
 
-    window.location.href =
-      "login.html";
+    window.location.href = "login.html";
 
     return;
   }
 
-
   currentUser = user;
 
-
-  /*
-    Check advertiser role
-  */
 
   const {
     data: profile,
@@ -491,9 +497,7 @@ async function loadUser() {
     profile.role !== "advertiser"
   ) {
 
-    alert(
-      "Only advertisers can post tasks."
-    );
+    alert("Only advertisers can post tasks.");
 
     window.location.href =
       "dashboard.html";
@@ -504,9 +508,7 @@ async function loadUser() {
 
   if (profile.status === "banned") {
 
-    alert(
-      "Your account has been banned."
-    );
+    alert("Your account has been banned.");
 
     await supabaseClient.auth.signOut();
 
@@ -517,26 +519,36 @@ async function loadUser() {
   }
 
 
-  /*
-    Load advertiser wallet
-  */
+  await loadWallet();
+
+}
+
+
+/* =========================
+   LOAD WALLET
+========================= */
+
+async function loadWallet() {
 
   const {
     data: wallet,
-    error: walletError
+    error
   } =
     await supabaseClient
       .from("Wallet")
       .select("available_balance")
-      .eq("user_id", user.id)
+      .eq("user_id", currentUser.id)
       .eq("wallet_type", "ADVERTISER")
       .maybeSingle();
 
 
-  if (walletError) {
+  if (error) {
 
-    document.getElementById("message").textContent =
-      walletError.message;
+    showMessage(
+      "Unable to load wallet: " +
+      error.message,
+      "error"
+    );
 
     return;
   }
@@ -544,8 +556,10 @@ async function loadUser() {
 
   if (!wallet) {
 
-    document.getElementById("message").textContent =
-      "Advertiser wallet not found.";
+    showMessage(
+      "Advertiser wallet not found.",
+      "error"
+    );
 
     return;
   }
@@ -554,15 +568,35 @@ async function loadUser() {
   currentBalance =
     Number(wallet.available_balance || 0);
 
-
   showBalance();
+
+  calculate();
 
 }
 
 
-/*
-  PLATFORM CHANGE
-*/
+/* =========================
+   SHOW BALANCE
+========================= */
+
+function showBalance() {
+
+  document.getElementById("balance")
+    .textContent =
+    currentBalance.toLocaleString(
+      "en-NG",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
+
+}
+
+
+/* =========================
+   PLATFORM CHANGE
+========================= */
 
 platform.addEventListener(
   "change",
@@ -576,6 +610,8 @@ platform.addEventListener(
     customCommentBox.classList.add(
       "hidden"
     );
+
+    customComment.value = "";
 
     if (!platform.value) {
 
@@ -612,9 +648,9 @@ platform.addEventListener(
 );
 
 
-/*
-  TASK CHANGE
-*/
+/* =========================
+   TASK TYPE CHANGE
+========================= */
 
 taskType.addEventListener(
   "change",
@@ -645,19 +681,29 @@ taskType.addEventListener(
 );
 
 
-/*
-  QUANTITY CHANGE
-*/
+/* =========================
+   INPUT CHANGES
+========================= */
 
 quantity.addEventListener(
   "input",
   calculate
 );
 
+taskLink.addEventListener(
+  "input",
+  calculate
+);
 
-/*
-  CALCULATE PRICE
-*/
+customComment.addEventListener(
+  "input",
+  calculate
+);
+
+
+/* =========================
+   CALCULATE
+========================= */
 
 function calculate() {
 
@@ -728,26 +774,26 @@ function calculate() {
     );
 
 
+  const customCommentValid =
+    taskType.value !== "Custom comment" ||
+    customComment.value.trim() !== "";
+
+
   postBtn.disabled =
     !platform.value ||
     !taskType.value ||
-    !taskLink.value ||
+    !taskLink.value.trim() ||
     qty < 1 ||
     total <= 0 ||
-    total > currentBalance;
+    total > currentBalance ||
+    !customCommentValid;
 
 }
 
 
-taskLink.addEventListener(
-  "input",
-  calculate
-);
-
-
-/*
-  POST TASK
-*/
+/* =========================
+   POST TASK
+========================= */
 
 postBtn.addEventListener(
   "click",
@@ -755,18 +801,16 @@ postBtn.addEventListener(
 
     postBtn.disabled = true;
 
-    document.getElementById("message")
-      .className = "";
-
-    document.getElementById("message")
-      .textContent =
-      "Posting task...";
+    showMessage(
+      "Posting task..."
+    );
 
 
     const price =
       Number(
         prices[platform.value][taskType.value]
       );
+
 
     const qty =
       parseInt(quantity.value);
@@ -778,12 +822,10 @@ postBtn.addEventListener(
 
     if (totalBudget > currentBalance) {
 
-      document.getElementById("message")
-        .className = "error";
-
-      document.getElementById("message")
-        .textContent =
-        "Insufficient available balance.";
+      showMessage(
+        "Insufficient available balance.",
+        "error"
+      );
 
       postBtn.disabled = false;
 
@@ -791,22 +833,15 @@ postBtn.addEventListener(
     }
 
 
-    /*
-      Custom comment validation
-    */
-
     if (
-      taskType.value ===
-      "Custom comment" &&
+      taskType.value === "Custom comment" &&
       !customComment.value.trim()
     ) {
 
-      document.getElementById("message")
-        .className = "error";
-
-      document.getElementById("message")
-        .textContent =
-        "Please enter the custom comment.";
+      showMessage(
+        "Please enter the custom comment.",
+        "error"
+      );
 
       postBtn.disabled = false;
 
@@ -815,7 +850,11 @@ postBtn.addEventListener(
 
 
     /*
-      Insert task
+      Create task.
+
+      The database INSERT policy ensures
+      advertiser_id must belong to the
+      logged-in user.
     */
 
     const {
@@ -839,8 +878,7 @@ postBtn.addEventListener(
             taskLink.value.trim(),
 
           custom_comment:
-            taskType.value ===
-            "Custom comment"
+            taskType.value === "Custom comment"
               ? customComment.value.trim()
               : null,
 
@@ -866,18 +904,19 @@ postBtn.addEventListener(
             "ACTIVE"
 
         })
-        .select()
+        .select("id")
         .single();
 
 
     if (error) {
 
-      document.getElementById("message")
-        .className = "error";
+      console.error(error);
 
-      document.getElementById("message")
-        .textContent =
-        error.message;
+      showMessage(
+        "Task posting failed: " +
+        error.message,
+        "error"
+      );
 
       postBtn.disabled = false;
 
@@ -886,23 +925,23 @@ postBtn.addEventListener(
 
 
     /*
-      NOTE:
-      The secure server-side wallet charge
-      will be connected next.
+      IMPORTANT:
+      Do NOT manually subtract from
+      currentBalance here.
+
+      The real wallet deduction must
+      happen server-side.
     */
 
-    currentBalance -= totalBudget;
+    showMessage(
+      "Task created successfully. Wallet charge will be connected next.",
+      "success"
+    );
 
-    showBalance();
 
-
-    document.getElementById("message")
-      .className = "success";
-
-    document.getElementById("message")
-      .textContent =
-      "Task posted successfully!";
-
+    /*
+      Reset form
+    */
 
     platform.value = "";
 
@@ -921,32 +960,23 @@ postBtn.addEventListener(
       "hidden"
     );
 
+
     calculate();
 
-    postBtn.disabled = false;
+
+    /*
+      Reload the real wallet balance
+    */
+
+    await loadWallet();
 
   }
 );
 
 
-/*
-  SHOW BALANCE
-*/
-
-function showBalance() {
-
-  document.getElementById("balance")
-    .textContent =
-    currentBalance.toLocaleString(
-      "en-NG",
-      {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }
-    );
-
-}
-
+/* =========================
+   START
+========================= */
 
 loadUser();
 
