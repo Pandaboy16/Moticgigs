@@ -3,9 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Available Tasks - MoticGigs</title>
 
@@ -103,13 +101,6 @@
       margin-top: 14px;
       cursor: pointer;
     }
-
-    .start-btn:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-
-    /* WORKSPACE */
 
     .workspace {
       display: none;
@@ -248,7 +239,6 @@
 
 </head>
 
-
 <body>
 
 <header>
@@ -280,9 +270,7 @@
     Complete advertiser tasks and earn rewards.
   </p>
 
-
   <div id="message" class="message"></div>
-
 
   <div id="taskList">
 
@@ -311,12 +299,10 @@ const supabaseClient =
 
 
 let currentUser = null;
-let selectedTask = null;
-let selectedFile = null;
 
 
 /* ==========================================
-   START
+   INITIALIZE
 ========================================== */
 
 async function initialize() {
@@ -337,8 +323,6 @@ async function initialize() {
 
   currentUser = user;
 
-
-  // Make sure account is actually a worker
 
   const {
     data: profile,
@@ -382,7 +366,7 @@ async function initialize() {
 
 
 /* ==========================================
-   LOAD TASKS
+   LOAD AVAILABLE TASKS
 ========================================== */
 
 async function loadTasks() {
@@ -396,8 +380,15 @@ async function loadTasks() {
 
 
   /*
-    First find tasks this worker has already
-    submitted and which are still pending/approved.
+    IMPORTANT:
+
+    We deliberately load ALL submissions made
+    by this worker.
+
+    We do NOT filter by PENDING or APPROVED.
+
+    This means even a REJECTED submission
+    permanently hides that task from this worker.
   */
 
   const {
@@ -405,14 +396,16 @@ async function loadTasks() {
     error: submissionError
   } = await supabaseClient
     .from("Submission")
-    .select("task_id,status")
-    .eq("worker_id", currentUser.id)
-    .in("status", ["PENDING", "APPROVED"]);
+    .select("task_id")
+    .eq("worker_id", currentUser.id);
 
 
   if (submissionError) {
 
-    console.error(submissionError);
+    console.error(
+      "Submission loading error:",
+      submissionError
+    );
 
     taskList.innerHTML =
       '<div class="empty">Unable to load your submissions.</div>';
@@ -420,6 +413,11 @@ async function loadTasks() {
     return;
   }
 
+
+  /*
+    Create a list of every task this worker
+    has ever submitted.
+  */
 
   const submittedTaskIds =
     new Set(
@@ -429,7 +427,7 @@ async function loadTasks() {
 
 
   /*
-    Load active advertiser tasks.
+    Load active tasks.
   */
 
   const {
@@ -458,7 +456,10 @@ async function loadTasks() {
 
   if (taskError) {
 
-    console.error(taskError);
+    console.error(
+      "Task loading error:",
+      taskError
+    );
 
     taskList.innerHTML =
       '<div class="empty">Unable to load available tasks.</div>';
@@ -468,10 +469,11 @@ async function loadTasks() {
 
 
   /*
-    Only show tasks that:
-    - are active
-    - still have slots
-    - this worker has not already submitted
+    Show ONLY tasks where:
+
+    1. Task is ACTIVE
+    2. Task still has slots
+    3. Worker has NEVER submitted it before
   */
 
   const availableTasks =
@@ -482,9 +484,13 @@ async function loadTasks() {
         Number(task.completed_quantity || 0);
 
 
+      const workerAlreadySubmitted =
+        submittedTaskIds.has(task.id);
+
+
       return (
         remaining > 0 &&
-        !submittedTaskIds.has(task.id)
+        !workerAlreadySubmitted
       );
 
     });
@@ -512,7 +518,8 @@ async function loadTasks() {
     const card =
       document.createElement("div");
 
-    card.className = "task-card";
+    card.className =
+      "task-card";
 
 
     card.innerHTML = `
@@ -529,26 +536,38 @@ async function loadTasks() {
 
       <div class="task-info">
         Price per action:
-        <b>₦${Number(task.price_per_action || 0).toFixed(2)}</b>
+        <b>
+          ₦${Number(
+            task.price_per_action || 0
+          ).toFixed(2)}
+        </b>
       </div>
 
       <div class="reward">
         Worker reward:
-        ₦${Number(task.worker_reward || 0).toFixed(2)}
+        ₦${Number(
+          task.worker_reward || 0
+        ).toFixed(2)}
       </div>
 
       ${
         task.custom_comment
         ? `
           <div class="task-info">
+
             Custom comment:
+
             <div class="comment-box">
-              ${escapeHtml(task.custom_comment)}
+              ${escapeHtml(
+                task.custom_comment
+              )}
             </div>
+
           </div>
         `
         : ""
       }
+
 
       <button
         class="start-btn"
@@ -558,13 +577,18 @@ async function loadTasks() {
 
       </button>
 
+
       <div
         id="workspace-${task.id}"
         class="workspace">
 
+
         <div class="workspace-title">
           Complete This Task
         </div>
+
+
+        <!-- STEP 1 -->
 
         <div class="step">
 
@@ -589,6 +613,8 @@ async function loadTasks() {
         </div>
 
 
+        <!-- STEP 2 -->
+
         <div class="step">
 
           <div class="step-title">
@@ -607,6 +633,8 @@ async function loadTasks() {
 
         </div>
 
+
+        <!-- STEP 3 -->
 
         <div class="step">
 
@@ -631,6 +659,8 @@ async function loadTasks() {
         </div>
 
 
+        <!-- SUBMIT -->
+
         <button
           class="submit-btn"
           id="submit-${task.id}"
@@ -648,6 +678,7 @@ async function loadTasks() {
           Cancel
 
         </button>
+
 
       </div>
 
@@ -667,9 +698,6 @@ async function loadTasks() {
 
 function openWorkspace(taskId) {
 
-  selectedTask = taskId;
-
-
   const workspace =
     document.getElementById(
       "workspace-" + taskId
@@ -678,7 +706,9 @@ function openWorkspace(taskId) {
 
   if (workspace) {
 
-    workspace.style.display = "block";
+    workspace.style.display =
+      "block";
+
 
     workspace.scrollIntoView({
       behavior: "smooth",
@@ -704,7 +734,8 @@ function closeWorkspace(taskId) {
 
   if (workspace) {
 
-    workspace.style.display = "none";
+    workspace.style.display =
+      "none";
 
   }
 
@@ -722,24 +753,32 @@ function previewProof(taskId) {
       "proof-" + taskId
     );
 
+
   const preview =
     document.getElementById(
       "preview-" + taskId
     );
 
 
-  if (!input.files || !input.files[0]) {
+  if (
+    !input.files ||
+    !input.files[0]
+  ) {
 
-    preview.style.display = "none";
+    preview.style.display =
+      "none";
 
     return;
   }
 
 
-  const file = input.files[0];
+  const file =
+    input.files[0];
 
 
-  if (!file.type.startsWith("image/")) {
+  if (
+    !file.type.startsWith("image/")
+  ) {
 
     input.value = "";
 
@@ -752,7 +791,10 @@ function previewProof(taskId) {
   }
 
 
-  if (file.size > 8 * 1024 * 1024) {
+  if (
+    file.size >
+    8 * 1024 * 1024
+  ) {
 
     input.value = "";
 
@@ -765,22 +807,20 @@ function previewProof(taskId) {
   }
 
 
-  selectedFile = file;
-
-
   const reader =
     new FileReader();
 
 
-  reader.onload = function(event) {
+  reader.onload =
+    function(event) {
 
-    preview.src =
-      event.target.result;
+      preview.src =
+        event.target.result;
 
-    preview.style.display =
-      "block";
+      preview.style.display =
+        "block";
 
-  };
+    };
 
 
   reader.readAsDataURL(file);
@@ -799,10 +839,12 @@ async function submitTask(taskId) {
       "username-" + taskId
     );
 
+
   const proofInput =
     document.getElementById(
       "proof-" + taskId
     );
+
 
   const submitButton =
     document.getElementById(
@@ -827,7 +869,10 @@ async function submitTask(taskId) {
   }
 
 
-  if (!proofInput.files || !proofInput.files[0]) {
+  if (
+    !proofInput.files ||
+    !proofInput.files[0]
+  ) {
 
     showMessage(
       "Please upload your screenshot proof.",
@@ -842,7 +887,9 @@ async function submitTask(taskId) {
     proofInput.files[0];
 
 
-  if (!file.type.startsWith("image/")) {
+  if (
+    !file.type.startsWith("image/")
+  ) {
 
     showMessage(
       "Proof must be an image.",
@@ -853,7 +900,10 @@ async function submitTask(taskId) {
   }
 
 
-  if (file.size > 8 * 1024 * 1024) {
+  if (
+    file.size >
+    8 * 1024 * 1024
+  ) {
 
     showMessage(
       "Image must be 8MB or smaller.",
@@ -864,23 +914,28 @@ async function submitTask(taskId) {
   }
 
 
-  submitButton.disabled = true;
+  submitButton.disabled =
+    true;
+
 
   submitButton.textContent =
     "Uploading proof...";
 
 
+  let uploadedPath = null;
+
+
   try {
 
     /*
-      Create a private storage path.
-
-      The file stays inside the private
+      Upload screenshot to private
       task-proofs bucket.
     */
 
     const extension =
-      getFileExtension(file.name);
+      getFileExtension(
+        file.name
+      );
 
 
     const filePath =
@@ -896,23 +951,26 @@ async function submitTask(taskId) {
     const {
       data: uploadData,
       error: uploadError
-    } = await supabaseClient
-      .storage
-      .from("task-proofs")
-      .upload(
-        filePath,
-        file,
-        {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type
-        }
-      );
+    } =
+      await supabaseClient
+        .storage
+        .from("task-proofs")
+        .upload(
+          filePath,
+          file,
+          {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type
+          }
+        );
 
 
     if (uploadError) {
 
-      console.error(uploadError);
+      console.error(
+        uploadError
+      );
 
       throw new Error(
         "Unable to upload screenshot."
@@ -921,48 +979,58 @@ async function submitTask(taskId) {
     }
 
 
-    /*
-      Store the private storage path
-      in the Submission.proof column.
+    uploadedPath =
+      uploadData.path;
 
-      The database trigger created earlier
-      will automatically:
-      - set reward
-      - set status to PENDING
-      - add reward to pending balance
+
+    /*
+      Insert submission.
+
+      The database trigger automatically:
+      - sets reward
+      - sets PENDING status
+      - adds reward to pending balance
     */
 
     const {
       error: insertError
-    } = await supabaseClient
-      .from("Submission")
-      .insert({
+    } =
+      await supabaseClient
+        .from("Submission")
+        .insert({
 
-        task_id: taskId,
+          task_id: taskId,
 
-        worker_id: currentUser.id,
+          worker_id:
+            currentUser.id,
 
-        username: username,
+          username:
+            username,
 
-        proof: uploadData.path
+          proof:
+            uploadedPath
 
-      });
+        });
 
 
     if (insertError) {
 
-      console.error(insertError);
+      console.error(
+        insertError
+      );
+
 
       /*
-        If submission fails, remove the
-        uploaded proof so unused files
-        are not left in storage.
+        Remove uploaded screenshot
+        if database submission failed.
       */
 
       await supabaseClient
         .storage
         .from("task-proofs")
-        .remove([uploadData.path]);
+        .remove([
+          uploadedPath
+        ]);
 
 
       throw new Error(
@@ -974,7 +1042,12 @@ async function submitTask(taskId) {
 
 
     /*
-      Submission successful.
+      SUCCESS
+
+      Because loadTasks() checks ALL
+      submissions from this worker,
+      this task will now permanently
+      disappear from their list.
     */
 
     showMessage(
@@ -983,20 +1056,13 @@ async function submitTask(taskId) {
     );
 
 
-    /*
-      Reload task list.
-
-      Because this worker now has a
-      PENDING submission, the task will
-      disappear from their list.
-    */
-
     await loadTasks();
 
 
   } catch (error) {
 
     console.error(error);
+
 
     showMessage(
       error.message ||
@@ -1005,7 +1071,9 @@ async function submitTask(taskId) {
     );
 
 
-    submitButton.disabled = false;
+    submitButton.disabled =
+      false;
+
 
     submitButton.textContent =
       "Submit Task";
@@ -1025,27 +1093,36 @@ function getFileExtension(filename) {
     String(filename)
       .split(".");
 
+
   if (parts.length < 2) {
     return "jpg";
   }
 
+
   const extension =
-    parts.pop()
+    parts
+      .pop()
       .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
+      .replace(
+        /[^a-z0-9]/g,
+        ""
+      );
 
 
-  const allowed =
-    [
-      "jpg",
-      "jpeg",
-      "png",
-      "webp"
-    ];
+  const allowed = [
+    "jpg",
+    "jpeg",
+    "png",
+    "webp"
+  ];
 
 
-  if (!allowed.includes(extension)) {
+  if (
+    !allowed.includes(extension)
+  ) {
+
     return "jpg";
+
   }
 
 
@@ -1058,10 +1135,15 @@ function getFileExtension(filename) {
    MESSAGE
 ========================================== */
 
-function showMessage(text, type) {
+function showMessage(
+  text,
+  type
+) {
 
   const message =
-    document.getElementById("message");
+    document.getElementById(
+      "message"
+    );
 
 
   message.textContent =
@@ -1087,11 +1169,26 @@ function showMessage(text, type) {
 function escapeHtml(value) {
 
   return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
 
@@ -1099,16 +1196,28 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
 
   return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "%3C")
-    .replace(/>/g, "%3E");
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /</g,
+      "%3C"
+    )
+    .replace(
+      />/g,
+      "%3E"
+    );
 
 }
 
 
 /* ==========================================
-   INITIALIZE
+   START
 ========================================== */
 
 initialize();
