@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Withdraw - MoticGigs</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f7f6;
+      color: #222;
+    }
+
+    header {
+      background: #16a34a;
+      color: white;
+      padding: 18px;
+    }
+
+    .header-inner {
+      max-width: 600px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .back {
+      background: white;
+      color: #16a34a;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .balance {
+      background: #dcfce7;
+      color: #166534;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      font-size: 15px;
+      background: white;
+    }
+
+    .withdraw-btn {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px;
+      border: none;
+      border-radius: 9px;
+      background: #16a34a;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .withdraw-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #16a34a;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">MoticGigs</div>
+
+    <button
+      class="back"
+      onclick="window.location.href='dashboard.html'">
+      Back
+    </button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="card">
+
+    <h2>Withdraw Funds</h2>
+
+    <div class="balance">
+      Available Balance:
+      ₦<span id="availableBalance">0.00</span>
+    </div>
+
+    <label for="amount">
+      Withdrawal Amount
+    </label>
+
+    <input
+      type="number"
+      id="amount"
+      min="1"
+      step="0.01"
+      placeholder="Enter amount">
+
+    <label for="bank">
+      Select Bank / MFB
+    </label>
+
+    <select id="bank">
+      <option value="">Loading banks...</option>
+    </select>
+
+    <label for="accountNumber">
+      Account Number
+    </label>
+
+    <input
+      type="text"
+      id="accountNumber"
+      inputmode="numeric"
+      maxlength="10"
+      placeholder="Enter account number">
+
+    <label for="accountName">
+      Account Name
+    </label>
+
+    <input
+      type="text"
+      id="accountName"
+      placeholder="Enter account name">
+
+    <button
+      class="withdraw-btn"
+      id="withdrawBtn">
+      Submit Withdrawal
+    </button>
+
+    <div id="message"></div>
+
+  </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+let currentUser = null;
+let availableBalance = 0;
+
+
+// ==========================================
+// LOAD USER
+// ==========================================
+
+async function loadUser() {
+
+  const {
+    data: { user },
+    error
+  } = await supabaseClient.auth.getUser();
+
+  if (error || !user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  currentUser = user;
+
+  await loadWallet();
+  await loadBanks();
+}
+
+
+// ==========================================
+// LOAD WALLET
+// ==========================================
+
+async function loadWallet() {
+
+  const {
+    data: wallet,
+    error
+  } = await supabaseClient
+    .from("Wallet")
+    .select("available_balance")
+    .eq("user_id", currentUser.id)
+    .eq("wallet_type", "WORKER")
+    .maybeSingle();
+
+  if (error || !wallet) {
+
+    showMessage(
+      "Unable to load your wallet.",
+      "error"
+    );
+
+    return;
+  }
+
+  availableBalance =
+    Number(wallet.available_balance || 0);
+
+  document.getElementById(
+    "availableBalance"
+  ).textContent =
+    availableBalance.toLocaleString(
+      "en-NG",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
+}
+
+
+// ==========================================
+// LOAD BANKS
+// ==========================================
+
+async function loadBanks() {
+
+  const bankSelect =
+    document.getElementById("bank");
+
+  const {
+    data: banks,
+    error
+  } = await supabaseClient
+    .from("Banks")
+    .select("id, name")
+    .eq("active", true)
+    .order("name");
+
+  if (error) {
+
+    console.error(error);
+
+    bankSelect.innerHTML =
+      '<option value="">Unable to load banks</option>';
+
+    return;
+  }
+
+  bankSelect.innerHTML =
+    '<option value="">Select your bank</option>';
+
+  for (const bank of banks || []) {
+
+    const option =
+      document.createElement("option");
+
+    option.value = bank.id;
+    option.textContent = bank.name;
+
+    bankSelect.appendChild(option);
+  }
+}
+
+
+// ==========================================
+// WITHDRAW
+// ==========================================
+
+document
+  .getElementById("withdrawBtn")
+  .addEventListener("click", async function() {
+
+    const amount =
+      Number(
+        document.getElementById("amount").value
+      );
+
+    const bankId =
+      document.getElementById("bank").value;
+
+    const bankSelect =
+      document.getElementById("bank");
+
+    const bankName =
+      bankSelect.options[
+        bankSelect.selectedIndex
+      ]?.textContent || "";
+
+    const accountNumber =
+      document
+        .getElementById("accountNumber")
+        .value
+        .trim();
+
+    const accountName =
+      document
+        .getElementById("accountName")
+        .value
+        .trim();
+
+
+    // VALIDATION
+
+    if (!amount || amount <= 0) {
+
+      showMessage(
+        "Enter a valid withdrawal amount.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (amount > availableBalance) {
+
+      showMessage(
+        "Insufficient available balance.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (!bankId) {
+
+      showMessage(
+        "Please select your bank.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (accountNumber.length !== 10) {
+
+      showMessage(
+        "Account number must be 10 digits.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (!/^[0-9]+$/.test(accountNumber)) {
+
+      showMessage(
+        "Account number must contain only numbers.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (accountName.length < 2) {
+
+      showMessage(
+        "Enter your account name.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const button =
+      document.getElementById("withdrawBtn");
+
+    button.disabled = true;
+    button.textContent = "Submitting...";
+
+
+    // CREATE WITHDRAWAL
+
+    const {
+      error
+    } = await supabaseClient
+      .from("Withdrawal")
+      .insert({
+        worker_id: currentUser.id,
+        bank_id: bankId,
+        bank_name: bankName,
+        account_number: accountNumber,
+        account_name: accountName,
+        amount: amount,
+        status: "PENDING"
+      });
+
+
+    if (error) {
+
+      console.error(error);
+
+      showMessage(
+        error.message ||
+        "Withdrawal request failed.",
+        "error"
+      );
+
+      button.disabled = false;
+      button.textContent =
+        "Submit Withdrawal";
+
+      return;
+    }
+
+
+    // SUCCESS
+
+    showMessage(
+      "Withdrawal request submitted successfully.",
+      "success"
+    );
+
+    document.getElementById("amount").value = "";
+    document.getElementById("bank").value = "";
+    document.getElementById("accountNumber").value = "";
+    document.getElementById("accountName").value = "";
+
+    button.disabled = false;
+    button.textContent =
+      "Submit Withdrawal";
+
+
+    // REFRESH BALANCE
+
+    await loadWallet();
+
+  });
+
+
+// ==========================================
+// MESSAGE
+// ==========================================
+
+function showMessage(text, type) {
+
+  const message =
+    document.getElementById("message");
+
+  message.textContent = text;
+
+  message.className = type;
+}
+
+
+// ==========================================
+// START
+// ==========================================
+
+loadUser();
+
+</script>
+
+</body>
+  </html>
