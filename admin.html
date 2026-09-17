@@ -35,7 +35,7 @@
     }
 
     header button {
-      background: #ef4444;
+      background: #dc2626;
       color: white;
       border: none;
       padding: 9px 14px;
@@ -166,6 +166,7 @@
       border-radius: 8px;
       border: 1px solid #ddd;
       background: #f9fafb;
+      cursor: pointer;
     }
 
     .proof-link {
@@ -182,28 +183,29 @@
 
     textarea {
       width: 100%;
-      min-height: 80px;
+      min-height: 75px;
       padding: 10px;
       border: 1px solid #d1d5db;
       border-radius: 7px;
       resize: vertical;
       margin-top: 10px;
+      font-family: Arial, sans-serif;
     }
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.65);
+      background: rgba(0,0,0,.75);
       z-index: 9999;
-      padding: 20px;
+      padding: 15px;
       overflow: auto;
     }
 
     .modal-content {
       background: white;
-      max-width: 700px;
-      margin: 30px auto;
+      max-width: 750px;
+      margin: 20px auto;
       padding: 20px;
       border-radius: 12px;
     }
@@ -246,7 +248,7 @@
 
 
   <!-- ========================= -->
-  <!-- DEPOSITS -->
+  <!-- PENDING DEPOSITS -->
   <!-- ========================= -->
 
   <div class="section">
@@ -264,7 +266,7 @@
 
 
   <!-- ========================= -->
-  <!-- WITHDRAWALS -->
+  <!-- PENDING WITHDRAWALS -->
   <!-- ========================= -->
 
   <div class="section">
@@ -282,7 +284,7 @@
 
 
   <!-- ========================= -->
-  <!-- SUBMISSIONS -->
+  <!-- PENDING SUBMISSIONS -->
   <!-- ========================= -->
 
   <div class="section">
@@ -302,18 +304,24 @@
 
 
 <!-- ========================= -->
-<!-- IMAGE MODAL -->
+<!-- SCREENSHOT MODAL -->
 <!-- ========================= -->
 
 <div id="imageModal" class="modal">
 
   <div class="modal-content">
 
-    <button class="close" onclick="closeImage()">Close</button>
+    <button class="close" onclick="closeImage()">
+      Close
+    </button>
 
     <h3>Worker Screenshot</h3>
 
-    <img id="modalImage" src="" alt="Worker proof">
+    <img
+      id="modalImage"
+      src=""
+      alt="Worker screenshot"
+    >
 
   </div>
 
@@ -323,7 +331,7 @@
 <script>
 
   // ==========================================
-  // SUPABASE
+  // SUPABASE CONNECTION
   // ==========================================
 
   const SUPABASE_URL =
@@ -340,12 +348,13 @@
 
 
   // ==========================================
-  // GLOBAL ERROR
+  // SHOW ERROR
   // ==========================================
 
   function showError(message) {
 
-    const box = document.getElementById("globalError");
+    const box =
+      document.getElementById("globalError");
 
     box.style.display = "block";
 
@@ -355,7 +364,8 @@
 
   function clearError() {
 
-    const box = document.getElementById("globalError");
+    const box =
+      document.getElementById("globalError");
 
     box.style.display = "none";
 
@@ -373,10 +383,15 @@
 
       clearError();
 
+      document.getElementById("adminStatus").textContent =
+        "Checking login...";
+
+
       const {
         data: userData,
         error: userError
-      } = await supabaseClient.auth.getUser();
+      } =
+        await supabaseClient.auth.getUser();
 
 
       if (userError) {
@@ -384,18 +399,25 @@
       }
 
 
-      if (!userData.user) {
+      if (!userData || !userData.user) {
 
         document.getElementById("adminStatus").textContent =
           "Not logged in";
 
-        window.location.href = "index.html";
+        showError(
+          "No active Supabase login session was found."
+        );
 
         return;
       }
 
 
-      const user = userData.user;
+      const user =
+        userData.user;
+
+
+      document.getElementById("adminStatus").textContent =
+        "Checking administrator account...";
 
 
       const {
@@ -414,17 +436,37 @@
       }
 
 
-      if (
-        !profile ||
-        profile.role !== "admin" ||
-        profile.status === "banned"
-      ) {
+      if (!profile) {
+
+        throw new Error(
+          "Admin profile was not found."
+        );
+
+      }
+
+
+      if (profile.role !== "admin") {
 
         document.getElementById("adminStatus").textContent =
           "Access denied";
 
         showError(
-          "Your account is not an active administrator."
+          "Your Moticgigs role is '" +
+          profile.role +
+          "', not 'admin'."
+        );
+
+        return;
+      }
+
+
+      if (profile.status === "banned") {
+
+        document.getElementById("adminStatus").textContent =
+          "Banned";
+
+        showError(
+          "This administrator account is banned."
         );
 
         return;
@@ -435,23 +477,27 @@
         "Active administrator";
 
 
-      // Load everything separately.
-      await loadDeposits();
-      await loadWithdrawals();
-      await loadSubmissions();
+      // Load independently.
+      loadDeposits();
+      loadWithdrawals();
+      loadSubmissions();
 
     }
 
     catch (error) {
 
-      console.error(error);
+      console.error(
+        "ADMIN CHECK ERROR:",
+        error
+      );
 
       document.getElementById("adminStatus").textContent =
         "Error";
 
       showError(
         "Admin check failed:\n\n" +
-        (error.message || JSON.stringify(error))
+        (error.message ||
+         JSON.stringify(error))
       );
 
     }
@@ -460,7 +506,7 @@
 
 
   // ==========================================
-  // DEPOSITS
+  // LOAD DEPOSITS
   // ==========================================
 
   async function loadDeposits() {
@@ -472,114 +518,142 @@
       '<div class="loading">Loading deposits...</div>';
 
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("Deposit")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
-          ascending: false
-        });
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("Deposit")
+          .select("*")
+          .eq("status", "PENDING")
+          .order("created_at", {
+            ascending: false
+          });
 
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
 
-      console.error(error);
+
+      document.getElementById(
+        "depositCount"
+      ).textContent = data.length;
+
+
+      if (!data.length) {
+
+        container.innerHTML =
+          '<div class="empty">' +
+          'No pending deposits.' +
+          '</div>';
+
+        return;
+      }
+
+
+      container.innerHTML = "";
+
+
+      data.forEach(deposit => {
+
+        const card =
+          document.createElement("div");
+
+        card.className = "card";
+
+
+        card.innerHTML = `
+
+          <div class="row">
+            <span class="label">Amount:</span>
+            ₦${Number(
+              deposit.amount || 0
+            ).toLocaleString()}
+          </div>
+
+          <div class="row">
+            <span class="label">Sender:</span>
+            ${escapeHtml(
+              deposit.sender_name || ""
+            )}
+          </div>
+
+          <div class="row">
+            <span class="label">Reference:</span>
+            ${escapeHtml(
+              deposit.payment_reference || ""
+            )}
+          </div>
+
+          <div class="row">
+            <span class="label">Payment Method:</span>
+            ${escapeHtml(
+              deposit.payment_method || ""
+            )}
+          </div>
+
+          <div class="row small">
+            Created:
+            ${
+              deposit.created_at
+              ? new Date(
+                  deposit.created_at
+                ).toLocaleString()
+              : ""
+            }
+          </div>
+
+          <textarea
+            id="depositNote_${deposit.id}"
+            placeholder="Admin note (optional)"
+          ></textarea>
+
+          <div class="buttons">
+
+            <button
+              class="action approve"
+              onclick="approveDeposit('${deposit.id}')"
+            >
+              Approve
+            </button>
+
+            <button
+              class="action reject"
+              onclick="rejectDeposit('${deposit.id}')"
+            >
+              Reject
+            </button>
+
+          </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "DEPOSIT ERROR:",
+        error
+      );
 
       container.innerHTML =
         '<div class="error" style="display:block">' +
-        escapeHtml(error.message) +
+        escapeHtml(
+          error.message ||
+          "Could not load deposits."
+        ) +
         '</div>';
 
-      return;
     }
-
-
-    document.getElementById("depositCount").textContent =
-      data.length;
-
-
-    if (!data.length) {
-
-      container.innerHTML =
-        '<div class="empty">No pending deposits.</div>';
-
-      return;
-    }
-
-
-    container.innerHTML = "";
-
-
-    data.forEach(deposit => {
-
-      const card =
-        document.createElement("div");
-
-      card.className = "card";
-
-
-      card.innerHTML = `
-
-        <div class="row">
-          <span class="label">Amount:</span>
-          ₦${Number(deposit.amount || 0).toLocaleString()}
-        </div>
-
-        <div class="row">
-          <span class="label">Sender:</span>
-          ${escapeHtml(deposit.sender_name || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Reference:</span>
-          ${escapeHtml(deposit.payment_reference || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Payment Method:</span>
-          ${escapeHtml(deposit.payment_method || "")}
-        </div>
-
-        <div class="row small">
-          Created:
-          ${deposit.created_at
-            ? new Date(deposit.created_at).toLocaleString()
-            : ""}
-        </div>
-
-        <textarea
-          id="depositNote_${deposit.id}"
-          placeholder="Admin note (optional)"
-        ></textarea>
-
-        <div class="buttons">
-
-          <button
-            class="action approve"
-            onclick="approveDeposit('${deposit.id}')"
-          >
-            Approve
-          </button>
-
-          <button
-            class="action reject"
-            onclick="rejectDeposit('${deposit.id}')"
-          >
-            Reject
-          </button>
-
-        </div>
-
-      `;
-
-
-      container.appendChild(card);
-
-    });
 
   }
 
@@ -589,6 +663,15 @@
   // ==========================================
 
   async function approveDeposit(id) {
+
+    if (
+      !confirm(
+        "Approve this deposit?"
+      )
+    ) {
+      return;
+    }
+
 
     try {
 
@@ -608,7 +691,10 @@
       }
 
 
-      alert("Deposit approved successfully.");
+      alert(
+        "Deposit approved successfully."
+      );
+
 
       await loadDeposits();
 
@@ -616,7 +702,10 @@
 
     catch (error) {
 
-      console.error(error);
+      console.error(
+        "APPROVE DEPOSIT ERROR:",
+        error
+      );
 
       alert(
         "Could not approve deposit:\n\n" +
@@ -668,7 +757,10 @@
       }
 
 
-      alert("Deposit rejected.");
+      alert(
+        "Deposit rejected."
+      );
+
 
       await loadDeposits();
 
@@ -676,7 +768,10 @@
 
     catch (error) {
 
-      console.error(error);
+      console.error(
+        "REJECT DEPOSIT ERROR:",
+        error
+      );
 
       alert(
         "Could not reject deposit:\n\n" +
@@ -689,7 +784,7 @@
 
 
   // ==========================================
-  // WITHDRAWALS
+  // LOAD WITHDRAWALS
   // ==========================================
 
   async function loadWithdrawals() {
@@ -701,133 +796,165 @@
       '<div class="loading">Loading withdrawals...</div>';
 
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("Withdrawal")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
-          ascending: false
-        });
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("Withdrawal")
+          .select("*")
+          .eq("status", "PENDING")
+          .order("created_at", {
+            ascending: false
+          });
 
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
 
-      console.error(error);
+
+      document.getElementById(
+        "withdrawalCount"
+      ).textContent = data.length;
+
+
+      if (!data.length) {
+
+        container.innerHTML =
+          '<div class="empty">' +
+          'No pending withdrawals.' +
+          '</div>';
+
+        return;
+      }
+
+
+      container.innerHTML = "";
+
+
+      data.forEach(withdrawal => {
+
+        const card =
+          document.createElement("div");
+
+        card.className = "card";
+
+
+        const workerId =
+          withdrawal.worker_id || "";
+
+        const createdAt =
+          withdrawal.created_at || "";
+
+        const amount =
+          Number(
+            withdrawal.amount || 0
+          );
+
+        const accountNumber =
+          withdrawal.account_number || "";
+
+
+        card.innerHTML = `
+
+          <div class="row">
+            <span class="label">Amount:</span>
+            ₦${amount.toLocaleString()}
+          </div>
+
+          <div class="row">
+            <span class="label">Worker ID:</span>
+            ${escapeHtml(workerId)}
+          </div>
+
+          <div class="row">
+            <span class="label">Bank:</span>
+            ${escapeHtml(
+              withdrawal.bank_name || ""
+            )}
+          </div>
+
+          <div class="row">
+            <span class="label">Account Number:</span>
+            ${escapeHtml(
+              accountNumber
+            )}
+          </div>
+
+          <div class="row">
+            <span class="label">Account Name:</span>
+            ${escapeHtml(
+              withdrawal.account_name || ""
+            )}
+          </div>
+
+          <div class="row small">
+            Created:
+            ${
+              createdAt
+              ? new Date(
+                  createdAt
+                ).toLocaleString()
+              : ""
+            }
+          </div>
+
+          <div class="buttons">
+
+            <button
+              class="action approve"
+              onclick="approveWithdrawal(
+                '${escapeJs(workerId)}',
+                '${escapeJs(createdAt)}',
+                ${amount},
+                '${escapeJs(accountNumber)}'
+              )"
+            >
+              Approve
+            </button>
+
+            <button
+              class="action reject"
+              onclick="rejectWithdrawal(
+                '${escapeJs(workerId)}',
+                '${escapeJs(createdAt)}',
+                ${amount},
+                '${escapeJs(accountNumber)}'
+              )"
+            >
+              Reject
+            </button>
+
+          </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "WITHDRAWAL ERROR:",
+        error
+      );
 
       container.innerHTML =
         '<div class="error" style="display:block">' +
-        escapeHtml(error.message) +
+        escapeHtml(
+          error.message ||
+          "Could not load withdrawals."
+        ) +
         '</div>';
 
-      return;
     }
-
-
-    document.getElementById("withdrawalCount").textContent =
-      data.length;
-
-
-    if (!data.length) {
-
-      container.innerHTML =
-        '<div class="empty">No pending withdrawals.</div>';
-
-      return;
-    }
-
-
-    container.innerHTML = "";
-
-
-    data.forEach(withdrawal => {
-
-      const card =
-        document.createElement("div");
-
-      card.className = "card";
-
-
-      const createdAt =
-        withdrawal.created_at || "";
-
-
-      card.innerHTML = `
-
-        <div class="row">
-          <span class="label">Amount:</span>
-          ₦${Number(withdrawal.amount || 0).toLocaleString()}
-        </div>
-
-        <div class="row">
-          <span class="label">Worker ID:</span>
-          ${escapeHtml(withdrawal.worker_id || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Bank:</span>
-          ${escapeHtml(withdrawal.bank_name || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Account Number:</span>
-          ${escapeHtml(withdrawal.account_number || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Account Name:</span>
-          ${escapeHtml(withdrawal.account_name || "")}
-        </div>
-
-        <div class="row small">
-          Created:
-          ${createdAt
-            ? new Date(createdAt).toLocaleString()
-            : ""}
-        </div>
-
-        <textarea
-          id="withdrawalNote_${createdAt}"
-          placeholder="Admin note (optional)"
-        ></textarea>
-
-        <div class="buttons">
-
-          <button
-            class="action approve"
-            onclick="approveWithdrawal(
-              '${escapeJs(withdrawal.worker_id)}',
-              '${escapeJs(createdAt)}',
-              '${Number(withdrawal.amount || 0)}',
-              '${escapeJs(withdrawal.account_number || "")}'
-            )"
-          >
-            Approve
-          </button>
-
-          <button
-            class="action reject"
-            onclick="rejectWithdrawal(
-              '${escapeJs(withdrawal.worker_id)}',
-              '${escapeJs(createdAt)}',
-              '${Number(withdrawal.amount || 0)}',
-              '${escapeJs(withdrawal.account_number || "")}'
-            )"
-          >
-            Reject
-          </button>
-
-        </div>
-
-      `;
-
-
-      container.appendChild(card);
-
-    });
 
   }
 
@@ -886,7 +1013,10 @@
 
     catch (error) {
 
-      console.error(error);
+      console.error(
+        "APPROVE WITHDRAWAL ERROR:",
+        error
+      );
 
       alert(
         "Could not approve withdrawal:\n\n" +
@@ -944,7 +1074,8 @@
 
 
       alert(
-        "Withdrawal rejected and the money was returned to the worker."
+        "Withdrawal rejected.\n\n" +
+        "The money has been returned to the worker's available balance."
       );
 
 
@@ -954,7 +1085,10 @@
 
     catch (error) {
 
-      console.error(error);
+      console.error(
+        "REJECT WITHDRAWAL ERROR:",
+        error
+      );
 
       alert(
         "Could not reject withdrawal:\n\n" +
@@ -967,7 +1101,7 @@
 
 
   // ==========================================
-  // SUBMISSIONS
+  // LOAD SUBMISSIONS
   // ==========================================
 
   async function loadSubmissions() {
@@ -979,129 +1113,32 @@
       '<div class="loading">Loading submissions...</div>';
 
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("Submission")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
-          ascending: false
-        });
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("Submission")
+          .select("*")
+          .eq("status", "PENDING")
+          .order("created_at", {
+            ascending: false
+          });
 
 
-    if (error) {
-
-      console.error(error);
-
-      container.innerHTML =
-        '<div class="error" style="display:block">' +
-        escapeHtml(error.message) +
-        '</div>';
-
-      return;
-    }
+      if (error) {
+        throw error;
+      }
 
 
-    document.getElementById("submissionCount").textContent =
-      data.length;
+      document.getElementById(
+        "submissionCount"
+      ).textContent = data.length;
 
 
-    if (!data.length) {
+      if (!data.length) {
 
-      container.innerHTML =
-        '<div class="empty">No pending worker submissions.</div>';
-
-      return;
-    }
-
-
-    container.innerHTML = "";
-
-
-    for (const submission of data) {
-
-      const card =
-        document.createElement("div");
-
-      card.className = "card";
-
-
-      card.innerHTML = `
-
-        <div class="row">
-          <span class="label">Worker ID:</span>
-          ${escapeHtml(submission.worker_id || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Task ID:</span>
-          ${escapeHtml(submission.task_id || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Username:</span>
-          ${escapeHtml(submission.username || "")}
-        </div>
-
-        <div class="row">
-          <span class="label">Reward:</span>
-          ₦${Number(submission.reward || 0).toLocaleString()}
-        </div>
-
-        <div class="row small">
-          Submitted:
-          ${
-            submission.submitted_at
-              ? new Date(
-                  submission.submitted_at
-                ).toLocaleString()
-              : ""
-          }
-        </div>
-
-        <div
-          class="proof-box"
-          id="proof_${submission.id}"
-        >
-          <strong>Worker Screenshot / Proof</strong>
-
-          <div class="loading">
-            Loading screenshot...
-          </div>
-        </div>
-
-        <textarea
-          id="submissionNote_${submission.id}"
-          placeholder="Rejection note (optional)"
-        ></textarea>
-
-        <div class="buttons">
-
-          <button
-            class="action approve"
-            onclick="approveSubmission('${submission.id}')"
-          >
-            Approve
-          </button>
-
-          <button
-            class="action reject"
-            onclick="rejectSubmission('${submission.id}')"
-          >
-            Reject
-          </button>
-
-        </div>
-
-      `;
-
-
-      container.appendChild(card);
-
-
-      // Load screenshot after card is displayed.
-      loadProofImage(
-        
+        container.innerHTML =
+          '<di
