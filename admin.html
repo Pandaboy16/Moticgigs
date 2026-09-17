@@ -35,12 +35,11 @@
     }
 
     header button {
+      border: none;
       background: #dc2626;
       color: white;
-      border: none;
       padding: 9px 14px;
       border-radius: 7px;
-      cursor: pointer;
     }
 
     .container {
@@ -49,52 +48,41 @@
       padding: 20px;
     }
 
-    .status {
+    .status,
+    .section {
       background: white;
-      padding: 15px;
-      border-radius: 10px;
+      border-radius: 12px;
+      padding: 18px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
     }
 
     .error {
+      display: none;
       background: #fee2e2;
       color: #991b1b;
       border: 1px solid #fecaca;
       padding: 12px;
       border-radius: 8px;
-      margin-bottom: 15px;
-      display: none;
+      margin-bottom: 20px;
       white-space: pre-wrap;
     }
 
-    .section {
-      background: white;
-      margin-bottom: 25px;
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    .loading {
+      color: #6b7280;
+      padding: 10px 0;
     }
 
-    .section h2 {
-      margin-top: 0;
-      font-size: 19px;
-    }
-
-    .count {
-      background: #111827;
-      color: white;
-      padding: 3px 8px;
-      border-radius: 20px;
-      font-size: 12px;
+    .empty {
+      color: #6b7280;
     }
 
     .card {
+      background: #fafafa;
       border: 1px solid #e5e7eb;
       border-radius: 10px;
       padding: 15px;
       margin-top: 12px;
-      background: #fafafa;
     }
 
     .row {
@@ -106,6 +94,14 @@
       font-weight: bold;
     }
 
+    .count {
+      background: #111827;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
     .buttons {
       display: flex;
       gap: 10px;
@@ -113,13 +109,13 @@
       margin-top: 15px;
     }
 
-    button.action {
+    .action {
       border: none;
+      color: white;
       padding: 10px 15px;
       border-radius: 7px;
-      cursor: pointer;
-      color: white;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .approve {
@@ -130,92 +126,63 @@
       background: #dc2626;
     }
 
-    .approve:hover {
-      background: #15803d;
+    textarea {
+      width: 100%;
+      min-height: 70px;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
     }
 
-    .reject:hover {
-      background: #b91c1c;
-    }
-
-    .loading {
-      color: #6b7280;
-      padding: 10px 0;
-    }
-
-    .empty {
-      color: #6b7280;
-      padding: 10px 0;
-    }
-
-    .proof-box {
+    .proof {
       margin-top: 15px;
       padding: 12px;
       background: white;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #ddd;
       border-radius: 8px;
     }
 
-    .proof-box img {
+    .proof img {
+      display: block;
       width: 100%;
       max-width: 450px;
       max-height: 600px;
       object-fit: contain;
-      display: block;
       margin-top: 10px;
       border-radius: 8px;
-      border: 1px solid #ddd;
-      background: #f9fafb;
       cursor: pointer;
     }
 
-    .proof-link {
+    .proof a {
       display: inline-block;
       margin-top: 8px;
       color: #2563eb;
-      text-decoration: none;
-    }
-
-    .small {
-      color: #6b7280;
-      font-size: 13px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 75px;
-      padding: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 7px;
-      resize: vertical;
-      margin-top: 10px;
-      font-family: Arial, sans-serif;
     }
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.75);
-      z-index: 9999;
+      background: rgba(0,0,0,.8);
       padding: 15px;
+      z-index: 9999;
       overflow: auto;
     }
 
-    .modal-content {
-      background: white;
+    .modal-box {
       max-width: 750px;
       margin: 20px auto;
-      padding: 20px;
-      border-radius: 12px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
     }
 
-    .modal-content img {
+    .modal img {
       width: 100%;
-      max-height: 75vh;
+      max-height: 80vh;
       object-fit: contain;
       background: #111;
-      border-radius: 8px;
     }
 
     .close {
@@ -225,7 +192,6 @@
       border: none;
       padding: 8px 12px;
       border-radius: 6px;
-      cursor: pointer;
     }
   </style>
 </head>
@@ -234,7 +200,10 @@
 
 <header>
   <h1>Admin Dashboard - MoticGigs</h1>
-  <button onclick="logout()">Logout</button>
+
+  <button onclick="logout()">
+    Logout
+  </button>
 </header>
 
 <div class="container">
@@ -243,13 +212,9 @@
 
   <div class="status">
     <strong>Admin status:</strong>
-    <span id="adminStatus">Checking...</span>
+    <span id="adminStatus">Starting...</span>
   </div>
 
-
-  <!-- ========================= -->
-  <!-- PENDING DEPOSITS -->
-  <!-- ========================= -->
 
   <div class="section">
 
@@ -259,15 +224,13 @@
     </h2>
 
     <div id="deposits">
-      <div class="loading">Loading deposits...</div>
+      <div class="loading">
+        Waiting for admin check...
+      </div>
     </div>
 
   </div>
 
-
-  <!-- ========================= -->
-  <!-- PENDING WITHDRAWALS -->
-  <!-- ========================= -->
 
   <div class="section">
 
@@ -277,15 +240,13 @@
     </h2>
 
     <div id="withdrawals">
-      <div class="loading">Loading withdrawals...</div>
+      <div class="loading">
+        Waiting for admin check...
+      </div>
     </div>
 
   </div>
 
-
-  <!-- ========================= -->
-  <!-- PENDING SUBMISSIONS -->
-  <!-- ========================= -->
 
   <div class="section">
 
@@ -295,7 +256,9 @@
     </h2>
 
     <div id="submissions">
-      <div class="loading">Loading submissions...</div>
+      <div class="loading">
+        Waiting for admin check...
+      </div>
     </div>
 
   </div>
@@ -303,15 +266,14 @@
 </div>
 
 
-<!-- ========================= -->
-<!-- SCREENSHOT MODAL -->
-<!-- ========================= -->
-
 <div id="imageModal" class="modal">
 
-  <div class="modal-content">
+  <div class="modal-box">
 
-    <button class="close" onclick="closeImage()">
+    <button
+      class="close"
+      onclick="closeImage()"
+    >
       Close
     </button>
 
@@ -331,7 +293,7 @@
 <script>
 
   // ==========================================
-  // SUPABASE CONNECTION
+  // SUPABASE
   // ==========================================
 
   const SUPABASE_URL =
@@ -340,36 +302,110 @@
   const SUPABASE_ANON_KEY =
     "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-  const supabaseClient =
-    supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+  let supabaseClient;
 
 
   // ==========================================
-  // SHOW ERROR
+  // START SUPABASE
+  // ==========================================
+
+  try {
+
+    if (
+      typeof supabase === "undefined"
+    ) {
+
+      throw new Error(
+        "Supabase JavaScript library did not load."
+      );
+
+    }
+
+    supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+  }
+
+  catch (error) {
+
+    showError(
+      "Supabase could not start:\n\n" +
+      error.message
+    );
+
+    document.getElementById(
+      "adminStatus"
+    ).textContent = "Supabase error";
+
+  }
+
+
+  // ==========================================
+  // ERROR
   // ==========================================
 
   function showError(message) {
 
     const box =
-      document.getElementById("globalError");
+      document.getElementById(
+        "globalError"
+      );
 
     box.style.display = "block";
 
     box.textContent = message;
+
   }
 
 
   function clearError() {
 
     const box =
-      document.getElementById("globalError");
+      document.getElementById(
+        "globalError"
+      );
 
     box.style.display = "none";
 
     box.textContent = "";
+
+  }
+
+
+  // ==========================================
+  // TIMEOUT HELPER
+  // ==========================================
+
+  function withTimeout(
+    promise,
+    milliseconds
+  ) {
+
+    return Promise.race([
+
+      promise,
+
+      new Promise((_, reject) => {
+
+        setTimeout(() => {
+
+          reject(
+            new Error(
+              "Supabase request timed out after " +
+              milliseconds +
+              " seconds."
+            )
+          );
+
+        }, milliseconds);
+
+      })
+
+    ]);
+
   }
 
 
@@ -383,86 +419,125 @@
 
       clearError();
 
-      document.getElementById("adminStatus").textContent =
-        "Checking login...";
+      const status =
+        document.getElementById(
+          "adminStatus"
+        );
 
 
-      const {
-        data: userData,
-        error: userError
-      } =
-        await supabaseClient.auth.getUser();
+      status.textContent =
+        "Checking Supabase session...";
 
 
-      if (userError) {
-        throw userError;
+      if (!supabaseClient) {
+
+        throw new Error(
+          "Supabase client was not created."
+        );
+
       }
 
 
-      if (!userData || !userData.user) {
+      // IMPORTANT:
+      // Use getSession instead of getUser.
+      const sessionResult =
+        await withTimeout(
+          supabaseClient.auth.getSession(),
+          8000
+        );
 
-        document.getElementById("adminStatus").textContent =
-          "Not logged in";
+
+      if (sessionResult.error) {
+
+        throw sessionResult.error;
+
+      }
+
+
+      const session =
+        sessionResult.data.session;
+
+
+      if (!session) {
+
+        status.textContent =
+          "No login session";
 
         showError(
-          "No active Supabase login session was found."
+          "There is no active Supabase login session on this page.\n\n" +
+          "Please log out, log in again with the admin account, and open admin.html."
         );
 
         return;
+
       }
 
 
       const user =
-        userData.user;
+        session.user;
 
 
-      document.getElementById("adminStatus").textContent =
-        "Checking administrator account...";
+      status.textContent =
+        "Checking administrator profile...";
 
 
-      const {
-        data: profile,
-        error: profileError
-      } =
-        await supabaseClient
-          .from("Moticgigs")
-          .select("role,status")
-          .eq("Id", user.id)
-          .single();
+      const profileResult =
+        await withTimeout(
+
+          supabaseClient
+            .from("Moticgigs")
+            .select("role,status")
+            .eq("Id", user.id)
+            .single(),
+
+          8000
+
+        );
 
 
-      if (profileError) {
-        throw profileError;
+      if (profileResult.error) {
+
+        throw profileResult.error;
+
       }
+
+
+      const profile =
+        profileResult.data;
 
 
       if (!profile) {
 
         throw new Error(
-          "Admin profile was not found."
+          "No Moticgigs profile exists for this account."
         );
 
       }
 
 
-      if (profile.role !== "admin") {
+      if (
+        profile.role !== "admin"
+      ) {
 
-        document.getElementById("adminStatus").textContent =
+        status.textContent =
           "Access denied";
 
         showError(
-          "Your Moticgigs role is '" +
+          "This account has role: " +
           profile.role +
-          "', not 'admin'."
+          "\n\nExpected role: admin"
         );
 
         return;
+
       }
 
 
-      if (profile.status === "banned") {
+      if (
+        profile.status === "banned"
+      ) {
 
-        document.getElementById("adminStatus").textContent =
+        status.textContent =
           "Banned";
 
         showError(
@@ -470,14 +545,15 @@
         );
 
         return;
+
       }
 
 
-      document.getElementById("adminStatus").textContent =
+      status.textContent =
         "Active administrator";
 
 
-      // Load independently.
+      // Load all three independently.
       loadDeposits();
       loadWithdrawals();
       loadSubmissions();
@@ -491,11 +567,13 @@
         error
       );
 
-      document.getElementById("adminStatus").textContent =
+      document.getElementById(
+        "adminStatus"
+      ).textContent =
         "Error";
 
       showError(
-        "Admin check failed:\n\n" +
+        "ADMIN CHECK ERROR:\n\n" +
         (error.message ||
          JSON.stringify(error))
       );
@@ -506,24 +584,23 @@
 
 
   // ==========================================
-  // LOAD DEPOSITS
+  // DEPOSITS
   // ==========================================
 
   async function loadDeposits() {
 
-    const container =
-      document.getElementById("deposits");
+    const box =
+      document.getElementById(
+        "deposits"
+      );
 
-    container.innerHTML =
+    box.innerHTML =
       '<div class="loading">Loading deposits...</div>';
 
 
     try {
 
-      const {
-        data,
-        error
-      } =
+      const result =
         await supabaseClient
           .from("Deposit")
           .select("*")
@@ -533,34 +610,40 @@
           });
 
 
-      if (error) {
-        throw error;
+      if (result.error) {
+        throw result.error;
       }
+
+
+      const rows =
+        result.data || [];
 
 
       document.getElementById(
         "depositCount"
-      ).textContent = data.length;
+      ).textContent =
+        rows.length;
 
 
-      if (!data.length) {
+      if (!rows.length) {
 
-        container.innerHTML =
-          '<div class="empty">' +
-          'No pending deposits.' +
-          '</div>';
+        box.innerHTML =
+          '<div class="empty">No pending deposits.</div>';
 
         return;
+
       }
 
 
-      container.innerHTML = "";
+      box.innerHTML = "";
 
 
-      data.forEach(deposit => {
+      rows.forEach(deposit => {
 
         const card =
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
 
         card.className = "card";
 
@@ -576,39 +659,28 @@
 
           <div class="row">
             <span class="label">Sender:</span>
-            ${escapeHtml(
-              deposit.sender_name || ""
+            ${safe(
+              deposit.sender_name
             )}
           </div>
 
           <div class="row">
             <span class="label">Reference:</span>
-            ${escapeHtml(
-              deposit.payment_reference || ""
+            ${safe(
+              deposit.payment_reference
             )}
           </div>
 
           <div class="row">
-            <span class="label">Payment Method:</span>
-            ${escapeHtml(
-              deposit.payment_method || ""
+            <span class="label">Method:</span>
+            ${safe(
+              deposit.payment_method
             )}
-          </div>
-
-          <div class="row small">
-            Created:
-            ${
-              deposit.created_at
-              ? new Date(
-                  deposit.created_at
-                ).toLocaleString()
-              : ""
-            }
           </div>
 
           <textarea
             id="depositNote_${deposit.id}"
-            placeholder="Admin note (optional)"
+            placeholder="Admin note"
           ></textarea>
 
           <div class="buttons">
@@ -632,7 +704,7 @@
         `;
 
 
-        container.appendChild(card);
+        box.appendChild(card);
 
       });
 
@@ -640,16 +712,10 @@
 
     catch (error) {
 
-      console.error(
-        "DEPOSIT ERROR:",
-        error
-      );
-
-      container.innerHTML =
+      box.innerHTML =
         '<div class="error" style="display:block">' +
-        escapeHtml(
-          error.message ||
-          "Could not load deposits."
+        safe(
+          error.message
         ) +
         '</div>';
 
@@ -675,9 +741,7 @@
 
     try {
 
-      const {
-        error
-      } =
+      const result =
         await supabaseClient.rpc(
           "approve_deposit",
           {
@@ -686,8 +750,8 @@
         );
 
 
-      if (error) {
-        throw error;
+      if (result.error) {
+        throw result.error;
       }
 
 
@@ -696,19 +760,14 @@
       );
 
 
-      await loadDeposits();
+      loadDeposits();
 
     }
 
     catch (error) {
 
-      console.error(
-        "APPROVE DEPOSIT ERROR:",
-        error
-      );
-
       alert(
-        "Could not approve deposit:\n\n" +
+        "Approve failed:\n\n" +
         error.message
       );
 
@@ -723,12 +782,6 @@
 
   async function rejectDeposit(id) {
 
-    const note =
-      document.getElementById(
-        "depositNote_" + id
-      )?.value || "";
-
-
     if (
       !confirm(
         "Reject this deposit?"
@@ -738,11 +791,15 @@
     }
 
 
+    const note =
+      document.getElementById(
+        "depositNote_" + id
+      )?.value || "";
+
+
     try {
 
-      const {
-        error
-      } =
+      const result =
         await supabaseClient.rpc(
           "reject_deposit",
           {
@@ -752,8 +809,8 @@
         );
 
 
-      if (error) {
-        throw error;
+      if (result.error) {
+        throw result.error;
       }
 
 
@@ -762,19 +819,14 @@
       );
 
 
-      await loadDeposits();
+      loadDeposits();
 
     }
 
     catch (error) {
 
-      console.error(
-        "REJECT DEPOSIT ERROR:",
-        error
-      );
-
       alert(
-        "Could not reject deposit:\n\n" +
+        "Reject failed:\n\n" +
         error.message
       );
 
@@ -784,24 +836,23 @@
 
 
   // ==========================================
-  // LOAD WITHDRAWALS
+  // WITHDRAWALS
   // ==========================================
 
   async function loadWithdrawals() {
 
-    const container =
-      document.getElementById("withdrawals");
+    const box =
+      document.getElementById(
+        "withdrawals"
+      );
 
-    container.innerHTML =
+    box.innerHTML =
       '<div class="loading">Loading withdrawals...</div>';
 
 
     try {
 
-      const {
-        data,
-        error
-      } =
+      const result =
         await supabaseClient
           .from("Withdrawal")
           .select("*")
@@ -811,95 +862,79 @@
           });
 
 
-      if (error) {
-        throw error;
+      if (result.error) {
+        throw result.error;
       }
+
+
+      const rows =
+        result.data || [];
 
 
       document.getElementById(
         "withdrawalCount"
-      ).textContent = data.length;
+      ).textContent =
+        rows.length;
 
 
-      if (!data.length) {
+      if (!rows.length) {
 
-        container.innerHTML =
-          '<div class="empty">' +
-          'No pending withdrawals.' +
-          '</div>';
+        box.innerHTML =
+          '<div class="empty">No pending withdrawals.</div>';
 
         return;
+
       }
 
 
-      container.innerHTML = "";
+      box.innerHTML = "";
 
 
-      data.forEach(withdrawal => {
+      rows.forEach(w => {
 
         const card =
-          document.createElement("div");
-
-        card.className = "card";
-
-
-        const workerId =
-          withdrawal.worker_id || "";
-
-        const createdAt =
-          withdrawal.created_at || "";
-
-        const amount =
-          Number(
-            withdrawal.amount || 0
+          document.createElement(
+            "div"
           );
 
-        const accountNumber =
-          withdrawal.account_number || "";
+        card.className = "card";
 
 
         card.innerHTML = `
 
           <div class="row">
             <span class="label">Amount:</span>
-            ₦${amount.toLocaleString()}
+            ₦${Number(
+              w.amount || 0
+            ).toLocaleString()}
           </div>
 
           <div class="row">
             <span class="label">Worker ID:</span>
-            ${escapeHtml(workerId)}
+            ${safe(w.worker_id)}
           </div>
 
           <div class="row">
             <span class="label">Bank:</span>
-            ${escapeHtml(
-              withdrawal.bank_name || ""
-            )}
+            ${safe(w.bank_name)}
           </div>
 
           <div class="row">
             <span class="label">Account Number:</span>
-            ${escapeHtml(
-              accountNumber
-            )}
+            ${safe(w.account_number)}
           </div>
 
           <div class="row">
             <span class="label">Account Name:</span>
-            ${escapeHtml(
-              withdrawal.account_name || ""
-            )}
+            ${safe(w.account_name)}
           </div>
 
           <div class="row small">
-            Created:
-            ${
-              createdAt
+            ${w.created_at
               ? new Date(
-                  createdAt
+                  w.created_at
                 ).toLocaleString()
-              : ""
-            }
+              : ""}
           </div>
 
           <div class="buttons">
@@ -907,10 +942,10 @@
             <button
               class="action approve"
               onclick="approveWithdrawal(
-                '${escapeJs(workerId)}',
-                '${escapeJs(createdAt)}',
-                ${amount},
-                '${escapeJs(accountNumber)}'
+                '${js(w.worker_id)}',
+                '${js(w.created_at)}',
+                ${Number(w.amount || 0)},
+                '${js(w.account_number)}'
               )"
             >
               Approve
@@ -919,10 +954,10 @@
             <button
               class="action reject"
               onclick="rejectWithdrawal(
-                '${escapeJs(workerId)}',
-                '${escapeJs(createdAt)}',
-                ${amount},
-                '${escapeJs(accountNumber)}'
+                '${js(w.worker_id)}',
+                '${js(w.created_at)}',
+                ${Number(w.amount || 0)},
+                '${js(w.account_number)}'
               )"
             >
               Reject
@@ -933,7 +968,7 @@
         `;
 
 
-        container.appendChild(card);
+        box.appendChild(card);
 
       });
 
@@ -941,17 +976,9 @@
 
     catch (error) {
 
-      console.error(
-        "WITHDRAWAL ERROR:",
-        error
-      );
-
-      container.innerHTML =
+      box.innerHTML =
         '<div class="error" style="display:block">' +
-        escapeHtml(
-          error.message ||
-          "Could not load withdrawals."
-        ) +
+        safe(error.message) +
         '</div>';
 
     }
@@ -981,9 +1008,7 @@
 
     try {
 
-      const {
-        error
-      } =
+      const result =
         await supabaseClient.rpc(
           "approve_withdrawal",
           {
@@ -997,29 +1022,24 @@
         );
 
 
-      if (error) {
-        throw error;
+      if (result.error) {
+        throw result.error;
       }
 
 
       alert(
-        "Withdrawal approved successfully."
+        "Withdrawal approved."
       );
 
 
-      await loadWithdrawals();
+      loadWithdrawals();
 
     }
 
     catch (error) {
 
-      console.error(
-        "APPROVE WITHDRAWAL ERROR:",
-        error
-      );
-
       alert(
-        "Could not approve withdrawal:\n\n" +
+        "Approve withdrawal failed:\n\n" +
         error.message
       );
 
@@ -1041,7 +1061,7 @@
 
     const note =
       prompt(
-        "Reason for rejecting this withdrawal:"
+        "Reason for rejection:"
       );
 
 
@@ -1052,9 +1072,7 @@
 
     try {
 
-      const {
-        error
-      } =
+      const result =
         await supabaseClient.rpc(
           "reject_withdrawal",
           {
@@ -1068,30 +1086,24 @@
         );
 
 
-      if (error) {
-        throw error;
+      if (result.error) {
+        throw result.error;
       }
 
 
       alert(
-        "Withdrawal rejected.\n\n" +
-        "The money has been returned to the worker's available balance."
+        "Withdrawal rejected and funds returned."
       );
 
 
-      await loadWithdrawals();
+      loadWithdrawals();
 
     }
 
     catch (error) {
 
-      console.error(
-        "REJECT WITHDRAWAL ERROR:",
-        error
-      );
-
       alert(
-        "Could not reject withdrawal:\n\n" +
+        "Reject withdrawal failed:\n\n" +
         error.message
       );
 
@@ -1101,24 +1113,23 @@
 
 
   // ==========================================
-  // LOAD SUBMISSIONS
+  // SUBMISSIONS
   // ==========================================
 
   async function loadSubmissions() {
 
-    const container =
-      document.getElementById("submissions");
+    const box =
+      document.getElementById(
+        "submissions"
+      );
 
-    container.innerHTML =
+    box.innerHTML =
       '<div class="loading">Loading submissions...</div>';
 
 
     try {
 
-      const {
-        data,
-        error
-      } =
+      const result =
         await supabaseClient
           .from("Submission")
           .select("*")
@@ -1128,17 +1139,71 @@
           });
 
 
-      if (error) {
-        throw error;
+      if (result.error) {
+        throw result.error;
       }
+
+
+      const rows =
+        result.data || [];
 
 
       document.getElementById(
         "submissionCount"
-      ).textContent = data.length;
+      ).textContent =
+        rows.length;
 
 
-      if (!data.length) {
+      if (!rows.length) {
 
-        container.innerHTML =
-          '<di
+        box.innerHTML =
+          '<div class="empty">No pending submissions.</div>';
+
+        return;
+
+      }
+
+
+      box.innerHTML = "";
+
+
+      for (
+        const submission of rows
+      ) {
+
+        const card =
+          document.createElement(
+            "div"
+          );
+
+        card.className = "card";
+
+
+        card.innerHTML = `
+
+          <div class="row">
+            <span class="label">Worker ID:</span>
+            ${safe(
+              submission.worker_id
+            )}
+          </div>
+
+          <div class="row">
+            <span class="label">Task ID:</span>
+            ${safe(
+              submission.task_id
+            )}
+          </div>
+
+          <div class="row">
+            <span class="label">Username:</span>
+            ${safe(
+              submission.username
+            )}
+          </div>
+
+          <div class="row">
+            <span class="label">Reward:</span>
+            ₦${Number(
+              submission.reward || 0
+     
