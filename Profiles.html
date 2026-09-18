@@ -6,6 +6,8 @@
 
 <title>Profile - MoticGigs</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 * {
   box-sizing: border-box;
@@ -74,6 +76,7 @@ body {
 .email {
   color: #777;
   margin-top: 6px;
+  word-break: break-word;
 }
 
 .info {
@@ -100,16 +103,16 @@ body {
   font-weight: bold;
 }
 
-.button {
-  width: 100%;
-  border: none;
-  padding: 14px;
-  border-radius: 9px;
-  margin-top: 20px;
-  background: #0f9d58;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
+.loading {
+  color: #777;
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  color: #d93025;
+  text-align: center;
+  padding: 20px;
 }
 </style>
 </head>
@@ -125,54 +128,202 @@ body {
 
   <div class="profile-card">
 
-    <div class="avatar">
+    <div class="avatar" id="avatar">
       M
     </div>
 
-    <div class="name">
-      MoticGigs User
+    <div class="name" id="profileName">
+      Loading...
     </div>
 
-    <div class="email">
-      user@example.com
+    <div class="email" id="profileEmail">
+      Loading...
     </div>
 
     <div class="info">
 
       <div class="info-item">
         <div class="label">Full Name</div>
-        <div class="value">MoticGigs User</div>
+        <div class="value" id="fullName">
+          Loading...
+        </div>
       </div>
 
       <div class="info-item">
         <div class="label">Email</div>
-        <div class="value">user@example.com</div>
+        <div class="value" id="email">
+          Loading...
+        </div>
       </div>
 
       <div class="info-item">
         <div class="label">Account Type</div>
-        <div class="value">Worker</div>
+        <div class="value" id="accountType">
+          Loading...
+        </div>
       </div>
 
       <div class="info-item">
         <div class="label">Account Status</div>
-        <div class="value">Active</div>
+        <div class="value" id="accountStatus">
+          Loading...
+        </div>
       </div>
 
       <div class="info-item">
         <div class="label">Member Since</div>
-        <div class="value">September 2026</div>
+        <div class="value" id="memberSince">
+          Loading...
+        </div>
       </div>
 
     </div>
 
-    <button class="button">
-      Edit Profile
-    </button>
-
   </div>
 
 </div>
+
+<script>
+
+const SUPABASE_URL = "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+async function loadProfile() {
+
+  try {
+
+    // Get logged-in user
+    const {
+      data: { user },
+      error: authError
+    } = await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+
+      window.location.href = "index.html";
+      return;
+
+    }
+
+    // Get profile from Moticgigs table
+    const {
+      data: profile,
+      error: profileError
+    } = await supabaseClient
+      .from("Moticgigs")
+      .select("full_name, email, role, status, created_at")
+      .eq("Id", user.id)
+      .single();
+
+    if (profileError) {
+
+      console.error(profileError);
+
+      document.getElementById("profileName").textContent =
+        "Unable to load profile";
+
+      document.getElementById("profileEmail").textContent =
+        "";
+
+      return;
+    }
+
+    // Full name
+    const fullName =
+      profile.full_name ||
+      "MoticGigs User";
+
+    document.getElementById("profileName").textContent =
+      fullName;
+
+    document.getElementById("fullName").textContent =
+      fullName;
+
+
+    // Email
+    const email =
+      profile.email ||
+      user.email ||
+      "No email";
+
+    document.getElementById("profileEmail").textContent =
+      email;
+
+    document.getElementById("email").textContent =
+      email;
+
+
+    // Avatar first letter
+    document.getElementById("avatar").textContent =
+      fullName.charAt(0).toUpperCase();
+
+
+    // Account type
+    let accountType = "Worker";
+
+    if (profile.role === "advertiser") {
+      accountType = "Advertiser";
+    }
+
+    if (profile.role === "admin") {
+      accountType = "Admin";
+    }
+
+    document.getElementById("accountType").textContent =
+      accountType;
+
+
+    // Account status
+    const status =
+      profile.status || "active";
+
+    document.getElementById("accountStatus").textContent =
+      status.charAt(0).toUpperCase() +
+      status.slice(1);
+
+
+    // Member since
+    if (profile.created_at) {
+
+      const date =
+        new Date(profile.created_at);
+
+      document.getElementById("memberSince").textContent =
+        date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        });
+
+    } else {
+
+      document.getElementById("memberSince").textContent =
+        "Unknown";
+
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("profileName").textContent =
+      "Unable to load profile";
+
+  }
+
+}
+
+
+// Load profile
+loadProfile();
+
+</script>
 
 </body>
 </html>
