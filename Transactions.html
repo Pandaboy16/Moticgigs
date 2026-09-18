@@ -1,243 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Transactions - MoticGigs</title>
+  <title>MoticGigs Dashboard</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-* {
-  box-sizing: border-box;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f7f5;
-  color: #17211b;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
+      color: #17211b;
+    }
 
-.header {
-  background: #0f9d58;
-  color: white;
-  padding: 18px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
+    .header {
+      background: #0f9d58;
+      color: white;
+      padding: 18px 20px;
+    }
 
-.back {
-  font-size: 25px;
-  cursor: pointer;
-}
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.header h1 {
-  margin: 0;
-  font-size: 20px;
-}
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
 
-.container {
-  padding: 20px;
-  max-width: 700px;
-  margin: auto;
-}
+    .logout {
+      border: none;
+      background: rgba(255,255,255,.18);
+      color: white;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
 
-/* BALANCE */
+    .welcome {
+      margin-top: 12px;
+    }
 
-.balance {
-  background: #0f9d58;
-  color: white;
-  padding: 22px;
-  border-radius: 14px;
-  margin-bottom: 20px;
-}
+    .welcome h2 {
+      margin: 0;
+      font-size: 21px;
+    }
 
-.balance small {
-  opacity: .9;
-}
+    .welcome p {
+      margin: 5px 0 0;
+      opacity: .9;
+      font-size: 14px;
+    }
 
-.balance h2 {
-  margin: 8px 0 0;
-  font-size: 30px;
-}
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
 
-/* FILTER */
+    .balance-card {
+      background: #0f9d58;
+      color: white;
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
 
-.filter {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 18px;
-}
+    .balance-label {
+      font-size: 14px;
+      opacity: .9;
+    }
 
-.filter button {
-  flex: 1;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  background: white;
-  color: #333;
-  cursor: pointer;
-}
+    .balance {
+      font-size: 32px;
+      font-weight: bold;
+      margin-top: 7px;
+    }
 
-.filter button.active {
-  background: #0f9d58;
-  color: white;
-}
+    .pending {
+      margin-top: 10px;
+      font-size: 14px;
+      opacity: .95;
+    }
 
-/* TRANSACTIONS */
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 22px 0 12px;
+    }
 
-.transaction {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-}
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
 
-.transaction-title {
-  font-weight: bold;
-  margin-bottom: 6px;
-}
+    .action {
+      background: white;
+      border: none;
+      border-radius: 12px;
+      padding: 18px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
 
-.date {
-  color: #777;
-  font-size: 13px;
-}
+    .action:hover {
+      background: #f0fdf4;
+    }
 
-.amount {
-  font-weight: bold;
-  white-space: nowrap;
-}
+    .task {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
 
-.credit {
-  color: #16a34a;
-}
+    .task-title {
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
 
-.debit {
-  color: #dc2626;
-}
+    .task-info {
+      font-size: 13px;
+      color: #666;
+      margin: 4px 0;
+    }
 
-.neutral {
-  color: #6b7280;
-}
+    .task-reward {
+      color: #0f9d58;
+      font-weight: bold;
+      margin-top: 10px;
+    }
 
-.empty {
-  background: white;
-  padding: 30px;
-  text-align: center;
-  border-radius: 12px;
-  color: #777;
-}
+    .loading {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      color: #777;
+    }
 
-.loading {
-  background: white;
-  padding: 30px;
-  text-align: center;
-  border-radius: 12px;
-  color: #777;
-}
+    .empty {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      color: #777;
+    }
 
-.error {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  display: none;
-}
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: none;
+    }
 
-.role {
-  font-size: 13px;
-  margin-top: 5px;
-  opacity: .9;
-}
-</style>
+    .advertiser-only,
+    .worker-only {
+      display: none;
+    }
+
+    @media (max-width: 500px) {
+      .actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .balance {
+        font-size: 28px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="header">
+  <div class="header">
 
-  <div class="back" onclick="history.back()">
-    ←
-  </div>
+    <div class="header-top">
 
-  <div>
-    <h1>Transactions</h1>
-    <div id="roleText" class="role">
-      Loading account...
+      <div class="logo">
+        MoticGigs
+      </div>
+
+      <button
+        class="logout"
+        onclick="logout()"
+      >
+        Logout
+      </button>
+
     </div>
-  </div>
 
-</div>
+    <div class="welcome">
 
+      <h2 id="welcomeName">
+        Welcome
+      </h2>
 
-<div class="container">
+      <p id="accountType">
+        Loading account...
+      </p>
 
-  <div id="errorBox" class="error"></div>
-
-
-  <!-- BALANCE -->
-
-  <div class="balance">
-
-    <small>
-      Available Balance
-    </small>
-
-    <h2 id="balance">
-      ₦0.00
-    </h2>
-
-  </div>
-
-
-  <!-- FILTER -->
-
-  <div class="filter">
-
-    <button
-      id="allBtn"
-      class="active"
-      onclick="setFilter('ALL')"
-    >
-      All
-    </button>
-
-    <button
-      id="creditBtn"
-      onclick="setFilter('CREDIT')"
-    >
-      Credits
-    </button>
-
-    <button
-      id="debitBtn"
-      onclick="setFilter('DEBIT')"
-    >
-      Debits
-    </button>
-
-  </div>
-
-
-  <!-- TRANSACTIONS -->
-
-  <div id="transactions">
-
-    <div class="loading">
-      Loading transactions...
     </div>
 
   </div>
 
-</div>
+
+  <div class="container">
+
+    <div id="errorBox" class="error"></div>
+
+
+    <!-- BALANCE -->
+
+    <div class="balance-card">
+
+      <div class="balance-label">
+        Available Balance
+      </div>
+
+      <div
+        id="availableBalance"
+        class="balance"
+      >
+        ₦0.00
+      </div>
+
+      <div
+        id="pendingBalance"
+        class="pending"
+      >
+        Pending: ₦0.00
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         WORKER ACTIONS
+    ========================== -->
+
+    <div
+      id="workerSection"
+      class="worker-only"
+    >
+
+      <div class="section-title">
+        Worker
+      </div>
+
+      <div class="actions">
+
+        <button
+          class="action"
+          onclick="goAvailableTasks()"
+        >
+          📋 Available Tasks
+        </button>
+
+        <button
+          class="action"
+          onclick="goWithdraw()"
+        >
+          💰 Withdraw
+        </button>
+
+        <button
+          class="action"
+          onclick="goTransactions()"
+        >
+          📊 Transactions
+        </button>
+
+        <button
+          class="action"
+          onclick="goProfile()"
+        >
+          👤 Profile
+        </button>
+
+      </div>
+
+      <div class="section-title">
+        Available Tasks
+      </div>
+
+      <div id="workerTasks">
+
+        <div class="loading">
+          Loading available tasks...
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         ADVERTISER ACTIONS
+    ========================== -->
+
+    <div
+      id="advertiserSection"
+      class="advertiser-only"
+    >
+
+      <div class="section-title">
+        Advertiser
+      </div>
+
+      <div class="actions">
+
+        <button
+          class="action"
+          onclick="goPostTask()"
+        >
+          ➕ Post Task
+        </button>
+
+        <button
+          class="action"
+          onclick="goDeposit()"
+        >
+          💳 Deposit
+        </button>
+
+        <button
+          class="action"
+          onclick="goMyTasks()"
+        >
+          📋 My Tasks
+        </button>
+
+        <button
+          class="action"
+          onclick="goTransactions()"
+        >
+          📊 Transactions
+        </button>
+
+        <button
+          class="action"
+          onclick="goProfile()"
+        >
+          👤 Profile
+        </button>
+
+      </div>
+
+      <div class="section-title">
+        My Tasks
+      </div>
+
+      <div id="advertiserTasks">
+
+        <div class="loading">
+          Loading your tasks...
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
 
 
 <script>
@@ -265,31 +404,27 @@ const supabaseClient =
 
 let currentUser = null;
 let currentRole = null;
-let allTransactions = [];
-let currentFilter = "ALL";
 
 
 /* ==========================================
    START
 ========================================== */
 
-loadPage();
+loadDashboard();
 
 
 /* ==========================================
-   LOAD PAGE
+   LOAD DASHBOARD
 ========================================== */
 
-async function loadPage() {
+async function loadDashboard() {
 
   try {
-
-    showLoading();
 
     hideError();
 
 
-    /* GET CURRENT USER */
+    /* GET USER */
 
     const {
       data: userData,
@@ -309,6 +444,7 @@ async function loadPage() {
         "index.html";
 
       return;
+
     }
 
 
@@ -324,8 +460,13 @@ async function loadPage() {
     } =
       await supabaseClient
         .from("Moticgigs")
-        .select("role,status")
-        .eq("Id", currentUser.id)
+        .select(
+          "full_name,email,role,status"
+        )
+        .eq(
+          "Id",
+          currentUser.id
+        )
         .single();
 
 
@@ -337,7 +478,7 @@ async function loadPage() {
     if (!profile) {
 
       throw new Error(
-        "User profile was not found."
+        "Profile not found."
       );
 
     }
@@ -345,9 +486,16 @@ async function loadPage() {
 
     if (profile.status === "banned") {
 
-      throw new Error(
+      await supabaseClient.auth.signOut();
+
+      alert(
         "This account has been banned."
       );
+
+      window.location.href =
+        "index.html";
+
+      return;
 
     }
 
@@ -356,24 +504,53 @@ async function loadPage() {
       profile.role;
 
 
+    /* WELCOME */
+
     document.getElementById(
-      "roleText"
+      "welcomeName"
+    ).textContent =
+      "Welcome, " +
+      (
+        profile.full_name ||
+        "User"
+      );
+
+
+    document.getElementById(
+      "accountType"
     ).textContent =
       currentRole === "advertiser"
         ? "Advertiser account"
-        : currentRole === "worker"
-          ? "Worker account"
-          : "Account";
+        : "Worker account";
 
 
-    /* LOAD BALANCE */
+    /* SHOW CORRECT DASHBOARD */
 
-    await loadBalance();
+    if (currentRole === "advertiser") {
 
+      document.getElementById(
+        "advertiserSection"
+      ).style.display =
+        "block";
 
-    /* LOAD TRANSACTIONS */
+      await loadAdvertiserWallet();
 
-    await loadTransactions();
+      await loadAdvertiserTasks();
+
+    }
+
+    else {
+
+      document.getElementById(
+        "workerSection"
+      ).style.display =
+        "block";
+
+      await loadWorkerWallet();
+
+      await loadWorkerTasks();
+
+    }
 
   }
 
@@ -383,15 +560,8 @@ async function loadPage() {
 
     showError(
       error.message ||
-      "Unable to load transactions."
+      "Unable to load dashboard."
     );
-
-    document.getElementById(
-      "transactions"
-    ).innerHTML =
-      `<div class="empty">
-        Unable to load transactions.
-      </div>`;
 
   }
 
@@ -399,16 +569,10 @@ async function loadPage() {
 
 
 /* ==========================================
-   LOAD BALANCE
+   WORKER WALLET
 ========================================== */
 
-async function loadBalance() {
-
-  const walletType =
-    currentRole === "advertiser"
-      ? "ADVERTISER"
-      : "WORKER";
-
+async function loadWorkerWallet() {
 
   const {
     data: wallet,
@@ -419,8 +583,14 @@ async function loadBalance() {
       .select(
         "available_balance,pending_balance"
       )
-      .eq("user_id", currentUser.id)
-      .eq("wallet_type", walletType)
+      .eq(
+        "user_id",
+        currentUser.id
+      )
+      .eq(
+        "wallet_type",
+        "WORKER"
+      )
       .maybeSingle();
 
 
@@ -429,35 +599,49 @@ async function loadBalance() {
   }
 
 
-  const available =
-    wallet?.available_balance || 0;
+  document.getElementById(
+    "availableBalance"
+  ).textContent =
+    formatMoney(
+      wallet?.available_balance || 0
+    );
 
 
   document.getElementById(
-    "balance"
+    "pendingBalance"
   ).textContent =
-    formatMoney(available);
+    "Pending: " +
+    formatMoney(
+      wallet?.pending_balance || 0
+    );
 
 }
 
 
 /* ==========================================
-   LOAD TRANSACTIONS
+   ADVERTISER WALLET
 ========================================== */
 
-async function loadTransactions() {
+async function loadAdvertiserWallet() {
 
   const {
-    data,
+    data: wallet,
     error
   } =
     await supabaseClient
-      .from("Wallet -Transaction")
-      .select("*")
-      .eq("user_id", currentUser.id)
-      .order("created_at", {
-        ascending: false
-      });
+      .from("Wallet")
+      .select(
+        "available_balance,pending_balance"
+      )
+      .eq(
+        "user_id",
+        currentUser.id
+      )
+      .eq(
+        "wallet_type",
+        "ADVERTISER"
+      )
+      .maybeSingle();
 
 
   if (error) {
@@ -465,167 +649,188 @@ async function loadTransactions() {
   }
 
 
-  allTransactions =
-    data || [];
+  document.getElementById(
+    "availableBalance"
+  ).textContent =
+    formatMoney(
+      wallet?.available_balance || 0
+    );
 
 
-  renderTransactions();
+  document.getElementById(
+    "pendingBalance"
+  ).textContent =
+    "Posting balance";
 
 }
 
 
 /* ==========================================
-   RENDER TRANSACTIONS
+   WORKER TASKS
 ========================================== */
 
-function renderTransactions() {
+async function loadWorkerTasks() {
 
   const container =
     document.getElementById(
-      "transactions"
+      "workerTasks"
     );
 
 
-  let transactions =
-    [...allTransactions];
-
-
-  /* FILTER */
-
-  if (currentFilter === "CREDIT") {
-
-    transactions =
-      transactions.filter(
-        transaction =>
-          Number(transaction.amount) > 0
+  const {
+    data: tasks,
+    error
+  } =
+    await supabaseClient
+      .from("Task")
+      .select(
+        "id,platform,task_type,task_link,custom_comment,quantity,completed_quantity,worker_reward,status"
+      )
+      .eq(
+        "status",
+        "ACTIVE"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
       );
 
+
+  if (error) {
+    throw error;
   }
 
 
-  if (currentFilter === "DEBIT") {
-
-    transactions =
-      transactions.filter(
-        transaction =>
-          Number(transaction.amount) < 0
-      );
-
-  }
-
-
-  if (!transactions.length) {
+  if (!tasks || tasks.length === 0) {
 
     container.innerHTML =
       `<div class="empty">
-        No transactions found.
+        No available tasks right now.
       </div>`;
 
     return;
+
+  }
+
+
+  /* GET USER SUBMISSIONS */
+
+  const {
+    data: submissions,
+    error: submissionError
+  } =
+    await supabaseClient
+      .from("Submission")
+      .select("task_id,status")
+      .eq(
+        "worker_id",
+        currentUser.id
+      );
+
+
+  if (submissionError) {
+    throw submissionError;
+  }
+
+
+  const submittedTaskIds =
+    new Set(
+      (submissions || [])
+        .map(
+          item => item.task_id
+        )
+    );
+
+
+  const availableTasks =
+    tasks.filter(
+      task =>
+        !submittedTaskIds.has(
+          task.id
+        )
+    );
+
+
+  if (availableTasks.length === 0) {
+
+    container.innerHTML =
+      `<div class="empty">
+        No new tasks available for you.
+      </div>`;
+
+    return;
+
   }
 
 
   container.innerHTML = "";
 
 
-  transactions.forEach(
-    transaction => {
+  availableTasks.forEach(
+    task => {
 
-      const amount =
-        Number(
-          transaction.amount || 0
+      const remaining =
+        Math.max(
+          0,
+          Number(task.quantity || 0) -
+          Number(
+            task.completed_quantity || 0
+          )
         );
 
 
-      const card =
+      const div =
         document.createElement(
           "div"
         );
 
-      card.className =
-        "transaction";
+      div.className =
+        "task";
 
 
-      const title =
-        getTransactionTitle(
-          transaction.transaction_type
-        );
+      div.innerHTML = `
 
-
-      const date =
-        transaction.created_at
-          ? new Date(
-              transaction.created_at
-            ).toLocaleString()
-          : "";
-
-
-      let amountClass =
-        "neutral";
-
-      let amountText =
-        formatMoney(amount);
-
-
-      if (amount > 0) {
-
-        amountClass =
-          "credit";
-
-        amountText =
-          "+" + formatMoney(amount);
-
-      }
-      else if (amount < 0) {
-
-        amountClass =
-          "debit";
-
-        amountText =
-          formatMoney(amount);
-
-      }
-
-
-      card.innerHTML = `
-
-        <div>
-
-          <div class="transaction-title">
-            ${escapeHtml(title)}
-          </div>
-
-          <div class="date">
-            ${escapeHtml(date)}
-          </div>
-
-          ${
-            transaction.note
-              ? `
-                <div
-                  class="date"
-                  style="margin-top:5px"
-                >
-                  ${escapeHtml(
-                    transaction.note
-                  )}
-                </div>
-              `
-              : ""
-          }
-
+        <div class="task-title">
+          ${escapeHtml(
+            task.platform
+          )} -
+          ${escapeHtml(
+            task.task_type
+          )}
         </div>
 
-
-        <div class="amount ${amountClass}">
-          ${amountText}
+        <div class="task-info">
+          Available slots:
+          ${remaining}
         </div>
+
+        <div class="task-reward">
+          Earn:
+          ${formatMoney(
+            task.worker_reward
+          )}
+        </div>
+
+        <button
+          class="action"
+          style="
+            width:100%;
+            margin-top:12px;
+            background:#0f9d58;
+            color:white;
+          "
+          onclick="openTask('${task.id}')"
+        >
+          Open Task
+        </button>
 
       `;
 
 
       container.appendChild(
-        card
+        div
       );
 
     }
@@ -635,119 +840,258 @@ function renderTransactions() {
 
 
 /* ==========================================
-   FILTER
+   ADVERTISER TASKS
 ========================================== */
 
-function setFilter(filter) {
+async function loadAdvertiserTasks() {
 
-  currentFilter =
-    filter;
-
-
-  document
-    .getElementById("allBtn")
-    .classList
-    .remove("active");
-
-  document
-    .getElementById("creditBtn")
-    .classList
-    .remove("active");
-
-  document
-    .getElementById("debitBtn")
-    .classList
-    .remove("active");
+  const container =
+    document.getElementById(
+      "advertiserTasks"
+    );
 
 
-  if (filter === "ALL") {
-
-    document
-      .getElementById("allBtn")
-      .classList
-      .add("active");
-
-  }
-
-  if (filter === "CREDIT") {
-
-    document
-      .getElementById("creditBtn")
-      .classList
-      .add("active");
-
-  }
-
-  if (filter === "DEBIT") {
-
-    document
-      .getElementById("debitBtn")
-      .classList
-      .add("active");
-
-  }
-
-
-  renderTransactions();
-
-}
-
-
-/* ==========================================
-   TRANSACTION NAMES
-========================================== */
-
-function getTransactionTitle(type) {
-
-  if (!type) {
-    return "Transaction";
-  }
-
-
-  const names = {
-
-    TASK_REWARD_PENDING:
-      "Task Reward Pending",
-
-    TASK_REWARD:
-      "Task Reward",
-
-    TASK_PAYMENT:
-      "Task Payment",
-
-    DEPOSIT:
-      "Deposit",
-
-    WITHDRAWAL:
-      "Withdrawal",
-
-    WITHDRAWAL_REFUND:
-      "Withdrawal Refund",
-
-    DEPOSIT_APPROVED:
-      "Deposit Approved",
-
-    DEPOSIT_REJECTED:
-      "Deposit Rejected"
-
-  };
-
-
-  return (
-    names[type] ||
-    String(type)
-      .replaceAll("_", " ")
-      .toLowerCase()
-      .replace(/\b\w/g, c =>
-        c.toUpperCase()
+  const {
+    data: tasks,
+    error
+  } =
+    await supabaseClient
+      .from("Task")
+      .select(
+        "id,platform,task_type,quantity,completed_quantity,total_budget,status"
       )
+      .eq(
+        "advertiser_id",
+        currentUser.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      )
+      .limit(5);
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  if (!tasks || tasks.length === 0) {
+
+    container.innerHTML =
+      `<div class="empty">
+        You have not posted any tasks yet.
+      </div>`;
+
+    return;
+
+  }
+
+
+  container.innerHTML = "";
+
+
+  tasks.forEach(
+    task => {
+
+      const completed =
+        Number(
+          task.completed_quantity || 0
+        );
+
+      const quantity =
+        Number(
+          task.quantity || 0
+        );
+
+      const percentage =
+        quantity > 0
+          ? Math.min(
+              100,
+              (completed / quantity) * 100
+            )
+          : 0;
+
+
+      const div =
+        document.createElement(
+          "div"
+        );
+
+      div.className =
+        "task";
+
+
+      div.innerHTML = `
+
+        <div class="task-title">
+          ${escapeHtml(
+            task.platform
+          )} -
+          ${escapeHtml(
+            task.task_type
+          )}
+        </div>
+
+        <div class="task-info">
+          Progress:
+          ${completed}/${quantity}
+        </div>
+
+        <div
+          style="
+            background:#e5e7eb;
+            height:8px;
+            border-radius:10px;
+            margin-top:10px;
+          "
+        >
+
+          <div
+            style="
+              width:${percentage}%;
+              height:8px;
+              background:#0f9d58;
+              border-radius:10px;
+            "
+          ></div>
+
+        </div>
+
+        <div class="task-info">
+          Status:
+          ${escapeHtml(
+            task.status
+          )}
+        </div>
+
+        <div class="task-reward">
+          Budget:
+          ${formatMoney(
+            task.total_budget
+          )}
+        </div>
+
+      `;
+
+
+      container.appendChild(
+        div
+      );
+
+    }
   );
 
 }
 
 
 /* ==========================================
-   MONEY
+   NAVIGATION
+========================================== */
+
+/*
+   THIS IS THE IMPORTANT FIX.
+
+   Transactions now opens the connected
+   transactions.html page instead of showing:
+
+   "Transaction history will be added next."
+*/
+
+function goTransactions() {
+
+  window.location.href =
+    "transactions.html";
+
+}
+
+
+function goProfile() {
+
+  window.location.href =
+    "profile.html";
+
+}
+
+
+function goMyTasks() {
+
+  window.location.href =
+    "mytasks.html";
+
+}
+
+
+function goWithdraw() {
+
+  window.location.href =
+    "withdraw.html";
+
+}
+
+
+function goPostTask() {
+
+  window.location.href =
+    "posttask.html";
+
+}
+
+
+function goDeposit() {
+
+  window.location.href =
+    "deposit.html";
+
+}
+
+
+function goAvailableTasks() {
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* ==========================================
+   OPEN TASK
+========================================== */
+
+function openTask(taskId) {
+
+  /*
+    The worker task workspace can be connected
+    to the task ID later.
+  */
+
+  window.location.href =
+    "task.html?id=" +
+    encodeURIComponent(taskId);
+
+}
+
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+async function logout() {
+
+  await supabaseClient.auth.signOut();
+
+  window.location.href =
+    "index.html";
+
+}
+
+
+/* ==========================================
+   FORMAT MONEY
 ========================================== */
 
 function formatMoney(amount) {
@@ -761,22 +1105,6 @@ function formatMoney(amount) {
           maximumFractionDigits: 2
         }
       );
-
-}
-
-
-/* ==========================================
-   LOADING
-========================================== */
-
-function showLoading() {
-
-  document.getElementById(
-    "transactions"
-  ).innerHTML =
-    `<div class="loading">
-      Loading transactions...
-    </div>`;
 
 }
 
@@ -803,12 +1131,9 @@ function showError(message) {
 
 function hideError() {
 
-  const box =
-    document.getElementById(
-      "errorBox"
-    );
-
-  box.style.display =
+  document.getElementById(
+    "errorBox"
+  ).style.display =
     "none";
 
 }
