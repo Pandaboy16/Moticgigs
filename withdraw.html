@@ -11,375 +11,455 @@
   <style>
     * {
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
     }
 
     body {
       margin: 0;
-      background: #f5f7f6;
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
       color: #222;
     }
 
-    header {
-      background: #16a34a;
+    .header {
+      background: #0b8f55;
       color: white;
       padding: 18px;
-    }
-
-    .header-inner {
-      max-width: 600px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .back {
-      background: white;
-      color: #16a34a;
-      border: none;
-      padding: 9px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
+      text-align: center;
     }
 
     .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
+      max-width: 500px;
+      margin: 25px auto;
+      padding: 15px;
     }
 
     .card {
       background: white;
-      padding: 22px;
-      border-radius: 16px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.06);
-    }
-
-    h2 {
-      margin-top: 0;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+      margin-bottom: 18px;
     }
 
     .balance {
-      background: #dcfce7;
-      color: #166534;
-      padding: 15px;
-      border-radius: 10px;
+      background: #e9f8f0;
+      border: 1px solid #bde8d0;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
       margin-bottom: 20px;
+    }
+
+    .balance-label {
+      color: #555;
+      font-size: 14px;
+    }
+
+    .balance-amount {
+      color: #087d4a;
+      font-size: 28px;
       font-weight: bold;
+      margin-top: 6px;
     }
 
     label {
       display: block;
+      font-weight: bold;
       margin-top: 15px;
       margin-bottom: 7px;
-      font-weight: bold;
     }
 
     input,
     select {
       width: 100%;
       padding: 13px;
-      border: 1px solid #d1d5db;
+      border: 1px solid #ccc;
       border-radius: 9px;
       font-size: 15px;
       background: white;
     }
 
-    .withdraw-btn {
+    button {
       width: 100%;
-      margin-top: 22px;
       padding: 14px;
+      margin-top: 20px;
       border: none;
       border-radius: 9px;
-      background: #16a34a;
+      background: #0b8f55;
       color: white;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    .withdraw-btn:disabled {
-      background: #9ca3af;
+    button:disabled {
+      background: #9bbcac;
       cursor: not-allowed;
     }
 
-    #message {
-      text-align: center;
+    .back-btn {
+      background: #eee;
+      color: #333;
+      margin-top: 10px;
+    }
+
+    .notice {
+      background: #fff8df;
+      border: 1px solid #f0d77a;
+      color: #6c5600;
+      padding: 12px;
+      border-radius: 9px;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      border-radius: 9px;
       margin-top: 15px;
-      font-weight: bold;
+      font-size: 14px;
     }
 
     .success {
-      color: #16a34a;
+      display: block;
+      background: #e6f7ed;
+      color: #087d4a;
+      border: 1px solid #b7e3c9;
     }
 
     .error {
-      color: #dc2626;
+      display: block;
+      background: #fdeaea;
+      color: #a40000;
+      border: 1px solid #efb7b7;
+    }
+
+    .loading {
+      color: #666;
+      text-align: center;
+      padding: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo">MoticGigs</div>
-
-    <button
-      class="back"
-      onclick="window.location.href='dashboard.html'">
-      Back
-    </button>
+  <div class="header">
+    <h2>Withdraw</h2>
   </div>
-</header>
 
-<div class="container">
-
-  <div class="card">
-
-    <h2>Withdraw Funds</h2>
+  <div class="container">
 
     <div class="balance">
-      Available Balance:
-      ₦<span id="availableBalance">0.00</span>
+      <div class="balance-label">Available Worker Balance</div>
+      <div class="balance-amount" id="balance">₦0.00</div>
     </div>
 
-    <label for="amount">
-      Withdrawal Amount
-    </label>
+    <div class="card">
 
-    <input
-      type="number"
-      id="amount"
-      min="1"
-      step="0.01"
-      placeholder="Enter amount">
+      <div class="notice">
+        Minimum withdrawal amount is <strong>₦500</strong>.
+        Only your available worker balance can be withdrawn.
+      </div>
 
-    <label for="bank">
-      Select Bank / MFB
-    </label>
+      <label for="amount">Withdrawal Amount</label>
+      <input
+        type="number"
+        id="amount"
+        min="500"
+        step="1"
+        placeholder="Enter amount"
+      >
 
-    <select id="bank">
-      <option value="">Loading banks...</option>
-    </select>
+      <label for="bank">Bank / MFB</label>
+      <select id="bank">
+        <option value="">Loading banks...</option>
+      </select>
 
-    <label for="accountNumber">
-      Account Number
-    </label>
+      <label for="accountNumber">Account Number</label>
+      <input
+        type="text"
+        id="accountNumber"
+        inputmode="numeric"
+        maxlength="10"
+        placeholder="Enter 10-digit account number"
+      >
 
-    <input
-      type="text"
-      id="accountNumber"
-      inputmode="numeric"
-      maxlength="10"
-      placeholder="Enter account number">
+      <label for="accountName">Account Name</label>
+      <input
+        type="text"
+        id="accountName"
+        placeholder="Enter account name"
+      >
 
-    <label for="accountName">
-      Account Name
-    </label>
+      <button id="withdrawBtn" onclick="submitWithdrawal()">
+        Request Withdrawal
+      </button>
 
-    <input
-      type="text"
-      id="accountName"
-      placeholder="Enter account name">
+      <button
+        class="back-btn"
+        onclick="window.location.href='dashboard.html'"
+      >
+        Back to Dashboard
+      </button>
 
-    <button
-      class="withdraw-btn"
-      id="withdrawBtn">
-      Submit Withdrawal
-    </button>
+      <div id="message" class="message"></div>
 
-    <div id="message"></div>
-
+    </div>
   </div>
 
-</div>
-
 <script>
+  const SUPABASE_URL =
+    "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
-const SUPABASE_URL =
-  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+  const SUPABASE_KEY =
+    "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-const SUPABASE_KEY =
-  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+  const supabaseClient =
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  let currentUser = null;
+  let currentBalance = 0;
 
+  async function init() {
 
-let currentUser = null;
-let availableBalance = 0;
+    try {
 
+      const {
+        data: { user },
+        error: authError
+      } = await supabaseClient.auth.getUser();
 
-// ==========================================
-// LOAD USER
-// ==========================================
-
-async function loadUser() {
-
-  const {
-    data: { user },
-    error
-  } = await supabaseClient.auth.getUser();
-
-  if (error || !user) {
-    window.location.href = "login.html";
-    return;
-  }
-
-  currentUser = user;
-
-  await loadWallet();
-  await loadBanks();
-}
-
-
-// ==========================================
-// LOAD WALLET
-// ==========================================
-
-async function loadWallet() {
-
-  const {
-    data: wallet,
-    error
-  } = await supabaseClient
-    .from("Wallet")
-    .select("available_balance")
-    .eq("user_id", currentUser.id)
-    .eq("wallet_type", "WORKER")
-    .maybeSingle();
-
-  if (error || !wallet) {
-
-    showMessage(
-      "Unable to load your wallet.",
-      "error"
-    );
-
-    return;
-  }
-
-  availableBalance =
-    Number(wallet.available_balance || 0);
-
-  document.getElementById(
-    "availableBalance"
-  ).textContent =
-    availableBalance.toLocaleString(
-      "en-NG",
-      {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+      if (authError || !user) {
+        window.location.href = "index.html";
+        return;
       }
-    );
-}
 
+      currentUser = user;
 
-// ==========================================
-// LOAD BANKS
-// ==========================================
+      // Check profile
+      const {
+        data: profile,
+        error: profileError
+      } = await supabaseClient
+        .from("Moticgigs")
+        .select("role,status")
+        .eq("Id", user.id)
+        .single();
 
-async function loadBanks() {
+      if (profileError || !profile) {
+        showMessage("Unable to load your profile.", "error");
+        return;
+      }
 
-  const bankSelect =
-    document.getElementById("bank");
+      if (profile.status === "banned") {
+        showMessage(
+          "Your account has been banned.",
+          "error"
+        );
+        return;
+      }
 
-  const {
-    data: banks,
-    error
-  } = await supabaseClient
-    .from("Banks")
-    .select("id, name")
-    .eq("active", true)
-    .order("name");
+      if (profile.role !== "worker") {
+        showMessage(
+          "Withdrawals are available only to workers.",
+          "error"
+        );
+        document.getElementById("withdrawBtn").disabled = true;
+        return;
+      }
 
-  if (error) {
+      await loadWallet();
+      await loadBanks();
 
-    console.error(error);
+    } catch (error) {
 
-    bankSelect.innerHTML =
-      '<option value="">Unable to load banks</option>';
-
-    return;
-  }
-
-  bankSelect.innerHTML =
-    '<option value="">Select your bank</option>';
-
-  for (const bank of banks || []) {
-
-    const option =
-      document.createElement("option");
-
-    option.value = bank.id;
-    option.textContent = bank.name;
-
-    bankSelect.appendChild(option);
-  }
-}
-
-
-// ==========================================
-// WITHDRAW
-// ==========================================
-
-document
-  .getElementById("withdrawBtn")
-  .addEventListener("click", async function() {
-
-    const amount =
-      Number(
-        document.getElementById("amount").value
-      );
-
-    const bankId =
-      document.getElementById("bank").value;
-
-    const bankSelect =
-      document.getElementById("bank");
-
-    const bankName =
-      bankSelect.options[
-        bankSelect.selectedIndex
-      ]?.textContent || "";
-
-    const accountNumber =
-      document
-        .getElementById("accountNumber")
-        .value
-        .trim();
-
-    const accountName =
-      document
-        .getElementById("accountName")
-        .value
-        .trim();
-
-
-    // VALIDATION
-
-    if (!amount || amount <= 0) {
+      console.error(error);
 
       showMessage(
-        "Enter a valid withdrawal amount.",
+        "Something went wrong while loading the page.",
+        "error"
+      );
+    }
+  }
+
+
+  async function loadWallet() {
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("Wallet")
+      .select("available_balance")
+      .eq("user_id", currentUser.id)
+      .eq("wallet_type", "WORKER")
+      .single();
+
+    if (error) {
+
+      console.error("Wallet error:", error);
+
+      showMessage(
+        "Could not load your wallet balance.",
         "error"
       );
 
       return;
     }
 
-    if (amount > availableBalance) {
+    currentBalance =
+      Number(data?.available_balance || 0);
+
+    document.getElementById("balance").textContent =
+      "₦" + currentBalance.toLocaleString(
+        "en-NG",
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }
+      );
+  }
+
+
+  async function loadBanks() {
+
+    const bankSelect =
+      document.getElementById("bank");
+
+    bankSelect.innerHTML =
+      '<option value="">Loading banks...</option>';
+
+    const {
+      data: banks,
+      error
+    } = await supabaseClient
+      .from("Banks")
+      .select("id,name,type")
+      .eq("active", true)
+      .order("type", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (error) {
+
+      console.error("Banks error:", error);
+
+      bankSelect.innerHTML =
+        '<option value="">Unable to load banks</option>';
+
+      showMessage(
+        "Could not load the bank list.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (!banks || banks.length === 0) {
+
+      bankSelect.innerHTML =
+        '<option value="">No active banks available</option>';
+
+      return;
+    }
+
+    bankSelect.innerHTML =
+      '<option value="">Select bank / MFB</option>';
+
+    // Group institutions by their database type.
+    const groups = {};
+
+    banks.forEach(bank => {
+
+      const type =
+        bank.type || "Other";
+
+      if (!groups[type]) {
+        groups[type] = [];
+      }
+
+      groups[type].push(bank);
+    });
+
+    Object.keys(groups)
+      .sort()
+      .forEach(type => {
+
+        const group =
+          document.createElement("optgroup");
+
+        group.label = type;
+
+        groups[type]
+          .sort((a, b) =>
+            a.name.localeCompare(b.name)
+          )
+          .forEach(bank => {
+
+            const option =
+              document.createElement("option");
+
+            option.value = bank.id;
+
+            option.textContent =
+              bank.name;
+
+            option.dataset.name =
+              bank.name;
+
+            option.dataset.type =
+              bank.type || "";
+
+            group.appendChild(option);
+          });
+
+        bankSelect.appendChild(group);
+      });
+  }
+
+
+  async function submitWithdrawal() {
+
+    const amountInput =
+      document.getElementById("amount");
+
+    const bankSelect =
+      document.getElementById("bank");
+
+    const accountNumber =
+      document.getElementById("accountNumber")
+        .value.trim();
+
+    const accountName =
+      document.getElementById("accountName")
+        .value.trim();
+
+    const amount =
+      Number(amountInput.value);
+
+    const bankId =
+      bankSelect.value;
+
+    const selectedOption =
+      bankSelect.options[
+        bankSelect.selectedIndex
+      ];
+
+    const bankName =
+      selectedOption?.dataset?.name || "";
+
+    if (!amount || amount < 500) {
+
+      showMessage(
+        "Minimum withdrawal amount is ₦500.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (amount > currentBalance) {
 
       showMessage(
         "Insufficient available balance.",
@@ -392,43 +472,32 @@ document
     if (!bankId) {
 
       showMessage(
-        "Please select your bank.",
+        "Please select your bank or MFB.",
         "error"
       );
 
       return;
     }
 
-    if (accountNumber.length !== 10) {
+    if (!/^\d{10}$/.test(accountNumber)) {
 
       showMessage(
-        "Account number must be 10 digits.",
+        "Please enter a valid 10-digit account number.",
         "error"
       );
 
       return;
     }
 
-    if (!/^[0-9]+$/.test(accountNumber)) {
+    if (!accountName) {
 
       showMessage(
-        "Account number must contain only numbers.",
+        "Please enter the account name.",
         "error"
       );
 
       return;
     }
-
-    if (accountName.length < 2) {
-
-      showMessage(
-        "Enter your account name.",
-        "error"
-      );
-
-      return;
-    }
-
 
     const button =
       document.getElementById("withdrawBtn");
@@ -436,88 +505,74 @@ document
     button.disabled = true;
     button.textContent = "Submitting...";
 
+    try {
 
-    // CREATE WITHDRAWAL
+      const {
+        error
+      } = await supabaseClient
+        .from("Withdrawal")
+        .insert({
+          worker_id: currentUser.id,
+          bank_id: bankId,
+          bank_name: bankName,
+          account_number: accountNumber,
+          account_name: accountName,
+          amount: amount,
+          status: "PENDING"
+        });
 
-    const {
-      error
-    } = await supabaseClient
-      .from("Withdrawal")
-      .insert({
-        worker_id: currentUser.id,
-        bank_id: bankId,
-        bank_name: bankName,
-        account_number: accountNumber,
-        account_name: accountName,
-        amount: amount,
-        status: "PENDING"
-      });
+      if (error) {
+        throw error;
+      }
 
+      showMessage(
+        "Withdrawal request submitted successfully. It is now pending admin approval.",
+        "success"
+      );
 
-    if (error) {
+      amountInput.value = "";
+      bankSelect.value = "";
+      document.getElementById("accountNumber").value = "";
+      document.getElementById("accountName").value = "";
 
-      console.error(error);
+      // Refresh the balance because the database trigger
+      // deducts the amount immediately.
+      await loadWallet();
+
+    } catch (error) {
+
+      console.error("Withdrawal error:", error);
 
       showMessage(
         error.message ||
-        "Withdrawal request failed.",
+        "Could not submit withdrawal request.",
         "error"
       );
 
+    } finally {
+
       button.disabled = false;
-      button.textContent =
-        "Submit Withdrawal";
-
-      return;
+      button.textContent = "Request Withdrawal";
     }
+  }
 
 
-    // SUCCESS
+  function showMessage(text, type) {
 
-    showMessage(
-      "Withdrawal request submitted successfully.",
-      "success"
-    );
+    const message =
+      document.getElementById("message");
 
-    document.getElementById("amount").value = "";
-    document.getElementById("bank").value = "";
-    document.getElementById("accountNumber").value = "";
-    document.getElementById("accountName").value = "";
+    message.textContent = text;
 
-    button.disabled = false;
-    button.textContent =
-      "Submit Withdrawal";
+    message.className =
+      "message " + type;
+
+    message.style.display = "block";
+  }
 
 
-    // REFRESH BALANCE
-
-    await loadWallet();
-
-  });
-
-
-// ==========================================
-// MESSAGE
-// ==========================================
-
-function showMessage(text, type) {
-
-  const message =
-    document.getElementById("message");
-
-  message.textContent = text;
-
-  message.className = type;
-}
-
-
-// ==========================================
-// START
-// ==========================================
-
-loadUser();
-
+  init();
 </script>
 
 </body>
-  </html>
+</html>
