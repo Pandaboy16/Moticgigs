@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Tasks - MoticGigs</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7f5;
+  color: #17211b;
+}
+
+.header {
+  background: #0f9d58;
+  color: white;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.back {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
+
+.task {
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.task-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.platform {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.status {
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status.completed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.task-type {
+  color: #555;
+  margin-top: 7px;
+}
+
+.progress-container {
+  margin-top: 18px;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+
+.progress {
+  height: 9px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #0f9d58;
+}
+
+.details {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.detail {
+  background: #f8faf9;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.detail small {
+  display: block;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.detail strong {
+  font-size: 15px;
+}
+
+.view-button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #0f9d58;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.view-button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.empty {
+  background: white;
+  padding: 35px;
+  border-radius: 12px;
+  text-align: center;
+  color: #777;
+}
+
+.loading {
+  text-align: center;
+  padding: 35px;
+  color: #777;
+}
+
+.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="back" onclick="history.back()">←</div>
+  <h1>My Tasks</h1>
+</div>
+
+<div class="container" id="taskContainer">
+
+  <div class="loading">
+    Loading your tasks...
+  </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+function formatMoney(amount) {
+
+  return "₦" + Number(amount || 0).toLocaleString(
+    "en-NG",
+    {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }
+  );
+
+}
+
+
+function getStatusClass(status) {
+
+  const value = String(status || "").toLowerCase();
+
+  if (value === "completed") {
+    return "completed";
+  }
+
+  if (
+    value === "pending" ||
+    value === "paused"
+  ) {
+    return "pending";
+  }
+
+  if (
+    value === "cancelled" ||
+    value === "rejected"
+  ) {
+    return "cancelled";
+  }
+
+  return "";
+
+}
+
+
+function createTaskHTML(task) {
+
+  const quantity =
+    Number(task.quantity || 0);
+
+  const completed =
+    Number(task.completed_quantity || 0);
+
+  let percentage = 0;
+
+  if (quantity > 0) {
+    percentage =
+      Math.min(
+        100,
+        Math.max(
+          0,
+          (completed / quantity) * 100
+        )
+      );
+  }
+
+
+  const status =
+    String(task.status || "UNKNOWN")
+      .toUpperCase();
+
+
+  const statusClass =
+    getStatusClass(task.status);
+
+
+  return `
+
+    <div class="task">
+
+      <div class="task-top">
+
+        <div>
+
+          <div class="platform">
+            ${escapeHTML(task.platform || "Platform")}
+          </div>
+
+          <div class="task-type">
+            ${escapeHTML(task.task_type || "Task")}
+          </div>
+
+        </div>
+
+        <div class="status ${statusClass}">
+          ${escapeHTML(status)}
+        </div>
+
+      </div>
+
+
+      <div class="progress-container">
+
+        <div class="progress-text">
+
+          <span>Completed</span>
+
+          <span>
+            ${completed} / ${quantity}
+          </span>
+
+        </div>
+
+
+        <div class="progress">
+
+          <div
+            class="progress-bar"
+            style="width:${percentage}%"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <div class="details">
+
+        <div class="detail">
+
+          <small>
+            Price per Action
+          </small>
+
+          <strong>
+            ${formatMoney(task.price_per_action)}
+          </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+          <small>
+            Total Budget
+          </small>
+
+          <strong>
+            ${formatMoney(task.total_budget)}
+          </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+          <small>
+            Worker Reward
+          </small>
+
+          <strong>
+            ${formatMoney(task.worker_reward)}
+          </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+          <small>
+            Platform Revenue
+          </small>
+
+          <strong>
+            ${formatMoney(task.platform_revenue)}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <button
+        class="view-button"
+        onclick="openTask('${escapeJS(task.task_link || "")}')"
+        ${task.task_link ? "" : "disabled"}
+      >
+        View Task
+      </button>
+
+    </div>
+
+  `;
+
+}
+
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function escapeJS(value) {
+
+  return String(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\r/g, "")
+    .replace(/\n/g, "\\n");
+
+}
+
+
+function openTask(link) {
+
+  if (!link) {
+    return;
+  }
+
+  window.open(
+    link,
+    "_blank"
+  );
+
+}
+
+
+async function loadMyTasks() {
+
+  const container =
+    document.getElementById("taskContainer");
+
+
+  try {
+
+    const {
+      data: { user },
+      error: authError
+    } =
+      await supabaseClient.auth.getUser();
+
+
+    if (authError || !user) {
+
+      window.location.href =
+        "index.html";
+
+      return;
+
+    }
+
+
+    const {
+      data: profile,
+      error: profileError
+    } =
+      await supabaseClient
+        .from("Moticgigs")
+        .select("role, status")
+        .eq("Id", user.id)
+        .single();
+
+
+    if (profileError) {
+      throw profileError;
+    }
+
+
+    if (profile.status === "banned") {
+
+      container.innerHTML = `
+        <div class="error">
+          Your account has been banned.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    if (profile.role !== "advertiser") {
+
+      container.innerHTML = `
+        <div class="error">
+          This page is only available to advertisers.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    const {
+      data: tasks,
+      error: taskError
+    } =
+      await supabaseClient
+        .from("Task")
+        .select(`
+          id,
+          platform,
+          task_type,
+          task_link,
+          quantity,
+          completed_quantity,
+          price_per_action,
+          worker_reward,
+          platform_revenue,
+          total_budget,
+          status,
+          created_at
+        `)
+        .eq("advertiser_id", user.id)
+        .order("created_at", {
+          ascending: false
+        });
+
+
+    if (taskError) {
+      throw taskError;
+    }
+
+
+    if (!tasks || tasks.length === 0) {
+
+      container.innerHTML = `
+        <div class="empty">
+
+          <h3>No tasks yet</h3>
+
+          <p>
+            You have not posted any tasks yet.
+          </p>
+
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      tasks
+        .map(task => createTaskHTML(task))
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(
+      "Error loading tasks:",
+      error
+    );
+
+    container.innerHTML = `
+      <div class="error">
+        Unable to load your tasks.
+        Please refresh the page.
+      </div>
+    `;
+
+  }
+
+}
+
+
+loadMyTasks();
+
+</script>
+
+</body>
+</html>
