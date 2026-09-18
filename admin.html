@@ -1,248 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - MoticGigs</title>
 
-  <title>Admin Dashboard - MoticGigs</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f4f7f6;
+  color:#222;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f7f6;
-      color: #222;
-    }
+header{
+  background:#159447;
+  color:white;
+  padding:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    header {
-      background: #159447;
-      color: white;
-      padding: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
+header h1{
+  margin:0;
+  font-size:22px;
+}
 
-    header h1 {
-      margin: 0;
-      font-size: 21px;
-    }
+header small{
+  display:block;
+  margin-top:5px;
+}
 
-    header small {
-      display: block;
-      margin-top: 4px;
-      opacity: .9;
-    }
+button{
+  border:0;
+  border-radius:8px;
+  padding:11px 15px;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-    .logout {
-      background: white;
-      color: #159447;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.logout{
+  background:white;
+  color:#159447;
+}
 
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 18px;
-    }
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:15px;
+}
 
-    .status-bar {
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-    }
+.status{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  box-shadow:0 2px 8px #0001;
+}
 
-    .status-ok {
-      color: #087f23;
-      font-weight: bold;
-    }
+.section{
+  background:white;
+  padding:18px;
+  margin-bottom:18px;
+  border-radius:14px;
+  box-shadow:0 2px 8px #0001;
+}
 
-    .status-error {
-      color: #c62828;
-      font-weight: bold;
-    }
+.section h2{
+  color:#159447;
+  margin-top:0;
+}
 
-    .section {
-      background: white;
-      border-radius: 14px;
-      margin-bottom: 22px;
-      padding: 18px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.07);
-    }
+.card{
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:15px;
+  margin:12px 0;
+}
 
-    .section h2 {
-      margin-top: 0;
-      font-size: 19px;
-      color: #159447;
-    }
+.row{
+  margin:7px 0;
+  word-break:break-word;
+}
 
-    .loading {
-      color: #666;
-      padding: 15px 0;
-    }
+.label{
+  font-weight:bold;
+}
 
-    .empty {
-      padding: 15px;
-      background: #f6f6f6;
-      border-radius: 9px;
-      color: #666;
-    }
+.amount{
+  color:#159447;
+  font-size:21px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
 
-    .error {
-      padding: 14px;
-      background: #fff0f0;
-      border-radius: 9px;
-      color: #c62828;
-      white-space: pre-wrap;
-    }
+.loading{
+  color:#666;
+  padding:10px 0;
+}
 
-    .card {
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
-      background: #fff;
-    }
+.empty{
+  background:#f5f5f5;
+  padding:13px;
+  border-radius:8px;
+  color:#666;
+}
 
-    .card:last-child {
-      margin-bottom: 0;
-    }
+.error{
+  background:#fff0f0;
+  color:#c62828;
+  padding:13px;
+  border-radius:8px;
+  white-space:pre-wrap;
+}
 
-    .row {
-      margin: 7px 0;
-      word-break: break-word;
-    }
+.ok{
+  color:#087f23;
+  font-weight:bold;
+}
 
-    .label {
-      font-weight: bold;
-    }
+.approve{
+  background:#159447;
+  color:white;
+  margin:5px 5px 0 0;
+}
 
-    .amount {
-      font-size: 21px;
-      color: #159447;
-      font-weight: bold;
-      margin: 8px 0;
-    }
+.reject{
+  background:#d93025;
+  color:white;
+  margin:5px 5px 0 0;
+}
 
-    .pending {
-      color: #d97706;
-      font-weight: bold;
-    }
+.refresh{
+  background:#333;
+  color:white;
+  margin-top:10px;
+}
 
-    .approved {
-      color: #087f23;
-      font-weight: bold;
-    }
+.proof{
+  width:100%;
+  max-width:320px;
+  max-height:400px;
+  object-fit:contain;
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin-top:10px;
+  cursor:pointer;
+}
 
-    .rejected {
-      color: #c62828;
-      font-weight: bold;
-    }
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000d;
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
 
-    button.action {
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 5px 5px 0 0;
-    }
+.modal img{
+  max-width:100%;
+  max-height:90vh;
+}
 
-    .approve {
-      background: #159447;
-      color: white;
-    }
+.close{
+  position:absolute;
+  top:10px;
+  right:20px;
+  color:white;
+  font-size:38px;
+}
 
-    .reject {
-      background: #d93025;
-      color: white;
-    }
-
-    .refresh {
-      background: #333;
-      color: white;
-    }
-
-    .proof-image {
-      display: block;
-      width: 100%;
-      max-width: 320px;
-      max-height: 400px;
-      object-fit: contain;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .proof-loading {
-      color: #666;
-      margin-top: 10px;
-    }
-
-    .proof-error {
-      color: #c62828;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.85);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      padding: 15px;
-    }
-
-    .modal img {
-      max-width: 100%;
-      max-height: 90vh;
-      border-radius: 10px;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      color: white;
-      font-size: 35px;
-      cursor: pointer;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 12px;
-      }
-
-      .section {
-        padding: 14px;
-      }
-
-      header h1 {
-        font-size: 18px;
-      }
-
-      header {
-        align-items: flex-start;
-      }
-    }
-  </style>
+@media(max-width:600px){
+  header h1{font-size:19px}
+  .section{padding:14px}
+}
+</style>
 </head>
 
 <body>
@@ -256,297 +195,211 @@
   <button class="logout" onclick="logout()">Logout</button>
 </header>
 
-
 <div class="container">
 
-  <div class="status-bar">
-    <div id="systemStatus">
-      Connecting to MoticGigs...
-    </div>
+  <div class="status" id="systemStatus">
+    Connecting to MoticGigs...
   </div>
 
-
-  <!-- ================= DEPOSITS ================= -->
-
+  <!-- DEPOSITS -->
   <div class="section">
-
     <h2>💰 Pending Deposits</h2>
 
     <div id="depositList">
-      <div class="loading">
-        Loading deposits...
-      </div>
+      <div class="loading">Loading deposits...</div>
     </div>
 
-    <button
-      class="action refresh"
-      onclick="loadDeposits()">
+    <button class="refresh" onclick="loadDeposits()">
       Refresh Deposits
     </button>
-
   </div>
 
-
-  <!-- ================= WITHDRAWALS ================= -->
-
+  <!-- WITHDRAWALS -->
   <div class="section">
-
     <h2>🏦 Pending Withdrawals</h2>
 
     <div id="withdrawalList">
-      <div class="loading">
-        Loading withdrawals...
-      </div>
+      <div class="loading">Loading withdrawals...</div>
     </div>
 
-    <button
-      class="action refresh"
-      onclick="loadWithdrawals()">
+    <button class="refresh" onclick="loadWithdrawals()">
       Refresh Withdrawals
     </button>
-
   </div>
 
-
-  <!-- ================= SUBMISSIONS ================= -->
-
+  <!-- SUBMISSIONS -->
   <div class="section">
-
     <h2>📸 Pending Worker Submissions</h2>
 
     <div id="submissionList">
-      <div class="loading">
-        Loading submissions...
-      </div>
+      <div class="loading">Loading submissions...</div>
     </div>
 
-    <button
-      class="action refresh"
-      onclick="loadSubmissions()">
+    <button class="refresh" onclick="loadSubmissions()">
       Refresh Submissions
     </button>
-
   </div>
 
 </div>
 
-
 <!-- IMAGE MODAL -->
-
-<div
-  id="imageModal"
-  class="modal"
-  onclick="closeImageModal()">
-
-  <span class="close-modal">&times;</span>
-
-  <img
-    id="modalImage"
-    src=""
-    alt="Proof">
-
+<div class="modal" id="imageModal" onclick="closeImage()">
+  <span class="close">&times;</span>
+  <img id="modalImage" src="" alt="Proof">
 </div>
-
 
 <script>
 
 const SUPABASE_URL =
-  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+"https://jfoijwjqfaewzyzjawbw.supabase.co";
 
 const SUPABASE_ANON_KEY =
-  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+"sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 
-/* =====================================================
-   BASIC HELPERS
-===================================================== */
+/* =========================
+   HELPERS
+========================= */
 
-function escapeHtml(value) {
-
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-
-function formatMoney(value) {
-
-  const number = Number(value || 0);
-
-  return "₦" + number.toLocaleString(
+function money(value){
+  return "₦" + Number(value || 0).toLocaleString(
     "en-NG",
     {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
     }
   );
 }
 
+function date(value){
+  if(!value) return "N/A";
 
-function formatDate(value) {
+  return new Date(value).toLocaleString(
+    "en-NG"
+  );
+}
 
-  if (!value) {
-    return "N/A";
+function safe(value){
+  if(value === null || value === undefined){
+    return "";
   }
 
-  try {
-
-    return new Date(value).toLocaleString(
-      "en-NG",
-      {
-        dateStyle: "medium",
-        timeStyle: "short"
-      }
-    );
-
-  } catch {
-
-    return value;
-  }
+  return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
 
-/* =====================================================
-   ADMIN AUTH CHECK
-===================================================== */
+/* =========================
+   ADMIN CHECK
+========================= */
 
-async function checkAdmin() {
+async function checkAdmin(){
 
-  const status =
+  const adminStatus =
     document.getElementById("adminStatus");
 
   const systemStatus =
     document.getElementById("systemStatus");
 
-  try {
-
-    status.textContent =
-      "Checking administrator...";
+  try{
 
     systemStatus.textContent =
       "Checking logged-in account...";
 
-
-    /* STEP 1 */
-
     const {
-      data: userData,
-      error: userError
+      data:userData,
+      error:userError
     } =
-      await supabaseClient.auth.getUser();
+    await supabaseClient.auth.getUser();
 
-
-    if (userError) {
-
+    if(userError){
       throw new Error(
         "Authentication error: " +
         userError.message
       );
     }
 
+    if(!userData || !userData.user){
 
-    if (!userData || !userData.user) {
-
-      status.textContent =
+      adminStatus.textContent =
         "Not logged in";
 
       systemStatus.innerHTML =
-        '<span class="status-error">❌ No logged-in user found.</span>';
+        '<span class="error">❌ No logged-in user found.</span>';
 
       return;
     }
-
 
     const user =
       userData.user;
 
-
-    /* STEP 2 */
-
     systemStatus.textContent =
       "Checking administrator profile...";
 
-
     const {
-      data: profile,
-      error: profileError
+      data:profile,
+      error:profileError
     } =
-      await supabaseClient
-        .from("Moticgigs")
-        .select("role, status, email")
-        .eq("Id", user.id)
-        .single();
+    await supabaseClient
+      .from("Moticgigs")
+      .select("role,status,email")
+      .eq("Id",user.id)
+      .single();
 
-
-    if (profileError) {
-
+    if(profileError){
       throw new Error(
-        "Moticgigs profile error: " +
+        "Profile error: " +
         profileError.message
       );
     }
 
-
-    if (!profile) {
+    if(!profile){
 
       throw new Error(
-        "No Moticgigs profile found."
+        "Administrator profile not found."
       );
     }
 
+    if(profile.role !== "admin"){
 
-    /* STEP 3 */
-
-    if (profile.role !== "admin") {
-
-      status.textContent =
+      adminStatus.textContent =
         "Not an administrator";
 
       systemStatus.innerHTML =
-        '<span class="status-error">❌ This account does not have administrator permission.</span>';
+        '<span class="error">❌ This account is not an administrator.</span>';
 
       return;
     }
 
+    if(profile.status !== "active"){
 
-    if (profile.status !== "active") {
-
-      status.textContent =
-        "Administrator account inactive";
+      adminStatus.textContent =
+        "Administrator inactive";
 
       systemStatus.innerHTML =
-        '<span class="status-error">❌ Administrator account is not active.</span>';
+        '<span class="error">❌ Administrator account is not active.</span>';
 
       return;
     }
 
-
-    /* SUCCESS */
-
-    status.textContent =
+    adminStatus.textContent =
       "Active administrator";
 
     systemStatus.innerHTML =
-      '<span class="status-ok">✅ Administrator authenticated successfully.</span>';
-
+      '<span class="ok">✅ Administrator authenticated successfully.</span>';
 
     /*
-      IMPORTANT:
-      Each section is loaded separately.
-      If one fails, the others can still work.
+      Start each section separately.
     */
 
     loadDeposits();
@@ -554,629 +407,781 @@ async function checkAdmin() {
     loadSubmissions();
 
   }
-
-  catch (error) {
+  catch(error){
 
     console.error(error);
 
-    status.textContent =
+    adminStatus.textContent =
       "Admin check failed";
 
     systemStatus.innerHTML =
       '<div class="error">❌ ' +
-      escapeHtml(error.message) +
+      safe(error.message) +
       '</div>';
   }
 }
 
 
-/* =====================================================
+/* =========================
    DEPOSITS
-===================================================== */
+========================= */
 
-async function loadDeposits() {
+async function loadDeposits(){
 
-  const container =
+  const box =
     document.getElementById("depositList");
 
-  container.innerHTML =
+  box.innerHTML =
     '<div class="loading">Loading deposits...</div>';
 
-
-  try {
+  try{
 
     const {
       data,
       error
     } =
-      await supabaseClient
-        .from("Deposit")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
-          ascending: false
-        });
+    await supabaseClient
+      .from("Deposit")
+      .select("*")
+      .eq("status","PENDING")
+      .order("created_at",{ascending:false});
 
+    if(error) throw error;
 
-    if (error) {
+    if(!data || data.length === 0){
 
-      throw error;
-    }
-
-
-    if (!data || data.length === 0) {
-
-      container.innerHTML =
+      box.innerHTML =
         '<div class="empty">No pending deposits.</div>';
 
       return;
     }
 
+    box.innerHTML = "";
 
-    container.innerHTML = "";
-
-
-    data.forEach(deposit => {
+    data.forEach(d => {
 
       const card =
         document.createElement("div");
 
       card.className = "card";
 
-
       card.innerHTML = `
 
         <div class="amount">
-          ${formatMoney(deposit.amount)}
+          ${money(d.amount)}
         </div>
 
         <div class="row">
           <span class="label">User ID:</span>
-          ${escapeHtml(deposit.user_id)}
+          ${safe(d.user_id)}
         </div>
 
         <div class="row">
-          <span class="label">Sender Name:</span>
-          ${escapeHtml(deposit.sender_name || "N/A")}
+          <span class="label">Sender:</span>
+          ${safe(d.sender_name || "N/A")}
         </div>
 
         <div class="row">
           <span class="label">Payment Method:</span>
-          ${escapeHtml(deposit.payment_method || "N/A")}
+          ${safe(d.payment_method || "N/A")}
         </div>
 
         <div class="row">
-          <span class="label">Payment Reference:</span>
-          ${escapeHtml(deposit.payment_reference || "N/A")}
+          <span class="label">Reference:</span>
+          ${safe(d.payment_reference || "N/A")}
         </div>
 
         <div class="row">
           <span class="label">Created:</span>
-          ${formatDate(deposit.created_at)}
-        </div>
-
-        <div class="row">
-          <span class="label">Expires:</span>
-          ${formatDate(deposit.expires_at)}
+          ${date(d.created_at)}
         </div>
 
         <button
-          class="action approve"
-          onclick="approveDeposit('${deposit.id}')">
+          class="approve"
+          onclick="approveDeposit('${d.id}')">
           ✅ Approve
         </button>
 
         <button
-          class="action reject"
-          onclick="rejectDeposit('${deposit.id}')">
+          class="reject"
+          onclick="rejectDeposit('${d.id}')">
           ❌ Reject
         </button>
-
       `;
 
-
-      container.appendChild(card);
-
+      box.appendChild(card);
     });
 
   }
+  catch(error){
 
-  catch (error) {
+    console.error(error);
 
-    console.error("Deposit error:", error);
-
-    container.innerHTML =
+    box.innerHTML =
       '<div class="error">❌ Could not load deposits:\n' +
-      escapeHtml(error.message) +
+      safe(error.message) +
       '</div>';
   }
 }
 
 
-/* =====================================================
+/* =========================
    APPROVE DEPOSIT
-===================================================== */
+========================= */
 
-async function approveDeposit(id) {
+async function approveDeposit(id){
 
-  if (!confirm(
-    "Approve this deposit?\n\nThe amount will be added to the advertiser's available posting balance."
-  )) {
-
+  if(!confirm(
+    "Approve this deposit?\n\nThe amount will be added to the advertiser's available balance."
+  )){
     return;
   }
 
+  try{
 
-  try {
-
-    const {
-      error
-    } =
+    const {error} =
       await supabaseClient.rpc(
         "approve_deposit",
         {
-          deposit_id: id
+          deposit_id:id
         }
       );
 
+    if(error) throw error;
 
-    if (error) {
-
-      throw error;
-    }
-
-
-    alert(
-      "Deposit approved successfully."
-    );
-
+    alert("Deposit approved successfully.");
 
     loadDeposits();
 
   }
-
-  catch (error) {
+  catch(error){
 
     alert(
       "Could not approve deposit:\n\n" +
       error.message
     );
-
   }
 }
 
 
-/* =====================================================
+/* =========================
    REJECT DEPOSIT
-===================================================== */
+========================= */
 
-async function rejectDeposit(id) {
+async function rejectDeposit(id){
 
   const note =
-    prompt(
-      "Enter rejection reason:"
-    );
+    prompt("Enter rejection reason:");
 
+  if(note === null) return;
 
-  if (note === null) {
-    return;
-  }
+  try{
 
-
-  try {
-
-    const {
-      error
-    } =
+    const {error} =
       await supabaseClient.rpc(
         "reject_deposit",
         {
-          p_deposit_id: id,
-          p_admin_note: note
+          p_deposit_id:id,
+          p_admin_note:note
         }
       );
 
+    if(error) throw error;
 
-    if (error) {
-
-      throw error;
-    }
-
-
-    alert(
-      "Deposit rejected."
-    );
-
+    alert("Deposit rejected.");
 
     loadDeposits();
 
   }
-
-  catch (error) {
+  catch(error){
 
     alert(
       "Could not reject deposit:\n\n" +
       error.message
     );
-
   }
 }
 
 
-/* =====================================================
+/* =========================
    WITHDRAWALS
-===================================================== */
+========================= */
 
-async function loadWithdrawals() {
+async function loadWithdrawals(){
 
-  const container =
-    document.getElementById(
-      "withdrawalList"
-    );
+  const box =
+    document.getElementById("withdrawalList");
 
-
-  container.innerHTML =
+  box.innerHTML =
     '<div class="loading">Loading withdrawals...</div>';
 
-
-  try {
+  try{
 
     const {
       data,
       error
     } =
-      await supabaseClient
-        .from("Withdrawal")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
-          ascending: false
-        });
+    await supabaseClient
+      .from("Withdrawal")
+      .select("*")
+      .eq("status","PENDING")
+      .order("created_at",{ascending:false});
 
+    if(error) throw error;
 
-    if (error) {
+    if(!data || data.length === 0){
 
-      throw error;
-    }
-
-
-    if (!data || data.length === 0) {
-
-      container.innerHTML =
+      box.innerHTML =
         '<div class="empty">No pending withdrawals.</div>';
 
       return;
     }
 
+    box.innerHTML = "";
 
-    container.innerHTML = "";
-
-
-    data.forEach(withdrawal => {
+    data.forEach(w => {
 
       const card =
         document.createElement("div");
 
       card.className = "card";
 
-
       card.innerHTML = `
 
         <div class="amount">
-          ${formatMoney(withdrawal.amount)}
+          ${money(w.amount)}
         </div>
 
         <div class="row">
           <span class="label">Worker ID:</span>
-          ${escapeHtml(withdrawal.worker_id)}
+          ${safe(w.worker_id)}
         </div>
 
         <div class="row">
           <span class="label">Bank:</span>
-          ${escapeHtml(withdrawal.bank_name || "N/A")}
+          ${safe(w.bank_name || "N/A")}
         </div>
 
         <div class="row">
           <span class="label">Account Number:</span>
-          ${escapeHtml(withdrawal.account_number || "N/A")}
+          ${safe(w.account_number || "N/A")}
         </div>
 
         <div class="row">
           <span class="label">Account Name:</span>
-          ${escapeHtml(withdrawal.account_name || "N/A")}
+          ${safe(w.account_name || "N/A")}
         </div>
 
         <div class="row">
           <span class="label">Requested:</span>
-          ${formatDate(withdrawal.created_at)}
+          ${date(w.created_at)}
         </div>
 
         <button
-          class="action approve"
+          class="approve"
           onclick="approveWithdrawal(
-            '${escapeJs(withdrawal.worker_id)}',
-            '${escapeJs(withdrawal.created_at)}',
-            '${escapeJs(withdrawal.amount)}',
-            '${escapeJs(withdrawal.account_number)}'
+            '${safe(w.worker_id)}',
+            '${safe(w.created_at)}',
+            '${safe(w.amount)}',
+            '${safe(w.account_number)}'
           )">
           ✅ Approve
         </button>
 
         <button
-          class="action reject"
+          class="reject"
           onclick="rejectWithdrawal(
-            '${escapeJs(withdrawal.worker_id)}',
-            '${escapeJs(withdrawal.created_at)}',
-            '${escapeJs(withdrawal.amount)}',
-            '${escapeJs(withdrawal.account_number)}'
+            '${safe(w.worker_id)}',
+            '${safe(w.created_at)}',
+            '${safe(w.amount)}',
+            '${safe(w.account_number)}'
           )">
           ❌ Reject
         </button>
-
       `;
 
-
-      container.appendChild(card);
-
+      box.appendChild(card);
     });
 
   }
+  catch(error){
 
-  catch (error) {
+    console.error(error);
 
-    console.error(
-      "Withdrawal error:",
-      error
-    );
-
-    container.innerHTML =
+    box.innerHTML =
       '<div class="error">❌ Could not load withdrawals:\n' +
-      escapeHtml(error.message) +
+      safe(error.message) +
       '</div>';
   }
 }
 
 
-/* Escape values used inside onclick */
-
-function escapeJs(value) {
-
-  if (value === null ||
-      value === undefined) {
-
-    return "";
-  }
-
-  return String(value)
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'");
-}
-
-
-/* =====================================================
+/* =========================
    APPROVE WITHDRAWAL
-===================================================== */
+========================= */
 
 async function approveWithdrawal(
   workerId,
   createdAt,
   amount,
   accountNumber
-) {
+){
 
-  if (!confirm(
-    "Approve this withdrawal?\n\nConfirm that you have processed the bank transfer."
-  )) {
-
+  if(!confirm(
+    "Approve this withdrawal?\n\nConfirm that the bank transfer has been processed."
+  )){
     return;
   }
 
+  try{
 
-  try {
-
-    const {
-      error
-    } =
+    const {error} =
       await supabaseClient.rpc(
         "approve_withdrawal",
         {
-          p_worker_id: workerId,
-          p_created_at: createdAt,
-          p_amount: Number(amount),
-          p_account_number: accountNumber,
-          p_provider_reference: null,
-          p_admin_note: null
+          p_worker_id:workerId,
+          p_created_at:createdAt,
+          p_amount:Number(amount),
+          p_account_number:accountNumber,
+          p_provider_reference:null,
+          p_admin_note:null
         }
       );
 
-
-    if (error) {
-
-      throw error;
-    }
-
+    if(error) throw error;
 
     alert(
       "Withdrawal approved successfully."
     );
 
-
     loadWithdrawals();
 
   }
-
-  catch (error) {
+  catch(error){
 
     alert(
       "Could not approve withdrawal:\n\n" +
       error.message
     );
-
   }
 }
 
 
-/* =====================================================
+/* =========================
    REJECT WITHDRAWAL
-===================================================== */
+========================= */
 
 async function rejectWithdrawal(
   workerId,
   createdAt,
   amount,
   accountNumber
-) {
+){
 
   const note =
-    prompt(
-      "Enter rejection reason:"
-    );
+    prompt("Enter rejection reason:");
 
+  if(note === null) return;
 
-  if (note === null) {
+  try{
 
-    return;
-  }
-
-
-  try {
-
-    const {
-      error
-    } =
+    const {error} =
       await supabaseClient.rpc(
         "reject_withdrawal",
         {
-          p_worker_id: workerId,
-          p_created_at: createdAt,
-          p_amount: Number(amount),
-          p_account_number: accountNumber,
-          p_provider_reference: null,
-          p_admin_note: note
+          p_worker_id:workerId,
+          p_created_at:createdAt,
+          p_amount:Number(amount),
+          p_account_number:accountNumber,
+          p_provider_reference:null,
+          p_admin_note:note
         }
       );
 
-
-    if (error) {
-
-      throw error;
-    }
-
+    if(error) throw error;
 
     alert(
-      "Withdrawal rejected and the amount has been returned to the worker balance."
+      "Withdrawal rejected. The amount has been returned to the worker balance."
     );
-
 
     loadWithdrawals();
 
   }
-
-  catch (error) {
+  catch(error){
 
     alert(
       "Could not reject withdrawal:\n\n" +
       error.message
     );
-
   }
 }
 
 
-/* =====================================================
+/* =========================
    SUBMISSIONS
-===================================================== */
+========================= */
 
-async function loadSubmissions() {
+async function loadSubmissions(){
 
-  const container =
-    document.getElementById(
-      "submissionList"
-    );
+  const box =
+    document.getElementById("submissionList");
 
-
-  container.innerHTML =
+  box.innerHTML =
     '<div class="loading">Loading submissions...</div>';
 
-
-  try {
+  try{
 
     const {
       data,
       error
     } =
-      await supabaseClient
-        .from("Submission")
-        .select("*")
-        .eq("status", "PENDING")
-        .order("created_at", {
-          ascending: false
-        });
+    await supabaseClient
+      .from("Submission")
+      .select("*")
+      .eq("status","PENDING")
+      .order("created_at",{ascending:false});
 
+    if(error) throw error;
 
-    if (error) {
+    if(!data || data.length === 0){
 
-      throw error;
-    }
-
-
-    if (!data || data.length === 0) {
-
-      container.innerHTML =
+      box.innerHTML =
         '<div class="empty">No pending worker submissions.</div>';
 
       return;
     }
 
+    box.innerHTML = "";
 
-    container.innerHTML = "";
-
-
-    data.forEach(submission => {
+    data.forEach(s => {
 
       const card =
         document.createElement("div");
 
       card.className = "card";
 
-
       const proofId =
-        "proof_" + submission.id;
-
+        "proof_" + s.id;
 
       card.innerHTML = `
 
         <div class="amount">
-          Reward: ${formatMoney(submission.reward)}
-        </div>
-
-        <div class="row">
-          <span class="label">Submission ID:</span>
-          ${escapeHtml(submission.id)}
+          Reward: ${money(s.reward)}
         </div>
 
         <div class="row">
           <span class="label">Worker ID:</span>
-          ${escapeHtml(submission.worker_id)}
+          ${safe(s.worker_id)}
         </div>
 
         <div class="row">
           <span class="label">Task ID:</span>
-          ${escapeHtml(submission.task_id)}
+          ${safe(s.task_id)}
         </div>
 
         <div class="row">
           <span class="label">Username:</span>
-          ${escapeHtml(submission.username || "N/A")}
+          ${safe(s.username || "N/A")}
         </div>
 
         <div class="row">
           <span class="label">Submitted:</span>
-          ${formatDate(
-            submission.submitted_at ||
-            submission.created_at
-          )}
+          ${date(s.submitted_at || s.created_at)}
         </div>
 
         <div id="${proofId}">
-          <div class=
+          <div class="loading">
+            Loading proof screenshot...
+          </div>
+        </div>
+
+        <button
+          class="approve"
+          onclick="approveSubmission('${s.id}')">
+          ✅ Approve
+        </button>
+
+        <button
+          class="reject"
+          onclick="rejectSubmission('${s.id}')">
+          ❌ Reject
+        </button>
+      `;
+
+      box.appendChild(card);
+
+      loadProof(
+        s.proof,
+        proofId
+      );
+    });
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    box.innerHTML =
+      '<div class="error">❌ Could not load submissions:\n' +
+      safe(error.message) +
+      '</div>';
+  }
+}
+
+
+/* =========================
+   PROOF SCREENSHOT
+========================= */
+
+async function loadProof(
+  proof,
+  elementId
+){
+
+  const box =
+    document.getElementById(elementId);
+
+  if(!proof){
+
+    box.innerHTML =
+      '<div class="error">No screenshot/proof submitted.</div>';
+
+    return;
+  }
+
+  try{
+
+    let path = proof;
+
+    /*
+      If proof is a full Storage URL,
+      extract the object path.
+    */
+
+    if(
+      path.startsWith("http://") ||
+      path.startsWith("https://")
+    ){
+
+      const marker =
+        "/storage/v1/object/";
+
+      const position =
+        path.indexOf(marker);
+
+      if(position !== -1){
+
+        path =
+          path.substring(
+            position + marker.length
+          );
+
+        path =
+          path
+            .replace(
+              /^sign\/task-proofs\//,
+              ""
+            )
+            .replace(
+              /^public\/task-proofs\//,
+              ""
+            )
+            .replace(
+              /^authenticated\/task-proofs\//,
+              ""
+            )
+            .replace(
+              /^task-proofs\//,
+              ""
+            );
+      }
+    }
+
+    path =
+      path.replace(
+        /^task-proofs\//,
+        ""
+      );
+
+    const {
+      data,
+      error
+    } =
+    await supabaseClient
+      .storage
+      .from("task-proofs")
+      .createSignedUrl(
+        path,
+        3600
+      );
+
+    if(error) throw error;
+
+    if(!data || !data.signedUrl){
+
+      throw new Error(
+        "Could not create screenshot URL."
+      );
+    }
+
+    box.innerHTML = `
+
+      <div class="row">
+        <span class="label">
+          Proof Screenshot:
+        </span>
+      </div>
+
+      <img
+        class="proof"
+        src="${safe(data.signedUrl)}"
+        alt="Worker proof screenshot"
+        onclick="openImage('${safe(data.signedUrl)}')"
+      >
+    `;
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    box.innerHTML =
+      '<div class="error">❌ Could not load screenshot:\n' +
+      safe(error.message) +
+      '</div>';
+  }
+}
+
+
+/* =========================
+   APPROVE SUBMISSION
+========================= */
+
+async function approveSubmission(id){
+
+  if(!confirm(
+    "Approve this submission?\n\nThe reward will move from pending balance to available balance."
+  )){
+    return;
+  }
+
+  try{
+
+    const {error} =
+      await supabaseClient.rpc(
+        "approve_submission",
+        {
+          p_submission_id:id
+        }
+      );
+
+    if(error) throw error;
+
+    alert(
+      "Submission approved successfully."
+    );
+
+    loadSubmissions();
+
+  }
+  catch(error){
+
+    alert(
+      "Could not approve submission:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================
+   REJECT SUBMISSION
+========================= */
+
+async function rejectSubmission(id){
+
+  const note =
+    prompt("Enter rejection reason:");
+
+  if(note === null) return;
+
+  try{
+
+    const {error} =
+      await supabaseClient.rpc(
+        "reject_submission",
+        {
+          p_submission_id:id,
+          p_rejection_note:note
+        }
+      );
+
+    if(error) throw error;
+
+    alert(
+      "Submission rejected."
+    );
+
+    loadSubmissions();
+
+  }
+  catch(error){
+
+    alert(
+      "Could not reject submission:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================
+   IMAGE MODAL
+========================= */
+
+function openImage(url){
+
+  document.getElementById(
+    "modalImage"
+  ).src = url;
+
+  document.getElementById(
+    "imageModal"
+  ).style.display = "flex";
+}
+
+function closeImage(){
+
+  document.getElementById(
+    "imageModal"
+  ).style.display = "none";
+
+  document.getElementById(
+    "modalImage"
+  ).src = "";
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout(){
+
+  await supabaseClient.auth.signOut();
+
+  window.location.href =
+    "index.html";
+}
+
+
+/* =========================
+   START
+========================= */
+
+checkAdmin();
+
+</script>
+
+</body>
+</ht
