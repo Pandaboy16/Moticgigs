@@ -6,6 +6,8 @@
 
 <title>Transactions - MoticGigs</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 * {
   box-sizing: border-box;
@@ -28,7 +30,7 @@ body {
 }
 
 .back {
-  font-size: 24px;
+  font-size: 25px;
   cursor: pointer;
 }
 
@@ -42,6 +44,8 @@ body {
   max-width: 700px;
   margin: auto;
 }
+
+/* BALANCE */
 
 .balance {
   background: #0f9d58;
@@ -59,6 +63,31 @@ body {
   margin: 8px 0 0;
   font-size: 30px;
 }
+
+/* FILTER */
+
+.filter {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.filter button {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+}
+
+.filter button.active {
+  background: #0f9d58;
+  color: white;
+}
+
+/* TRANSACTIONS */
 
 .transaction {
   background: white;
@@ -94,6 +123,10 @@ body {
   color: #dc2626;
 }
 
+.neutral {
+  color: #6b7280;
+}
+
 .empty {
   background: white;
   padding: 30px;
@@ -101,57 +134,725 @@ body {
   border-radius: 12px;
   color: #777;
 }
+
+.loading {
+  background: white;
+  padding: 30px;
+  text-align: center;
+  border-radius: 12px;
+  color: #777;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  display: none;
+}
+
+.role {
+  font-size: 13px;
+  margin-top: 5px;
+  opacity: .9;
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <div class="back" onclick="history.back()">←</div>
-  <h1>Transactions</h1>
+
+  <div class="back" onclick="history.back()">
+    ←
+  </div>
+
+  <div>
+    <h1>Transactions</h1>
+    <div id="roleText" class="role">
+      Loading account...
+    </div>
+  </div>
+
 </div>
+
 
 <div class="container">
 
+  <div id="errorBox" class="error"></div>
+
+
+  <!-- BALANCE -->
+
   <div class="balance">
-    <small>Current Balance</small>
-    <h2>₦0.00</h2>
+
+    <small>
+      Available Balance
+    </small>
+
+    <h2 id="balance">
+      ₦0.00
+    </h2>
+
   </div>
 
-  <div class="transaction">
-    <div>
-      <div class="transaction-title">Task Reward</div>
-      <div class="date">18 Sep 2026 • 2:30 PM</div>
-    </div>
 
-    <div class="amount credit">
-      +₦15.00
-    </div>
+  <!-- FILTER -->
+
+  <div class="filter">
+
+    <button
+      id="allBtn"
+      class="active"
+      onclick="setFilter('ALL')"
+    >
+      All
+    </button>
+
+    <button
+      id="creditBtn"
+      onclick="setFilter('CREDIT')"
+    >
+      Credits
+    </button>
+
+    <button
+      id="debitBtn"
+      onclick="setFilter('DEBIT')"
+    >
+      Debits
+    </button>
+
   </div>
 
-  <div class="transaction">
-    <div>
-      <div class="transaction-title">Withdrawal</div>
-      <div class="date">17 Sep 2026 • 5:10 PM</div>
+
+  <!-- TRANSACTIONS -->
+
+  <div id="transactions">
+
+    <div class="loading">
+      Loading transactions...
     </div>
 
-    <div class="amount debit">
-      -₦500.00
-    </div>
-  </div>
-
-  <div class="transaction">
-    <div>
-      <div class="transaction-title">Task Reward Pending</div>
-      <div class="date">17 Sep 2026 • 1:20 PM</div>
-    </div>
-
-    <div class="amount credit">
-      +₦20.00
-    </div>
   </div>
 
 </div>
+
+
+<script>
+
+/* ==========================================
+   SUPABASE
+========================================== */
+
+const SUPABASE_URL =
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+/* ==========================================
+   VARIABLES
+========================================== */
+
+let currentUser = null;
+let currentRole = null;
+let allTransactions = [];
+let currentFilter = "ALL";
+
+
+/* ==========================================
+   START
+========================================== */
+
+loadPage();
+
+
+/* ==========================================
+   LOAD PAGE
+========================================== */
+
+async function loadPage() {
+
+  try {
+
+    showLoading();
+
+    hideError();
+
+
+    /* GET CURRENT USER */
+
+    const {
+      data: userData,
+      error: userError
+    } =
+      await supabaseClient.auth.getUser();
+
+
+    if (userError) {
+      throw userError;
+    }
+
+
+    if (!userData.user) {
+
+      window.location.href =
+        "index.html";
+
+      return;
+    }
+
+
+    currentUser =
+      userData.user;
+
+
+    /* GET PROFILE */
+
+    const {
+      data: profile,
+      error: profileError
+    } =
+      await supabaseClient
+        .from("Moticgigs")
+        .select("role,status")
+        .eq("Id", currentUser.id)
+        .single();
+
+
+    if (profileError) {
+      throw profileError;
+    }
+
+
+    if (!profile) {
+
+      throw new Error(
+        "User profile was not found."
+      );
+
+    }
+
+
+    if (profile.status === "banned") {
+
+      throw new Error(
+        "This account has been banned."
+      );
+
+    }
+
+
+    currentRole =
+      profile.role;
+
+
+    document.getElementById(
+      "roleText"
+    ).textContent =
+      currentRole === "advertiser"
+        ? "Advertiser account"
+        : currentRole === "worker"
+          ? "Worker account"
+          : "Account";
+
+
+    /* LOAD BALANCE */
+
+    await loadBalance();
+
+
+    /* LOAD TRANSACTIONS */
+
+    await loadTransactions();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    showError(
+      error.message ||
+      "Unable to load transactions."
+    );
+
+    document.getElementById(
+      "transactions"
+    ).innerHTML =
+      `<div class="empty">
+        Unable to load transactions.
+      </div>`;
+
+  }
+
+}
+
+
+/* ==========================================
+   LOAD BALANCE
+========================================== */
+
+async function loadBalance() {
+
+  const walletType =
+    currentRole === "advertiser"
+      ? "ADVERTISER"
+      : "WORKER";
+
+
+  const {
+    data: wallet,
+    error
+  } =
+    await supabaseClient
+      .from("Wallet")
+      .select(
+        "available_balance,pending_balance"
+      )
+      .eq("user_id", currentUser.id)
+      .eq("wallet_type", walletType)
+      .maybeSingle();
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  const available =
+    wallet?.available_balance || 0;
+
+
+  document.getElementById(
+    "balance"
+  ).textContent =
+    formatMoney(available);
+
+}
+
+
+/* ==========================================
+   LOAD TRANSACTIONS
+========================================== */
+
+async function loadTransactions() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("Wallet -Transaction")
+      .select("*")
+      .eq("user_id", currentUser.id)
+      .order("created_at", {
+        ascending: false
+      });
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  allTransactions =
+    data || [];
+
+
+  renderTransactions();
+
+}
+
+
+/* ==========================================
+   RENDER TRANSACTIONS
+========================================== */
+
+function renderTransactions() {
+
+  const container =
+    document.getElementById(
+      "transactions"
+    );
+
+
+  let transactions =
+    [...allTransactions];
+
+
+  /* FILTER */
+
+  if (currentFilter === "CREDIT") {
+
+    transactions =
+      transactions.filter(
+        transaction =>
+          Number(transaction.amount) > 0
+      );
+
+  }
+
+
+  if (currentFilter === "DEBIT") {
+
+    transactions =
+      transactions.filter(
+        transaction =>
+          Number(transaction.amount) < 0
+      );
+
+  }
+
+
+  if (!transactions.length) {
+
+    container.innerHTML =
+      `<div class="empty">
+        No transactions found.
+      </div>`;
+
+    return;
+  }
+
+
+  container.innerHTML = "";
+
+
+  transactions.forEach(
+    transaction => {
+
+      const amount =
+        Number(
+          transaction.amount || 0
+        );
+
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "transaction";
+
+
+      const title =
+        getTransactionTitle(
+          transaction.transaction_type
+        );
+
+
+      const date =
+        transaction.created_at
+          ? new Date(
+              transaction.created_at
+            ).toLocaleString()
+          : "";
+
+
+      let amountClass =
+        "neutral";
+
+      let amountText =
+        formatMoney(amount);
+
+
+      if (amount > 0) {
+
+        amountClass =
+          "credit";
+
+        amountText =
+          "+" + formatMoney(amount);
+
+      }
+      else if (amount < 0) {
+
+        amountClass =
+          "debit";
+
+        amountText =
+          formatMoney(amount);
+
+      }
+
+
+      card.innerHTML = `
+
+        <div>
+
+          <div class="transaction-title">
+            ${escapeHtml(title)}
+          </div>
+
+          <div class="date">
+            ${escapeHtml(date)}
+          </div>
+
+          ${
+            transaction.note
+              ? `
+                <div
+                  class="date"
+                  style="margin-top:5px"
+                >
+                  ${escapeHtml(
+                    transaction.note
+                  )}
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+
+
+        <div class="amount ${amountClass}">
+          ${amountText}
+        </div>
+
+      `;
+
+
+      container.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+/* ==========================================
+   FILTER
+========================================== */
+
+function setFilter(filter) {
+
+  currentFilter =
+    filter;
+
+
+  document
+    .getElementById("allBtn")
+    .classList
+    .remove("active");
+
+  document
+    .getElementById("creditBtn")
+    .classList
+    .remove("active");
+
+  document
+    .getElementById("debitBtn")
+    .classList
+    .remove("active");
+
+
+  if (filter === "ALL") {
+
+    document
+      .getElementById("allBtn")
+      .classList
+      .add("active");
+
+  }
+
+  if (filter === "CREDIT") {
+
+    document
+      .getElementById("creditBtn")
+      .classList
+      .add("active");
+
+  }
+
+  if (filter === "DEBIT") {
+
+    document
+      .getElementById("debitBtn")
+      .classList
+      .add("active");
+
+  }
+
+
+  renderTransactions();
+
+}
+
+
+/* ==========================================
+   TRANSACTION NAMES
+========================================== */
+
+function getTransactionTitle(type) {
+
+  if (!type) {
+    return "Transaction";
+  }
+
+
+  const names = {
+
+    TASK_REWARD_PENDING:
+      "Task Reward Pending",
+
+    TASK_REWARD:
+      "Task Reward",
+
+    TASK_PAYMENT:
+      "Task Payment",
+
+    DEPOSIT:
+      "Deposit",
+
+    WITHDRAWAL:
+      "Withdrawal",
+
+    WITHDRAWAL_REFUND:
+      "Withdrawal Refund",
+
+    DEPOSIT_APPROVED:
+      "Deposit Approved",
+
+    DEPOSIT_REJECTED:
+      "Deposit Rejected"
+
+  };
+
+
+  return (
+    names[type] ||
+    String(type)
+      .replaceAll("_", " ")
+      .toLowerCase()
+      .replace(/\b\w/g, c =>
+        c.toUpperCase()
+      )
+  );
+
+}
+
+
+/* ==========================================
+   MONEY
+========================================== */
+
+function formatMoney(amount) {
+
+  return "₦" +
+    Number(amount || 0)
+      .toLocaleString(
+        "en-NG",
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }
+      );
+
+}
+
+
+/* ==========================================
+   LOADING
+========================================== */
+
+function showLoading() {
+
+  document.getElementById(
+    "transactions"
+  ).innerHTML =
+    `<div class="loading">
+      Loading transactions...
+    </div>`;
+
+}
+
+
+/* ==========================================
+   ERROR
+========================================== */
+
+function showError(message) {
+
+  const box =
+    document.getElementById(
+      "errorBox"
+    );
+
+  box.style.display =
+    "block";
+
+  box.textContent =
+    message;
+
+}
+
+
+function hideError() {
+
+  const box =
+    document.getElementById(
+      "errorBox"
+    );
+
+  box.style.display =
+    "none";
+
+}
+
+
+/* ==========================================
+   ESCAPE HTML
+========================================== */
+
+function escapeHtml(value) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return "";
+  }
+
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+</script>
 
 </body>
 </html>
