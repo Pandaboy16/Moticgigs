@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Profile - MoticGigs</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7f5;
+  color: #17211b;
+}
+
+.header {
+  background: #0f9d58;
+  color: white;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.back {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.avatar {
+  width: 85px;
+  height: 85px;
+  background: #0f9d58;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.name {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.email {
+  color: #777;
+  margin-top: 6px;
+}
+
+.info {
+  margin-top: 25px;
+  text-align: left;
+}
+
+.info-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 5px;
+}
+
+.value {
+  font-weight: bold;
+}
+
+.button {
+  width: 100%;
+  border: none;
+  padding: 14px;
+  border-radius: 9px;
+  margin-top: 20px;
+  background: #0f9d58;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="back" onclick="history.back()">←</div>
+  <h1>My Profile</h1>
+</div>
+
+<div class="container">
+
+  <div class="profile-card">
+
+    <div class="avatar">
+      M
+    </div>
+
+    <div class="name">
+      MoticGigs User
+    </div>
+
+    <div class="email">
+      user@example.com
+    </div>
+
+    <div class="info">
+
+      <div class="info-item">
+        <div class="label">Full Name</div>
+        <div class="value">MoticGigs User</div>
+      </div>
+
+      <div class="info-item">
+        <div class="label">Email</div>
+        <div class="value">user@example.com</div>
+      </div>
+
+      <div class="info-item">
+        <div class="label">Account Type</div>
+        <div class="value">Worker</div>
+      </div>
+
+      <div class="info-item">
+        <div class="label">Account Status</div>
+        <div class="value">Active</div>
+      </div>
+
+      <div class="info-item">
+        <div class="label">Member Since</div>
+        <div class="value">September 2026</div>
+      </div>
+
+    </div>
+
+    <button class="button">
+      Edit Profile
+    </button>
+
+  </div>
+
+</div>
+
+</body>
+</html>
