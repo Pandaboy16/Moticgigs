@@ -1,1274 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Admin Dashboard - MoticGigs</title>
+  <title>MoticGigs Admin Diagnostic</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-*{
-  box-sizing:border-box;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7f6;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f3f4f6;
-  color:#111827;
-}
+    .box {
+      max-width: 600px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
 
-header{
-  background:#111827;
-  color:white;
-  padding:16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+    h1 {
+      margin-top: 0;
+      color: #159447;
+    }
 
-header h1{
-  margin:0;
-  font-size:20px;
-}
+    #status {
+      background: #f1f1f1;
+      padding: 15px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 15px;
+    }
 
-header button{
-  border:0;
-  background:#ef4444;
-  color:white;
-  padding:9px 14px;
-  border-radius:7px;
-}
+    .success {
+      color: #087f23;
+      font-weight: bold;
+    }
 
-.container{
-  max-width:1000px;
-  margin:auto;
-  padding:18px;
-}
+    .error {
+      color: #c62828;
+      font-weight: bold;
+    }
 
-.status{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:18px;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
-}
-
-.error{
-  display:none;
-  background:#fee2e2;
-  color:#991b1b;
-  border:1px solid #fecaca;
-  padding:12px;
-  border-radius:8px;
-  margin-bottom:15px;
-  white-space:pre-wrap;
-}
-
-.section{
-  background:white;
-  padding:18px;
-  margin-bottom:22px;
-  border-radius:12px;
-  box-shadow:0 2px 8px rgba(0,0,0,.07);
-}
-
-.section h2{
-  margin-top:0;
-  font-size:19px;
-}
-
-.count{
-  background:#111827;
-  color:white;
-  border-radius:20px;
-  padding:3px 8px;
-  font-size:12px;
-}
-
-.card{
-  background:#fafafa;
-  border:1px solid #e5e7eb;
-  border-radius:10px;
-  padding:15px;
-  margin-top:12px;
-}
-
-.row{
-  margin:7px 0;
-  word-break:break-word;
-}
-
-.label{
-  font-weight:bold;
-}
-
-.buttons{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:15px;
-}
-
-.action{
-  border:0;
-  color:white;
-  padding:10px 15px;
-  border-radius:7px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.approve{
-  background:#16a34a;
-}
-
-.reject{
-  background:#dc2626;
-}
-
-.loading{
-  color:#6b7280;
-  padding:10px 0;
-}
-
-.empty{
-  color:#6b7280;
-  padding:10px 0;
-}
-
-textarea{
-  width:100%;
-  min-height:70px;
-  margin-top:10px;
-  padding:10px;
-  border:1px solid #d1d5db;
-  border-radius:7px;
-  resize:vertical;
-}
-
-.proof{
-  margin-top:15px;
-  padding:12px;
-  background:white;
-  border:1px solid #ddd;
-  border-radius:8px;
-}
-
-.proof img{
-  width:100%;
-  max-width:450px;
-  max-height:600px;
-  object-fit:contain;
-  display:block;
-  margin-top:10px;
-  border-radius:8px;
-  cursor:pointer;
-  border:1px solid #ddd;
-}
-
-.proof a{
-  display:inline-block;
-  margin-top:10px;
-  color:#2563eb;
-}
-
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  z-index:9999;
-  padding:20px;
-  overflow:auto;
-}
-
-.modalBox{
-  max-width:700px;
-  margin:20px auto;
-  background:white;
-  padding:15px;
-  border-radius:10px;
-}
-
-.modalBox img{
-  width:100%;
-  max-height:80vh;
-  object-fit:contain;
-  background:#111;
-}
-
-.close{
-  float:right;
-  border:0;
-  background:#111827;
-  color:white;
-  padding:8px 12px;
-  border-radius:6px;
-}
-</style>
+    .step {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-  <h1>MoticGigs Admin</h1>
-  <button onclick="logout()">Logout</button>
-</header>
+<div class="box">
+  <h1>🔧 MoticGigs Admin Diagnostic</h1>
 
-<div class="container">
-
-  <div id="globalError" class="error"></div>
-
-  <div class="status">
-    <strong>Admin status:</strong>
-    <span id="adminStatus">Checking...</span>
+  <div id="status">
+    Starting diagnostic...
   </div>
-
-
-  <!-- DEPOSITS -->
-
-  <div class="section">
-
-    <h2>
-      Pending Deposits
-      <span id="depositCount" class="count">0</span>
-    </h2>
-
-    <div id="deposits">
-      <div class="loading">Loading deposits...</div>
-    </div>
-
-  </div>
-
-
-  <!-- WITHDRAWALS -->
-
-  <div class="section">
-
-    <h2>
-      Pending Withdrawals
-      <span id="withdrawalCount" class="count">0</span>
-    </h2>
-
-    <div id="withdrawals">
-      <div class="loading">Loading withdrawals...</div>
-    </div>
-
-  </div>
-
-
-  <!-- SUBMISSIONS -->
-
-  <div class="section">
-
-    <h2>
-      Pending Worker Submissions
-      <span id="submissionCount" class="count">0</span>
-    </h2>
-
-    <div id="submissions">
-      <div class="loading">Loading submissions...</div>
-    </div>
-
-  </div>
-
 </div>
-
-
-<!-- IMAGE VIEWER -->
-
-<div id="imageModal" class="modal">
-
-  <div class="modalBox">
-
-    <button class="close" onclick="closeImage()">Close</button>
-
-    <h3>Worker Screenshot</h3>
-
-    <img id="largeImage" src="" alt="Worker screenshot">
-
-  </div>
-
-</div>
-
 
 <script>
 
-/* =========================================
-   SUPABASE
-========================================= */
-
 const SUPABASE_URL =
-"https://jfoijwjqfaewzyzjawbw.supabase.co";
+  "https://jfoijwjqfaewzyzjawbw.supabase.co";
 
 const SUPABASE_ANON_KEY =
-"sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
+  "sb_publishable_DPAJewEuko9ejvxwH_5CrA_AZLD9Dn_";
 
-const supabaseClient =
-supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const statusBox = document.getElementById("status");
 
+function show(message, type = "") {
 
-/* =========================================
-   HELPERS
-========================================= */
+  const line = document.createElement("div");
 
-function escapeHtml(value){
+  line.className = "step " + type;
 
-  if(value === null || value === undefined){
-    return "";
-  }
+  line.textContent = message;
 
-  return String(value)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+  statusBox.appendChild(line);
 }
 
+async function runDiagnostic() {
 
-function showError(message){
+  statusBox.innerHTML = "";
 
-  const box =
-    document.getElementById("globalError");
+  try {
 
-  box.style.display = "block";
+    show("STEP 1: Checking Supabase library...");
 
-  box.textContent = message;
-}
-
-
-function clearError(){
-
-  const box =
-    document.getElementById("globalError");
-
-  box.style.display = "none";
-
-  box.textContent = "";
-}
-
-
-/* =========================================
-   ADMIN CHECK
-========================================= */
-
-async function checkAdmin(){
-
-  try{
-
-    clearError();
-
-    const {
-      data,
-      error
-    } =
-    await supabaseClient.auth.getUser();
-
-    if(error){
-      throw error;
+    if (!window.supabase) {
+      show(
+        "❌ Supabase JavaScript library did NOT load.",
+        "error"
+      );
+      return;
     }
 
-    if(!data.user){
+    show(
+      "✅ Supabase JavaScript library loaded.",
+      "success"
+    );
 
-      document.getElementById(
-        "adminStatus"
-      ).textContent = "Not logged in";
 
-      showError("No active login session.");
+    show("STEP 2: Creating Supabase client...");
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+    show(
+      "✅ Supabase client created.",
+      "success"
+    );
+
+
+    show("STEP 3: Checking logged-in user...");
+
+    const {
+      data: userData,
+      error: userError
+    } =
+      await supabaseClient.auth.getUser();
+
+    if (userError) {
+
+      show(
+        "❌ Auth error: " + userError.message,
+        "error"
+      );
 
       return;
     }
 
-    const user = data.user;
+    if (!userData || !userData.user) {
+
+      show(
+        "❌ NO USER IS CURRENTLY LOGGED IN.",
+        "error"
+      );
+
+      return;
+    }
+
+    const user = userData.user;
+
+    show(
+      "✅ Logged-in user found.",
+      "success"
+    );
+
+    show(
+      "User ID: " + user.id
+    );
+
+    show(
+      "Email: " + (user.email || "No email")
+    );
+
+
+    show("STEP 4: Checking Moticgigs profile...");
 
 
     const {
-      data:profile,
-      error:profileError
+      data: profile,
+      error: profileError
     } =
-    await supabaseClient
-      .from("Moticgigs")
-      .select("role,status")
-      .eq("Id",user.id)
-      .single();
+      await supabaseClient
+        .from("Moticgigs")
+        .select("role, status, email")
+        .eq("Id", user.id)
+        .single();
 
 
-    if(profileError){
-      throw profileError;
-    }
+    if (profileError) {
 
+      show(
+        "❌ Moticgigs profile query failed:",
+        "error"
+      );
 
-    if(
-      !profile ||
-      profile.role !== "admin" ||
-      profile.status === "banned"
-    ){
+      show(
+        profileError.message,
+        "error"
+      );
 
-      document.getElementById(
-        "adminStatus"
-      ).textContent = "Access denied";
+      show(
+        "Error code: " +
+        (profileError.code || "none")
+      );
 
-      showError(
-        "This account is not an active administrator."
+      show(
+        "Details: " +
+        (profileError.details || "none")
+      );
+
+      show(
+        "Hint: " +
+        (profileError.hint || "none")
       );
 
       return;
     }
 
 
-    document.getElementById(
-      "adminStatus"
-    ).textContent = "Active administrator";
+    if (!profile) {
+
+      show(
+        "❌ No Moticgigs profile found for this user.",
+        "error"
+      );
+
+      return;
+    }
 
 
-    await loadDeposits();
-    await loadWithdrawals();
-    await loadSubmissions();
+    show(
+      "✅ Moticgigs profile found.",
+      "success"
+    );
+
+    show(
+      "Profile email: " +
+      (profile.email || "none")
+    );
+
+    show(
+      "Role: " +
+      (profile.role || "none")
+    );
+
+    show(
+      "Status: " +
+      (profile.status || "none")
+    );
+
+
+    show("STEP 5: Checking administrator permission...");
+
+
+    if (profile.role !== "admin") {
+
+      show(
+        "❌ This account does NOT have admin role.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (profile.status !== "active") {
+
+      show(
+        "❌ Admin account is not active.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    show(
+      "✅ ADMIN CHECK PASSED!",
+      "success"
+    );
+
+    show("");
+    show("🎉 Everything required for admin authentication is working.");
+    show("The problem is probably in the original admin.html code.");
 
   }
-  catch(error){
+
+  catch (error) {
+
+    show(
+      "❌ UNEXPECTED ERROR",
+      "error"
+    );
+
+    show(
+      error.message || String(error),
+      "error"
+    );
 
     console.error(error);
-
-    document.getElementById(
-      "adminStatus"
-    ).textContent = "Error";
-
-    showError(
-      "Admin check failed:\n\n" +
-      error.message
-    );
-
   }
 }
 
 
-/* =========================================
-   DEPOSITS
-========================================= */
+runDiagnostic();
 
-async function loadDeposits(){
+</script>
 
-  const box =
-    document.getElementById("deposits");
-
-  box.innerHTML =
-    '<div class="loading">Loading deposits...</div>';
-
-
-  const {
-    data,
-    error
-  } =
-  await supabaseClient
-    .from("Deposit")
-    .select("*")
-    .eq("status","PENDING")
-    .order("created_at",{ascending:false});
-
-
-  if(error){
-
-    box.innerHTML =
-      '<div class="error" style="display:block">' +
-      escapeHtml(error.message) +
-      '</div>';
-
-    return;
-  }
-
-
-  document.getElementById(
-    "depositCount"
-  ).textContent = data.length;
-
-
-  if(data.length === 0){
-
-    box.innerHTML =
-      '<div class="empty">No pending deposits.</div>';
-
-    return;
-  }
-
-
-  box.innerHTML = "";
-
-
-  data.forEach(deposit => {
-
-    const card =
-      document.createElement("div");
-
-    card.className = "card";
-
-
-    card.innerHTML = `
-
-      <div class="row">
-        <span class="label">Amount:</span>
-        ₦${Number(deposit.amount || 0).toLocaleString()}
-      </div>
-
-      <div class="row">
-        <span class="label">Sender:</span>
-        ${escapeHtml(deposit.sender_name)}
-      </div>
-
-      <div class="row">
-        <span class="label">Reference:</span>
-        ${escapeHtml(deposit.payment_reference)}
-      </div>
-
-      <div class="row">
-        <span class="label">Method:</span>
-        ${escapeHtml(deposit.payment_method)}
-      </div>
-
-      <div class="row">
-        <span class="label">Created:</span>
-        ${
-          deposit.created_at
-          ? new Date(deposit.created_at).toLocaleString()
-          : ""
-        }
-      </div>
-
-      <textarea
-        id="depositNote_${deposit.id}"
-        placeholder="Admin note (optional)"
-      ></textarea>
-
-      <div class="buttons">
-
-        <button
-          class="action approve"
-          onclick="approveDeposit('${deposit.id}')"
-        >
-          Approve
-        </button>
-
-        <button
-          class="action reject"
-          onclick="rejectDeposit('${deposit.id}')"
-        >
-          Reject
-        </button>
-
-      </div>
-
-    `;
-
-    box.appendChild(card);
-
-  });
-
-}
-
-
-/* =========================================
-   APPROVE DEPOSIT
-========================================= */
-
-async function approveDeposit(id){
-
-  if(!confirm("Approve this deposit?")){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-  await supabaseClient.rpc(
-    "approve_deposit",
-    {
-      deposit_id:id
-    }
-  );
-
-
-  if(error){
-
-    alert(
-      "Could not approve deposit:\n\n" +
-      error.message
-    );
-
-    return;
-  }
-
-
-  alert("Deposit approved successfully.");
-
-  await loadDeposits();
-
-}
-
-
-/* =========================================
-   REJECT DEPOSIT
-========================================= */
-
-async function rejectDeposit(id){
-
-  const note =
-    document.getElementById(
-      "depositNote_" + id
-    )?.value || "";
-
-
-  if(!confirm("Reject this deposit?")){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-  await supabaseClient.rpc(
-    "reject_deposit",
-    {
-      p_deposit_id:id,
-      p_admin_note:note
-    }
-  );
-
-
-  if(error){
-
-    alert(
-      "Could not reject deposit:\n\n" +
-      error.message
-    );
-
-    return;
-  }
-
-
-  alert("Deposit rejected.");
-
-  await loadDeposits();
-
-}
-
-
-/* =========================================
-   WITHDRAWALS
-========================================= */
-
-async function loadWithdrawals(){
-
-  const box =
-    document.getElementById("withdrawals");
-
-  box.innerHTML =
-    '<div class="loading">Loading withdrawals...</div>';
-
-
-  const {
-    data,
-    error
-  } =
-  await supabaseClient
-    .from("Withdrawal")
-    .select("*")
-    .eq("status","PENDING")
-    .order("created_at",{ascending:false});
-
-
-  if(error){
-
-    box.innerHTML =
-      '<div class="error" style="display:block">' +
-      escapeHtml(error.message) +
-      '</div>';
-
-    return;
-  }
-
-
-  document.getElementById(
-    "withdrawalCount"
-  ).textContent = data.length;
-
-
-  if(data.length === 0){
-
-    box.innerHTML =
-      '<div class="empty">No pending withdrawals.</div>';
-
-    return;
-  }
-
-
-  box.innerHTML = "";
-
-
-  data.forEach(withdrawal => {
-
-    const card =
-      document.createElement("div");
-
-    card.className = "card";
-
-
-    card.innerHTML = `
-
-      <div class="row">
-        <span class="label">Amount:</span>
-        ₦${Number(withdrawal.amount || 0).toLocaleString()}
-      </div>
-
-      <div class="row">
-        <span class="label">Worker ID:</span>
-        ${escapeHtml(withdrawal.worker_id)}
-      </div>
-
-      <div class="row">
-        <span class="label">Bank:</span>
-        ${escapeHtml(withdrawal.bank_name)}
-      </div>
-
-      <div class="row">
-        <span class="label">Account Number:</span>
-        ${escapeHtml(withdrawal.account_number)}
-      </div>
-
-      <div class="row">
-        <span class="label">Account Name:</span>
-        ${escapeHtml(withdrawal.account_name)}
-      </div>
-
-      <div class="row">
-        <span class="label">Created:</span>
-        ${
-          withdrawal.created_at
-          ? new Date(withdrawal.created_at).toLocaleString()
-          : ""
-        }
-      </div>
-
-      <div class="buttons">
-
-        <button
-          class="action approve"
-          onclick='approveWithdrawal(
-            ${JSON.stringify(withdrawal.worker_id)},
-            ${JSON.stringify(withdrawal.created_at)},
-            ${Number(withdrawal.amount || 0)},
-            ${JSON.stringify(withdrawal.account_number)}
-          )'
-        >
-          Approve
-        </button>
-
-        <button
-          class="action reject"
-          onclick='rejectWithdrawal(
-            ${JSON.stringify(withdrawal.worker_id)},
-            ${JSON.stringify(withdrawal.created_at)},
-            ${Number(withdrawal.amount || 0)},
-            ${JSON.stringify(withdrawal.account_number)}
-          )'
-        >
-          Reject
-        </button>
-
-      </div>
-
-    `;
-
-    box.appendChild(card);
-
-  });
-
-}
-
-
-/* =========================================
-   APPROVE WITHDRAWAL
-========================================= */
-
-async function approveWithdrawal(
-  workerId,
-  createdAt,
-  amount,
-  accountNumber
-){
-
-  if(!confirm("Approve this withdrawal?")){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-  await supabaseClient.rpc(
-    "approve_withdrawal",
-    {
-      p_worker_id:workerId,
-      p_created_at:createdAt,
-      p_amount:Number(amount),
-      p_account_number:accountNumber,
-      p_provider_reference:null,
-      p_admin_note:null
-    }
-  );
-
-
-  if(error){
-
-    alert(
-      "Could not approve withdrawal:\n\n" +
-      error.message
-    );
-
-    return;
-  }
-
-
-  alert(
-    "Withdrawal approved successfully."
-  );
-
-  await loadWithdrawals();
-
-}
-
-
-/* =========================================
-   REJECT WITHDRAWAL
-========================================= */
-
-async function rejectWithdrawal(
-  workerId,
-  createdAt,
-  amount,
-  accountNumber
-){
-
-  const note =
-    prompt(
-      "Reason for rejecting this withdrawal:"
-    );
-
-
-  if(note === null){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-  await supabaseClient.rpc(
-    "reject_withdrawal",
-    {
-      p_worker_id:workerId,
-      p_created_at:createdAt,
-      p_amount:Number(amount),
-      p_account_number:accountNumber,
-      p_provider_reference:null,
-      p_admin_note:note
-    }
-  );
-
-
-  if(error){
-
-    alert(
-      "Could not reject withdrawal:\n\n" +
-      error.message
-    );
-
-    return;
-  }
-
-
-  alert(
-    "Withdrawal rejected. The money has been returned to the worker."
-  );
-
-  await loadWithdrawals();
-
-}
-
-
-/* =========================================
-   SUBMISSIONS
-========================================= */
-
-async function loadSubmissions(){
-
-  const box =
-    document.getElementById("submissions");
-
-  box.innerHTML =
-    '<div class="loading">Loading submissions...</div>';
-
-
-  const {
-    data,
-    error
-  } =
-  await supabaseClient
-    .from("Submission")
-    .select("*")
-    .eq("status","PENDING")
-    .order("created_at",{ascending:false});
-
-
-  if(error){
-
-    box.innerHTML =
-      '<div class="error" style="display:block">' +
-      escapeHtml(error.message) +
-      '</div>';
-
-    return;
-  }
-
-
-  document.getElementById(
-    "submissionCount"
-  ).textContent = data.length;
-
-
-  if(data.length === 0){
-
-    box.innerHTML =
-      '<div class="empty">No pending worker submissions.</div>';
-
-    return;
-  }
-
-
-  box.innerHTML = "";
-
-
-  data.forEach(submission => {
-
-    const card =
-      document.createElement("div");
-
-    card.className = "card";
-
-
-    card.innerHTML = `
-
-      <div class="row">
-        <span class="label">Worker ID:</span>
-        ${escapeHtml(submission.worker_id)}
-      </div>
-
-      <div class="row">
-        <span class="label">Task ID:</span>
-        ${escapeHtml(submission.task_id)}
-      </div>
-
-      <div class="row">
-        <span class="label">Username:</span>
-        ${escapeHtml(submission.username)}
-      </div>
-
-      <div class="row">
-        <span class="label">Reward:</span>
-        ₦${Number(submission.reward || 0).toLocaleString()}
-      </div>
-
-      <div class="row">
-        <span class="label">Submitted:</span>
-        ${
-          submission.submitted_at
-          ? new Date(
-              submission.submitted_at
-            ).toLocaleString()
-          : ""
-        }
-      </div>
-
-      <div
-        class="proof"
-        id="proof_${submission.id}"
-      >
-
-        <strong>Worker Screenshot</strong>
-
-        <div class="loading">
-          Loading screenshot...
-        </div>
-
-      </div>
-
-      <textarea
-        id="submissionNote_${submission.id}"
-        placeholder="Reason for rejection (optional)"
-      ></textarea>
-
-      <div class="buttons">
-
-        <button
-          class="action approve"
-          onclick="approveSubmission('${submission.id}')"
-        >
-          Approve
-        </button>
-
-        <button
-          class="action reject"
-          onclick="rejectSubmission('${submission.id}')"
-        >
-          Reject
-        </button>
-
-      </div>
-
-    `;
-
-
-    box.appendChild(card);
-
-
-    loadProof(
-      submission.id,
-      submission.proof
-    );
-
-  });
-
-}
-
-
-/* =========================================
-   LOAD SCREENSHOT
-========================================= */
-
-async function loadProof(
-  submissionId,
-  proof
-){
-
-  const box =
-    document.getElementById(
-      "proof_" + submissionId
-    );
-
-
-  if(!box){
-    return;
-  }
-
-
-  if(!proof){
-
-    box.innerHTML += `
-      <div style="margin-top:10px;color:#991b1b">
-        No screenshot/proof was submitted.
-      </div>
-    `;
-
-    return;
-  }
-
-
-  try{
-
-    let path = proof;
-
-
-    /*
-      If the Submission.proof column
-      contains a full Supabase URL,
-      extract the storage path.
-    */
-
-    if(
-      proof.startsWith("http://") ||
-      proof.startsWith("https://")
-    ){
-
-      const marker =
-        "/storage/v1/object/";
-
-      const position =
-        proof.indexOf(marker);
-
-
-      if(position !== -1){
-
-        path =
-          proof.substring(
-            position + marker.length
-          );
-
-        path =
-          path.replace(
-            /^sign\/task-proofs\//,
-            ""
-          );
-
-        path =
-          path.replace(
-            /^authenticated\/task-proofs\//,
-            ""
-          );
-
-        path =
-          path.replace(
-            /^public\/task-proofs\//,
-            ""
-          );
-
-        path =
-          path.split("?")[0];
-
-      }
-      else{
-
-        box.innerHTML = `
-
-          <strong>Worker Screenshot</strong>
-
-          <img
-            src="${escapeHtml(proof)}"
-            alt="Worker screenshot"
-            onclick="openImage('${escapeHtml(proof)}')"
-          >
-
-          <a
-            href="${escapeHtml(proof)}"
-            target="_blank"
-          >
-            Open screenshot
-          </a>
-
-        `;
-
-        return;
-      }
-
-    }
-
-
-    /*
-      Create a signed URL from
-      the private task-proofs bucket.
-    */
-
-    const {
-      data,
-      error
-    } =
-    await supabaseClient.storage
-      .from("task-proofs")
-      .createSignedUrl(
-        path,
-        3600
-      );
-
-
-    if(error){
-      throw error;
-    }
-
-
-    if(
-      !data ||
-      !data.signedUrl
-    ){
-
-      throw new Error(
-        "Could not create screenshot URL."
-      );
-
-    }
-
-
-    const imageUrl =
-      data.signedUrl;
-
-
-    box.innerHTML = `
-
-      <strong>Worker Screenshot</strong>
-
-      <img
-        src="${imageUrl}"
-        alt="Worker screenshot"
-        onclick="openImage('${imageUrl}')"
-      >
-
-      <a
-        href="${imageUrl}"
-        target="_blank"
-      >
-        Open screenshot
-      </a>
-
-      <div style="font-size:13px;color:#6b7280;margin-top:7px">
-        Tap the screenshot to view it larger.
-      </div>
-
-    `;
-
-  }
-  catch(error){
-
-    console.error(
-      "Screenshot error:",
-      error
-    );
-
-
-    box.innerHTML = `
-
-      <strong>Worker Screenshot</strong>
-
-      <div style="
-        color:#991b1b;
-        margin-top:10px;
-      ">
-
-        Could not load screenshot.
-
-        <br><br>
-
-        ${escapeHtml(error.message)}
-
-      </div>
-
-    `;
-
-  }
-
-}
-
-
-/* =========================================
-   APPROVE SUBMISSION
-========================================= */
-
-async function approveSubmission(id){
-
-  if(
-    !confirm(
-      "Approve this worker submission?"
-    )
-  ){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-  await supabaseClient.rpc(
+</body>
+</html>
