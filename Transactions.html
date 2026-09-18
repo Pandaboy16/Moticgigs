@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Transactions - MoticGigs</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7f5;
+  color: #17211b;
+}
+
+.header {
+  background: #0f9d58;
+  color: white;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.back {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.container {
+  padding: 20px;
+  max-width: 700px;
+  margin: auto;
+}
+
+.balance {
+  background: #0f9d58;
+  color: white;
+  padding: 22px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.balance small {
+  opacity: .9;
+}
+
+.balance h2 {
+  margin: 8px 0 0;
+  font-size: 30px;
+}
+
+.transaction {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.transaction-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.date {
+  color: #777;
+  font-size: 13px;
+}
+
+.amount {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.credit {
+  color: #16a34a;
+}
+
+.debit {
+  color: #dc2626;
+}
+
+.empty {
+  background: white;
+  padding: 30px;
+  text-align: center;
+  border-radius: 12px;
+  color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="back" onclick="history.back()">←</div>
+  <h1>Transactions</h1>
+</div>
+
+<div class="container">
+
+  <div class="balance">
+    <small>Current Balance</small>
+    <h2>₦0.00</h2>
+  </div>
+
+  <div class="transaction">
+    <div>
+      <div class="transaction-title">Task Reward</div>
+      <div class="date">18 Sep 2026 • 2:30 PM</div>
+    </div>
+
+    <div class="amount credit">
+      +₦15.00
+    </div>
+  </div>
+
+  <div class="transaction">
+    <div>
+      <div class="transaction-title">Withdrawal</div>
+      <div class="date">17 Sep 2026 • 5:10 PM</div>
+    </div>
+
+    <div class="amount debit">
+      -₦500.00
+    </div>
+  </div>
+
+  <div class="transaction">
+    <div>
+      <div class="transaction-title">Task Reward Pending</div>
+      <div class="date">17 Sep 2026 • 1:20 PM</div>
+    </div>
+
+    <div class="amount credit">
+      +₦20.00
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
