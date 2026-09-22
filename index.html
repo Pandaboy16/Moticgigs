@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="manifest" href="/manifest.json">
+
   <meta name="theme-color" content="#0b8f55">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -87,15 +88,18 @@
     }
 
     #installBtn {
-      display: none;
+      display: block;
     }
 
     .install-note {
       display: none;
       margin-top: 12px;
+      padding: 12px;
+      background: #f0f7f3;
+      border-radius: 10px;
       font-size: 13px;
-      color: #66736c;
-      line-height: 1.4;
+      color: #4d5b53;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -129,10 +133,7 @@
         📲 Install MoticGigs
       </button>
 
-      <div id="installNote" class="install-note">
-        If the install button is not available, use your browser's
-        menu and choose "Add to Home screen" when available.
-      </div>
+      <div id="installNote" class="install-note"></div>
 
     </div>
   </main>
@@ -153,19 +154,29 @@
     });
 
     installBtn.addEventListener("click", async () => {
-      if (!deferredPrompt) {
-        installNote.style.display = "block";
+
+      if (deferredPrompt) {
+
+        deferredPrompt.prompt();
+
+        const result = await deferredPrompt.userChoice;
+
+        console.log(
+          "MoticGigs install choice:",
+          result.outcome
+        );
+
+        deferredPrompt = null;
+
         return;
       }
 
-      deferredPrompt.prompt();
+      installNote.innerHTML =
+        "Chrome has not provided the automatic install prompt yet.<br><br>" +
+        "Tap the <strong>⋮</strong> menu in Chrome and choose " +
+        "<strong>Add to Home screen</strong> if it is available.";
 
-      const { outcome } = await deferredPrompt.userChoice;
-
-      console.log("MoticGigs install choice:", outcome);
-
-      deferredPrompt = null;
-      installBtn.style.display = "none";
+      installNote.style.display = "block";
     });
 
     window.addEventListener("appinstalled", () => {
@@ -179,16 +190,21 @@
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
+
         navigator.serviceWorker.register("/service-worker.js")
-          .then(() => {
-            console.log("MoticGigs service worker registered");
+          .then((registration) => {
+            console.log(
+              "MoticGigs service worker registered:",
+              registration.scope
+            );
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(
               "Service worker registration failed:",
               error
             );
           });
+
       });
     }
   </script>
