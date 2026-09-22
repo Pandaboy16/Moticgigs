@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b8f55">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="MoticGigs">
+
   <title>MoticGigs</title>
 
   <style>
@@ -78,6 +85,18 @@
       background: #e7f5ee;
       color: #0b8f55;
     }
+
+    #installBtn {
+      display: none;
+    }
+
+    .install-note {
+      display: none;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #66736c;
+      line-height: 1.4;
+    }
   </style>
 </head>
 
@@ -90,29 +109,96 @@
 
   <main>
     <div class="card">
+
       <h2>Welcome to MoticGigs</h2>
 
       <p>
         Earn money by completing simple social media
         and online tasks.
       </p>
-<a href="signup.html" class="button">Create Account</a>
-      <a href="#" class="button secondary">Log In</a>
+
+      <a href="signup.html" class="button">
+        Create Account
+      </a>
+
+      <a href="login.html" class="button secondary">
+        Log In
+      </a>
+
+      <button id="installBtn" class="button">
+        📲 Install MoticGigs
+      </button>
+
+      <div id="installNote" class="install-note">
+        If the install button is not available, use your browser's
+        menu and choose "Add to Home screen" when available.
+      </div>
+
     </div>
   </main>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js")
-      .then(() => console.log("MoticGigs service worker registered"))
-      .catch(error => console.error("Service worker registration failed:", error));
-  });
-}
-</script>
-  <script
-  src="https://cdn.mellow.tel/widget.js?type=button&position=bottom-right&invite_id=rj85eph12t8"
-  async>
+
+  <script>
+    let deferredPrompt = null;
+
+    const installBtn = document.getElementById("installBtn");
+    const installNote = document.getElementById("installNote");
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+
+      deferredPrompt = event;
+
+      installBtn.style.display = "block";
+      installNote.style.display = "none";
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) {
+        installNote.style.display = "block";
+        return;
+      }
+
+      deferredPrompt.prompt();
+
+      const { outcome } = await deferredPrompt.userChoice;
+
+      console.log("MoticGigs install choice:", outcome);
+
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    });
+
+    window.addEventListener("appinstalled", () => {
+      console.log("MoticGigs was installed.");
+
+      installBtn.style.display = "none";
+      installNote.style.display = "none";
+    });
   </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+          .then(() => {
+            console.log("MoticGigs service worker registered");
+          })
+          .catch(error => {
+            console.error(
+              "Service worker registration failed:",
+              error
+            );
+          });
+      });
+    }
+  </script>
+
+  <script
+    src="https://cdn.mellow.tel/widget.js?type=button&position=bottom-right&invite_id=rj85eph12t8"
+    async>
+  </script>
+
   <script src="/pwa.js"></script>
+
 </body>
 </html>
