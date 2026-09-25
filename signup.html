@@ -3,11 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="manifest" href="/manifest.json">
 
   <title>Create Account - MoticGigs</title>
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
     * {
@@ -121,6 +126,7 @@
       padding: 12px;
       border-radius: 7px;
       margin-top: 15px;
+      line-height: 1.5;
     }
 
     .error {
@@ -131,6 +137,40 @@
     .success {
       background: #dff5e8;
       color: #126b3e;
+    }
+
+    .otp-box {
+      display: none;
+      margin-top: 20px;
+      padding: 18px;
+      background: #f0f8f4;
+      border-radius: 10px;
+    }
+
+    .otp-box h3 {
+      margin-top: 0;
+      color: #075e3d;
+    }
+
+    .otp-box p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .otp-input {
+      text-align: center;
+      letter-spacing: 8px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .resend {
+      background: transparent;
+      color: #075e3d;
+      border: 1px solid #075e3d;
+      margin-top: 10px;
+      font-size: 14px;
     }
 
     .login {
@@ -171,7 +211,6 @@
         required
       >
 
-
       <label for="email">
         Email Address
       </label>
@@ -182,7 +221,6 @@
         placeholder="Enter your email"
         required
       >
-
 
       <label for="password">
         Password
@@ -196,13 +234,9 @@
         required
       >
 
-
       <div class="role-title">
         What do you want to do on MoticGigs?
       </div>
-
-
-      <!-- WORKER -->
 
       <label class="role-option">
 
@@ -223,9 +257,6 @@
 
       </label>
 
-
-      <!-- ADVERTISER -->
-
       <label class="role-option">
 
         <input
@@ -244,21 +275,58 @@
 
       </label>
 
-
       <button
         type="submit"
         id="signupButton">
-        Create Account
+        Send Verification Code
       </button>
 
     </form>
 
+    <!-- OTP SECTION -->
+
+    <div id="otpBox" class="otp-box">
+
+      <h3>Verify your email</h3>
+
+      <p>
+        We sent a 6-digit verification code to
+        <strong id="otpEmail"></strong>.
+      </p>
+
+      <label for="otpCode">
+        Verification Code
+      </label>
+
+      <input
+        type="text"
+        id="otpCode"
+        class="otp-input"
+        maxlength="6"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        placeholder="000000"
+      >
+
+      <button
+        type="button"
+        id="verifyButton">
+        Verify & Create Account
+      </button>
+
+      <button
+        type="button"
+        id="resendButton"
+        class="resend">
+        Resend Code
+      </button>
+
+    </div>
 
     <div
       id="message"
       class="message">
     </div>
-
 
     <div class="login">
       Already have an account?
@@ -270,7 +338,6 @@
   </div>
 
 </div>
-
 
 <script>
 
@@ -292,6 +359,36 @@
 
 
   // ==========================================
+  // EMAILJS
+  // ==========================================
+
+  const EMAILJS_SERVICE_ID =
+    "service_o8ykxm7";
+
+  const EMAILJS_TEMPLATE_ID =
+    "template_zf7aohn";
+
+  const EMAILJS_PUBLIC_KEY =
+    "d2iy1nsNp2ltA2eyH";
+
+
+  emailjs.init({
+    publicKey: EMAILJS_PUBLIC_KEY
+  });
+
+
+  // ==========================================
+  // OTP VARIABLES
+  // ==========================================
+
+  let generatedOTP = "";
+
+  let otpExpiresAt = 0;
+
+  let otpVerified = false;
+
+
+  // ==========================================
   // MESSAGE
   // ==========================================
 
@@ -307,182 +404,417 @@
 
     message.style.display =
       "block";
+  }
+
+
+  // ==========================================
+  // GENERATE OTP
+  // ==========================================
+
+  function generateOTP() {
+
+    return Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
 
   }
 
 
   // ==========================================
-  // SIGN UP
+  // SEND OTP
   // ==========================================
 
-  document
-    .getElementById("signupForm")
-    .addEventListener("submit", async function(event) {
+  async function sendOTP() {
 
-      event.preventDefault();
+    const fullName =
+      document
+        .getElementById("fullName")
+        .value
+        .trim();
 
+    const email =
+      document
+        .getElementById("email")
+        .value
+        .trim();
 
-      const fullName =
-        document
-          .getElementById("fullName")
-          .value
-          .trim();
+    if (!fullName) {
 
+      showMessage(
+        "Please enter your full name.",
+        "error"
+      );
 
-      const email =
-        document
-          .getElementById("email")
-          .value
-          .trim();
+      return false;
+    }
 
+    if (!email) {
 
-      const password =
-        document
-          .getElementById("password")
-          .value;
+      showMessage(
+        "Please enter your email address.",
+        "error"
+      );
 
-
-      const selectedRole =
-        document
-          .querySelector(
-            'input[name="role"]:checked'
-          )
-          .value;
-
-
-      const button =
-        document.getElementById(
-          "signupButton"
-        );
+      return false;
+    }
 
 
-      button.disabled = true;
+    generatedOTP =
+      generateOTP();
 
-      button.textContent =
-        "Creating account...";
+    otpExpiresAt =
+      Date.now() + (10 * 60 * 1000);
 
 
-      // ------------------------------------------
-      // Create Supabase account
-      // ------------------------------------------
+    try {
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth.signUp({
-
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name: fullName,
           email: email,
-
-          password: password,
-
-          options: {
-
-            data: {
-              full_name: fullName,
-              role: selectedRole
-            }
-
-          }
-
-        });
+          passcode: generatedOTP
+        }
+      );
 
 
-      if (error) {
-
-        console.error(error);
-
-        button.disabled = false;
-
-        button.textContent =
-          "Create Account";
-
-        showMessage(
-          error.message,
-          "error"
-        );
-
-        return;
-
-      }
+      document
+        .getElementById("otpEmail")
+        .textContent = email;
 
 
-      // ------------------------------------------
-      // Make sure account was created
-      // ------------------------------------------
-
-      if (!data || !data.user) {
-
-        button.disabled = false;
-
-        button.textContent =
-          "Create Account";
-
-        showMessage(
-          "Account could not be created.",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      // ------------------------------------------
-      // Confirm Email is OFF, so session should
-      // normally already exist.
-      // ------------------------------------------
-
-      if (!data.session) {
-
-        button.disabled = false;
-
-        button.textContent =
-          "Create Account";
-
-        showMessage(
-          "Account created, but no login session was returned. Please check your Supabase email confirmation settings.",
-          "error"
-        );
-
-        return;
-
-      }
+      document
+        .getElementById("otpBox")
+        .style.display = "block";
 
 
       showMessage(
-        "Account created successfully. Redirecting...",
+        "Verification code sent to your email.",
         "success"
       );
 
 
-      // ------------------------------------------
-      // Redirect based on selected role
-      // ------------------------------------------
+      return true;
 
-      if (selectedRole === "advertiser") {
+    } catch (error) {
 
-        setTimeout(() => {
+      console.error(
+        "EmailJS error:",
+        error
+      );
 
-          window.location.href =
-            "dashboard.html";
+      showMessage(
+        "We could not send the verification code. Please check your email address and try again.",
+        "error"
+      );
 
-        }, 1000);
+      return false;
+    }
+  }
 
-      } else {
 
-        setTimeout(() => {
+  // ==========================================
+  // CREATE ACCOUNT
+  // ==========================================
 
-          window.location.href =
-            "dashboard.html";
+  async function createAccount() {
 
-        }, 1000);
+    if (!generatedOTP) {
+
+      showMessage(
+        "Please request a verification code first.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (Date.now() > otpExpiresAt) {
+
+      showMessage(
+        "Your verification code has expired. Please request a new code.",
+        "error"
+      );
+
+      generatedOTP = "";
+
+      return;
+    }
+
+
+    const enteredOTP =
+      document
+        .getElementById("otpCode")
+        .value
+        .trim();
+
+
+    if (enteredOTP !== generatedOTP) {
+
+      showMessage(
+        "Incorrect verification code.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    otpVerified = true;
+
+
+    const fullName =
+      document
+        .getElementById("fullName")
+        .value
+        .trim();
+
+
+    const email =
+      document
+        .getElementById("email")
+        .value
+        .trim();
+
+
+    const password =
+      document
+        .getElementById("password")
+        .value;
+
+
+    const selectedRole =
+      document
+        .querySelector(
+          'input[name="role"]:checked'
+        )
+        .value;
+
+
+    const verifyButton =
+      document.getElementById(
+        "verifyButton"
+      );
+
+
+    verifyButton.disabled = true;
+
+    verifyButton.textContent =
+      "Creating account...";
+
+
+    // ==========================================
+    // SUPABASE SIGN UP
+    // ==========================================
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.signUp({
+
+        email: email,
+
+        password: password,
+
+        options: {
+
+          data: {
+            full_name: fullName,
+            role: selectedRole
+          }
+
+        }
+
+      });
+
+
+    if (error) {
+
+      console.error(error);
+
+      verifyButton.disabled = false;
+
+      verifyButton.textContent =
+        "Verify & Create Account";
+
+      showMessage(
+        error.message,
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!data || !data.user) {
+
+      verifyButton.disabled = false;
+
+      verifyButton.textContent =
+        "Verify & Create Account";
+
+      showMessage(
+        "Account could not be created.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!data.session) {
+
+      verifyButton.disabled = false;
+
+      verifyButton.textContent =
+        "Verify & Create Account";
+
+      showMessage(
+        "Account was created, but Supabase did not return a login session. Please check your Supabase email confirmation setting.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    generatedOTP = "";
+
+    otpVerified = true;
+
+
+    showMessage(
+      "Email verified and account created successfully. Redirecting...",
+      "success"
+    );
+
+
+    setTimeout(() => {
+
+      window.location.href =
+        "dashboard.html";
+
+    }, 1000);
+
+  }
+
+
+  // ==========================================
+  // INITIAL SIGNUP BUTTON
+  // ==========================================
+
+  document
+    .getElementById("signupForm")
+    .addEventListener(
+      "submit",
+      async function(event) {
+
+        event.preventDefault();
+
+
+        const button =
+          document.getElementById(
+            "signupButton"
+          );
+
+
+        button.disabled = true;
+
+        button.textContent =
+          "Sending code...";
+
+
+        const sent =
+          await sendOTP();
+
+
+        if (sent) {
+
+          button.textContent =
+            "Code Sent";
+
+        } else {
+
+          button.disabled = false;
+
+          button.textContent =
+            "Send Verification Code";
+        }
 
       }
+    );
 
-    });
+
+  // ==========================================
+  // VERIFY BUTTON
+  // ==========================================
+
+  document
+    .getElementById("verifyButton")
+    .addEventListener(
+      "click",
+      createAccount
+    );
+
+
+  // ==========================================
+  // RESEND OTP
+  // ==========================================
+
+  document
+    .getElementById("resendButton")
+    .addEventListener(
+      "click",
+      async function() {
+
+        const button =
+          document.getElementById(
+            "resendButton"
+          );
+
+        button.disabled = true;
+
+        button.textContent =
+          "Sending...";
+
+
+        const sent =
+          await sendOTP();
+
+
+        button.disabled = false;
+
+        button.textContent =
+          "Resend Code";
+
+      }
+    );
+
+
+  // ==========================================
+  // ONLY ALLOW NUMBERS IN OTP
+  // ==========================================
+
+  document
+    .getElementById("otpCode")
+    .addEventListener(
+      "input",
+      function() {
+
+        this.value =
+          this.value
+            .replace(/\D/g, "")
+            .slice(0, 6);
+
+      }
+    );
 
 </script>
+
 <script src="/pwa.js"></script>
+
 </body>
 </html>
