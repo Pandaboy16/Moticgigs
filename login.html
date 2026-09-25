@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#16a34a">
+
   <title>Login - MoticGigs</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -68,6 +70,28 @@
       border-color: #16a34a;
     }
 
+    .password-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .password-row label {
+      margin-bottom: 0;
+    }
+
+    .forgot-link {
+      color: #16a34a;
+      font-size: 14px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
     button {
       width: 100%;
       padding: 14px;
@@ -82,6 +106,7 @@
 
     button:disabled {
       opacity: 0.6;
+      cursor: not-allowed;
     }
 
     #message {
@@ -127,7 +152,16 @@
       autocomplete="email"
     >
 
-    <label for="password">Password</label>
+    <div class="password-row">
+      <label for="password">Password</label>
+
+      <a
+        href="forgot-password.html"
+        class="forgot-link"
+      >
+        Forgot Password?
+      </a>
+    </div>
 
     <input
       type="password"
@@ -296,7 +330,7 @@ loginForm.addEventListener("submit", async function(event) {
 
   } else {
 
-    // Normal users go to Worker Dashboard
+    // Normal users go to Dashboard
     window.location.href = "dashboard.html";
 
   }
